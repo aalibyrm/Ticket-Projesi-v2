@@ -1,0 +1,43 @@
+package com.ticketmanagement.ticket.application;
+
+import java.util.UUID;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.ticketmanagement.ticket.api.dto.CreateTicketRequest;
+import com.ticketmanagement.ticket.api.dto.TicketResponse;
+import com.ticketmanagement.ticket.domain.TicketPriority;
+import com.ticketmanagement.ticket.infrastructure.persistence.ProductEntity;
+import com.ticketmanagement.ticket.infrastructure.persistence.ProductJpaRepository;
+import com.ticketmanagement.ticket.infrastructure.persistence.TicketEntity;
+import com.ticketmanagement.ticket.infrastructure.persistence.TicketJpaRepository;
+
+@Service
+@RequiredArgsConstructor
+public class TicketCommandService {
+
+    private final ProductJpaRepository productRepository;
+    private final TicketJpaRepository ticketRepository;
+    private final TicketMapper ticketMapper;
+    private final TicketNumberGenerator ticketNumberGenerator;
+
+    // Musteri adina yeni ticket kaydi olusturur.
+    @Transactional
+    public TicketResponse createTicket(UUID customerId, CreateTicketRequest request) {
+        ProductEntity product = productRepository.findByIdAndActiveTrue(request.productId())
+                .orElseThrow(() -> NotFoundException.product(request.productId()));
+
+        TicketEntity ticket = TicketEntity.open(
+                UUID.randomUUID(),
+                ticketNumberGenerator.nextTicketNumber(),
+                customerId,
+                product,
+                request.summary().trim(),
+                request.description().trim(),
+                request.priority() == null ? TicketPriority.MEDIUM : request.priority());
+
+        return ticketMapper.toResponse(ticketRepository.save(ticket));
+    }
+}

@@ -54,6 +54,21 @@ loglamayi ve domain kimligi hatalarini engellemek icindir.
 - Authorization karari servis tarafinda da uygulanir; gateway tek guvenlik
   siniri kabul edilmez.
 
+## Service ve Controller Yorumlari
+
+Controller ve service siniflarinda endpoint/use-case fonksiyonlarinin ustunde
+kisa yorum satiri bulunur. Yorum, fonksiyonun ne is yaptigini tek cumlede
+aciklar.
+
+Ornek:
+
+```java
+// Musterinin kendi ticket listesini getirir.
+List<TicketResponse> listOwnTickets(UUID customerId) {
+    ...
+}
+```
+
 ## Event Standartlari
 
 Kafka eventleri minimum veri tasir:

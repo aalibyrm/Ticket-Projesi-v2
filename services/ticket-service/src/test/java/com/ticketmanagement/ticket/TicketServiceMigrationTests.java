@@ -33,6 +33,9 @@ class TicketServiceMigrationTests {
                 Integer.class);
 
         assertThat(count).isEqualTo(1);
+
+        Integer productCount = jdbcTemplate.queryForObject("select count(*) from ticket_schema.products", Integer.class);
+
+        assertThat(productCount).isGreaterThanOrEqualTo(3);
     }
 }
-
