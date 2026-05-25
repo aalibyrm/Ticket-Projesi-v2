@@ -20,6 +20,7 @@ OpenTelemetry, OpenSearch ve gercek e-posta gonderimi uzerine kurulacaktir.
 - [Commit Policy](docs/architecture/commit-policy.md)
 - [Local Setup](docs/development/local-setup.md)
 - [Service Conventions](docs/development/service-conventions.md)
+- [Backend Build](docs/development/backend-build.md)
 
 ## Lokal Altyapi
 
