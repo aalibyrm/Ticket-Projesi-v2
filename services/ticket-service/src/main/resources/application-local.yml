@@ -1,0 +1,6 @@
+logging:
+  level:
+    com.ticketmanagement.ticket: INFO
+    org.flywaydb: INFO
+    org.hibernate.SQL: WARN
+

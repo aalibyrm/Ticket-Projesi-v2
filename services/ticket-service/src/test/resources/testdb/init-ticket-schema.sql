@@ -1,0 +1,2 @@
+CREATE SCHEMA IF NOT EXISTS ticket_schema AUTHORIZATION ticket_app;
+

@@ -1,0 +1,10 @@
+spring:
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    schemas: ticket_schema
+    default-schema: ticket_schema
+    locations: classpath:db/migration

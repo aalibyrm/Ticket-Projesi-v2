@@ -1,0 +1,48 @@
+server:
+  port: ${TICKET_SERVICE_PORT:8081}
+
+spring:
+  application:
+    name: ticket-service
+  datasource:
+    url: ${TICKET_DB_URL:jdbc:postgresql://localhost:5432/ticket_platform}
+    username: ${TICKET_DB_USER:ticket_app}
+    password: ${TICKET_DB_PASSWORD:ticket_dev_password}
+    hikari:
+      pool-name: ticket-service-pool
+      maximum-pool-size: ${TICKET_DB_POOL_MAX_SIZE:10}
+      minimum-idle: ${TICKET_DB_POOL_MIN_IDLE:2}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: ticket_schema
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    schemas: ticket_schema
+    default-schema: ticket_schema
+    table: flyway_schema_history
+    locations: classpath:db/migration
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: ticket-service
+    description: Core ticket domain service
+
