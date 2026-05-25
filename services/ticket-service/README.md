@@ -31,3 +31,17 @@ Health endpoint:
 GET http://localhost:8081/actuator/health
 ```
 
+## Security
+
+Default profile validates JWT tokens from:
+
+```text
+http://localhost:8080/realms/ticket-management
+```
+
+Realm roles under `realm_access.roles` are mapped to Spring authorities with the
+`ROLE_` prefix.
+
+The `local` profile disables JWT validation for early local development. In that
+profile, `X-Actor-Id` is accepted as a temporary actor header. Production and
+integration flows must use JWT subject as the actor identity.

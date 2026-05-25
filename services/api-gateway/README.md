@@ -23,8 +23,11 @@ GATEWAY_JWT_ENABLED=true
 KEYCLOAK_ISSUER_URI=http://localhost:8080/realms/ticket-management
 ```
 
-`local` profil, #10 tamamlanana kadar gateway bootstrapping icin JWT kontrolunu
-kapatir. Bu profil production icin kullanilmaz.
+`local` profil sadece erken/lokal bootstrapping icin JWT kontrolunu kapatir. Bu
+profil production icin kullanilmaz.
+
+Keycloak realm rolleri `realm_access.roles` alanindan okunur ve Spring
+Security'de `ROLE_` prefix'i ile authority'ye cevrilir.
 
 ## Lokal Calistirma
 
@@ -37,4 +40,3 @@ Health endpoint:
 ```text
 GET http://localhost:8088/actuator/health
 ```
-

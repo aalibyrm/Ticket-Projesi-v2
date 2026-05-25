@@ -6,7 +6,10 @@ import java.util.UUID;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.ticketmanagement.ticket.api.dto.CreateTicketRequest;
@@ -32,8 +36,10 @@ class TicketController {
     // Musterinin yeni bir ticket acmasini saglar.
     @PostMapping
     ResponseEntity<TicketResponse> createTicket(
-            @RequestHeader("X-Actor-Id") UUID customerId,
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestHeader(value = "X-Actor-Id", required = false) UUID localActorId,
             @Valid @RequestBody CreateTicketRequest request) {
+        UUID customerId = resolveCustomerId(jwt, localActorId);
         TicketResponse response = ticketCommandService.createTicket(customerId, request);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
@@ -44,14 +50,31 @@ class TicketController {
 
     // Musterinin kendi ticket listesini dondurur.
     @GetMapping
-    List<TicketResponse> listOwnTickets(@RequestHeader("X-Actor-Id") UUID customerId) {
+    List<TicketResponse> listOwnTickets(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestHeader(value = "X-Actor-Id", required = false) UUID localActorId) {
+        UUID customerId = resolveCustomerId(jwt, localActorId);
         return ticketQueryService.listTicketsForCustomer(customerId);
     }
 
     // Musterinin kendisine ait tek bir ticket detayini dondurur.
     @GetMapping("/{id}")
-    TicketResponse getOwnTicket(@RequestHeader("X-Actor-Id") UUID customerId, @PathVariable UUID id) {
+    TicketResponse getOwnTicket(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestHeader(value = "X-Actor-Id", required = false) UUID localActorId,
+            @PathVariable UUID id) {
+        UUID customerId = resolveCustomerId(jwt, localActorId);
         return ticketQueryService.getTicketForCustomer(customerId, id);
     }
-}
 
+    // JWT subject degerinden veya local test header'indan musteri kimligini cozer.
+    private UUID resolveCustomerId(Jwt jwt, UUID localActorId) {
+        if (jwt != null && jwt.getSubject() != null && !jwt.getSubject().isBlank()) {
+            return UUID.fromString(jwt.getSubject());
+        }
+        if (localActorId != null) {
+            return localActorId;
+        }
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing authenticated user");
+    }
+}

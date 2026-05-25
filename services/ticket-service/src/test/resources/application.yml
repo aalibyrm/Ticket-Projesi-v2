@@ -8,3 +8,8 @@ spring:
     schemas: ticket_schema
     default-schema: ticket_schema
     locations: classpath:db/migration
+
+app:
+  security:
+    jwt:
+      enabled: false

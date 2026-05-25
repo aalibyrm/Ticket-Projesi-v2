@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: ticket-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/ticket-management}
   datasource:
     url: ${TICKET_DB_URL:jdbc:postgresql://localhost:5432/ticket_platform}
     username: ${TICKET_DB_USER:ticket_app}
@@ -46,3 +51,7 @@ info:
     name: ticket-service
     description: Core ticket domain service
 
+app:
+  security:
+    jwt:
+      enabled: ${TICKET_SERVICE_JWT_ENABLED:true}
