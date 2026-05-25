@@ -22,8 +22,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.ticketmanagement.ticket.api.dto.CreateTicketRequest;
 import com.ticketmanagement.ticket.api.dto.ProductResponse;
 import com.ticketmanagement.ticket.api.dto.TicketResponse;
+import com.ticketmanagement.ticket.api.error.ApiErrorResponse;
 import com.ticketmanagement.ticket.domain.TicketPriority;
 import com.ticketmanagement.ticket.domain.TicketStatus;
+import com.ticketmanagement.ticket.infrastructure.web.CorrelationIdFilter;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers(disabledWithoutDocker = true)
@@ -97,14 +99,40 @@ class TicketApiIntegrationTests {
         assertThat(ownDetail.getBody()).isNotNull();
         assertThat(ownDetail.getBody().id()).isEqualTo(created.id());
 
-        ResponseEntity<String> otherDetail = restTemplate.exchange(
+        ResponseEntity<ApiErrorResponse> otherDetail = restTemplate.exchange(
                 "/api/tickets/{id}",
                 HttpMethod.GET,
                 new HttpEntity<>(actorHeaders(otherCustomerId)),
-                String.class,
+                ApiErrorResponse.class,
                 created.id());
 
         assertThat(otherDetail.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(otherDetail.getBody()).isNotNull();
+        assertThat(otherDetail.getBody().errorCode()).isEqualTo("RESOURCE_NOT_FOUND");
+    }
+
+    @Test
+    void invalidCreateRequestReturnsStandardValidationError() {
+        UUID customerId = UUID.randomUUID();
+        String correlationId = "validation-test-correlation";
+        HttpHeaders headers = actorHeaders(customerId);
+        headers.set(CorrelationIdFilter.HEADER_NAME, correlationId);
+        CreateTicketRequest request = new CreateTicketRequest(null, "", "", null);
+
+        ResponseEntity<ApiErrorResponse> response = restTemplate.exchange(
+                "/api/tickets",
+                HttpMethod.POST,
+                new HttpEntity<>(request, headers),
+                ApiErrorResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getHeaders().getFirst(CorrelationIdFilter.HEADER_NAME)).isEqualTo(correlationId);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().errorCode()).isEqualTo("VALIDATION_FAILED");
+        assertThat(response.getBody().correlationId()).isEqualTo(correlationId);
+        assertThat(response.getBody().validationErrors())
+                .extracting(error -> error.field())
+                .contains("productId", "summary", "description");
     }
 
     private ProductResponse firstProduct() {
@@ -120,4 +148,3 @@ class TicketApiIntegrationTests {
         return headers;
     }
 }
-
