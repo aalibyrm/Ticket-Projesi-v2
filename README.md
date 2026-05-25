@@ -21,6 +21,16 @@ OpenTelemetry, OpenSearch ve gercek e-posta gonderimi uzerine kurulacaktir.
 - [Local Setup](docs/development/local-setup.md)
 - [Service Conventions](docs/development/service-conventions.md)
 
+## Lokal Altyapi
+
+```powershell
+Copy-Item .env.example .env
+docker compose --env-file .env -f infra/docker/docker-compose.yml config
+docker compose --env-file .env -f infra/docker/docker-compose.yml up -d
+```
+
+`.env` dosyasi lokal secret kabul edilir ve commit'lenmez.
+
 ## Monorepo Dizini
 
 ```text

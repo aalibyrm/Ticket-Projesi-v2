@@ -18,8 +18,29 @@ Bu proje Docker Compose tabanli lokal gelistirme akisiyle baslayacak.
 4. Backend servisleri local profile ile calistirilir.
 5. Web ve mobil istemciler gateway uzerinden API tuketir.
 
+## Compose Komutlari
+
+```powershell
+Copy-Item .env.example .env
+docker compose --env-file .env -f infra/docker/docker-compose.yml config
+docker compose --env-file .env -f infra/docker/docker-compose.yml up -d
+docker compose --env-file .env -f infra/docker/docker-compose.yml ps
+```
+
+Servis URL'leri:
+
+- Keycloak: `http://localhost:8080`
+- OpenSearch: `http://localhost:9200`
+- OpenSearch Dashboards: `http://localhost:5601`
+- Mailpit: `http://localhost:8025`
+- Kafka external listener: `localhost:9094`
+- OpenTelemetry OTLP gRPC: `localhost:4317`
+- OpenTelemetry OTLP HTTP: `localhost:4318`
+
 ## Guvenlik Kurali
 
 `.env`, private key, SMTP credential, R2 secret veya Keycloak admin secret
 commit'lenmez.
 
+`.env.example` sadece local development placeholder degerleri icerir. Prod veya
+gercek provider secret'i bu dosyaya yazilmaz.
