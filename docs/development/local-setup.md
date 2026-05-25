@@ -30,6 +30,7 @@ docker compose --env-file .env -f infra/docker/docker-compose.yml ps
 Servis URL'leri:
 
 - Keycloak: `http://localhost:8080`
+- Keycloak realm: `http://localhost:8080/realms/ticket-management`
 - OpenSearch: `http://localhost:9200`
 - OpenSearch Dashboards: `http://localhost:5601`
 - Mailpit: `http://localhost:8025`
