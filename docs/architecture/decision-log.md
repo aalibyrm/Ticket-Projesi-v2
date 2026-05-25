@@ -16,4 +16,4 @@ kayitlar `docs/architecture/adr` altindadir.
 | ADR-0009 | OpenTelemetry + OpenSearch + JSON Log4j2 logs | Log, trace, metrik ve dashboard isterlerini karsilamak | Prod'a yakin izlenebilirlik, ek altyapi maliyeti |
 | ADR-0010 | Docker Compose ilk hedef | Tum bilesenleri lokal/demo ortaminda calistirmak | Kurulum kolaylasir, Kubernetes sonraki faza kalir |
 | ADR-0011 | Gercek e-posta gonderimi | Notification isterini prod'a yakin hale getirmek | SMTP/provider, retry ve template guvenligi gerekir |
-
+| ADR-0012 | Lombok backend standardi | Boilerplate'i azaltmak ve servis kodunu okunur tutmak | Kontrollu kullanim gerekir; JPA entity'lerinde `@Data` yasak |

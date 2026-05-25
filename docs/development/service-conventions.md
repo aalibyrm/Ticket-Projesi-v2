@@ -32,6 +32,19 @@ Backend servislerinde temel katmanlar:
 - `infrastructure`: persistence, messaging, external adapter
 - `config`: Spring configuration
 
+## Lombok Kullanimi
+
+Lombok tum backend servislerinde standarttir.
+
+- Spring bean constructor injection: `@RequiredArgsConstructor`
+- Basit config/property holder siniflari: `@Getter`, `@Setter`
+- JPA entity: kontrollu `@Getter` ve `@Setter`
+- DTO: mumkunse Java `record`
+
+JPA entity'lerinde `@Data`, kontrolsuz `@EqualsAndHashCode` ve kontrolsuz
+`@ToString` kullanilmaz. Bu kural lazy loading yan etkilerini, hassas veri
+loglamayi ve domain kimligi hatalarini engellemek icindir.
+
 ## API Standartlari
 
 - Tum endpointler gateway arkasindan `/api/...` prefix'i ile yayinlanir.
@@ -55,4 +68,3 @@ Kafka eventleri minimum veri tasir:
 
 Hassas veri, dosya icerigi, access token veya presigned URL event icine
 koyulmaz.
-
