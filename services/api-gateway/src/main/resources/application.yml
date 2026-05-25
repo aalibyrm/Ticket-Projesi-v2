@@ -1,0 +1,65 @@
+server:
+  port: ${API_GATEWAY_PORT:8088}
+
+spring:
+  application:
+    name: api-gateway
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/ticket-management}
+  cloud:
+    gateway:
+      server:
+        webflux:
+          default-filters:
+            - RemoveRequestHeader=Cookie
+            - RemoveRequestHeader=Set-Cookie
+            - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+          routes:
+            - id: ticket-service
+              uri: ${TICKET_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/api/tickets/**,/api/products/**
+            - id: file-service
+              uri: ${FILE_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/api/files/**
+            - id: workflow-sla-service
+              uri: ${WORKFLOW_SLA_SERVICE_URL:http://localhost:8083}
+              predicates:
+                - Path=/api/workflows/**,/api/sla/**
+            - id: notification-service
+              uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8084}
+              predicates:
+                - Path=/api/notifications/**
+            - id: reporting-service
+              uri: ${REPORTING_SERVICE_URL:http://localhost:8085}
+              predicates:
+                - Path=/api/reports/**
+
+app:
+  cors:
+    allowed-origins: ${GATEWAY_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
+  security:
+    jwt:
+      enabled: ${GATEWAY_JWT_ENABLED:true}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: api-gateway
+    description: Ticket Management API Gateway
