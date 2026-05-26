@@ -1,0 +1,1 @@
+CREATE SCHEMA IF NOT EXISTS file_schema AUTHORIZATION file_app;

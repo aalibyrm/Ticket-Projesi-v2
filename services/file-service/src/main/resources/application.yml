@@ -1,0 +1,47 @@
+server:
+  port: ${FILE_SERVICE_PORT:8082}
+
+spring:
+  application:
+    name: file-service
+  datasource:
+    url: ${FILE_DB_URL:jdbc:postgresql://localhost:5432/ticket_platform}
+    username: ${FILE_DB_USER:file_app}
+    password: ${FILE_DB_PASSWORD:file_dev_password}
+    hikari:
+      pool-name: file-service-pool
+      maximum-pool-size: ${FILE_DB_POOL_MAX_SIZE:10}
+      minimum-idle: ${FILE_DB_POOL_MIN_IDLE:2}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: file_schema
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    schemas: file_schema
+    default-schema: file_schema
+    table: flyway_schema_history
+    locations: classpath:db/migration
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: file-service
+    description: Attachment metadata and object storage integration service
