@@ -22,6 +22,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.ticketmanagement.ticket.api.dto.CreateTicketRequest;
 import com.ticketmanagement.ticket.api.dto.TicketResponse;
+import com.ticketmanagement.ticket.application.ForbiddenOperationException;
 import com.ticketmanagement.ticket.application.TicketCommandService;
 import com.ticketmanagement.ticket.application.TicketQueryService;
 
@@ -29,6 +30,10 @@ import com.ticketmanagement.ticket.application.TicketQueryService;
 @RequestMapping("/api/tickets")
 @RequiredArgsConstructor
 class TicketController {
+
+    private static final String REALM_ACCESS_CLAIM = "realm_access";
+    private static final String ROLES_CLAIM = "roles";
+    private static final String CUSTOMER_ROLE = "CUSTOMER";
 
     private final TicketCommandService ticketCommandService;
     private final TicketQueryService ticketQueryService;
@@ -70,11 +75,32 @@ class TicketController {
     // JWT subject degerinden veya local test header'indan musteri kimligini cozer.
     private UUID resolveCustomerId(Jwt jwt, UUID localActorId) {
         if (jwt != null && jwt.getSubject() != null && !jwt.getSubject().isBlank()) {
-            return UUID.fromString(jwt.getSubject());
+            ensureCustomerRole(jwt);
+            return parseCustomerSubject(jwt);
         }
         if (localActorId != null) {
             return localActorId;
         }
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing authenticated user");
+    }
+
+    // Customer endpointlerini sadece CUSTOMER rolune sahip JWT'lere acar.
+    private void ensureCustomerRole(Jwt jwt) {
+        Object realmAccess = jwt.getClaims().get(REALM_ACCESS_CLAIM);
+        if (realmAccess instanceof java.util.Map<?, ?> access
+                && access.get(ROLES_CLAIM) instanceof java.util.Collection<?> roles
+                && roles.contains(CUSTOMER_ROLE)) {
+            return;
+        }
+        throw ForbiddenOperationException.customerRoleRequired();
+    }
+
+    // JWT subject degerini UUID musteri kimligine cevirir.
+    private UUID parseCustomerSubject(Jwt jwt) {
+        try {
+            return UUID.fromString(jwt.getSubject());
+        } catch (IllegalArgumentException exception) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid authenticated user", exception);
+        }
     }
 }

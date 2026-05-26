@@ -106,9 +106,9 @@ class TicketApiIntegrationTests {
                 ApiErrorResponse.class,
                 created.id());
 
-        assertThat(otherDetail.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(otherDetail.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
         assertThat(otherDetail.getBody()).isNotNull();
-        assertThat(otherDetail.getBody().errorCode()).isEqualTo("RESOURCE_NOT_FOUND");
+        assertThat(otherDetail.getBody().errorCode()).isEqualTo("ACCESS_DENIED");
     }
 
     @Test

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ticketmanagement.ticket.api.dto.TicketResponse;
+import com.ticketmanagement.ticket.infrastructure.persistence.TicketEntity;
 import com.ticketmanagement.ticket.infrastructure.persistence.TicketJpaRepository;
 
 @Service
@@ -29,9 +30,13 @@ public class TicketQueryService {
     // Musterinin sadece kendisine ait ticket detayini getirir.
     @Transactional(readOnly = true)
     public TicketResponse getTicketForCustomer(UUID customerId, UUID ticketId) {
-        return ticketRepository.findByIdAndCustomerId(ticketId, customerId)
-                .map(ticketMapper::toResponse)
+        TicketEntity ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> NotFoundException.ticket(ticketId));
+
+        if (!ticket.getCustomerId().equals(customerId)) {
+            throw ForbiddenOperationException.accessDenied();
+        }
+
+        return ticketMapper.toResponse(ticket);
     }
 }
-

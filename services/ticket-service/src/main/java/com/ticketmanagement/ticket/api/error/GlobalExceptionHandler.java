@@ -10,7 +10,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.ticketmanagement.ticket.application.ForbiddenOperationException;
 import com.ticketmanagement.ticket.application.NotFoundException;
 import com.ticketmanagement.ticket.infrastructure.web.CorrelationIdFilter;
 
@@ -61,6 +63,37 @@ class GlobalExceptionHandler {
                 List.of());
     }
 
+    // Yetkisiz is kurali ihlallerini standart 403 response formatina cevirir.
+    @ExceptionHandler(ForbiddenOperationException.class)
+    ResponseEntity<ApiErrorResponse> handleForbiddenOperationException(
+            ForbiddenOperationException exception,
+            HttpServletRequest request) {
+        return buildResponse(
+                HttpStatus.FORBIDDEN,
+                "ACCESS_DENIED",
+                exception.getMessage(),
+                request,
+                List.of());
+    }
+
+    // Controller tarafindan verilen HTTP status hatalarini standart response formatina cevirir.
+    @ExceptionHandler(ResponseStatusException.class)
+    ResponseEntity<ApiErrorResponse> handleResponseStatusException(
+            ResponseStatusException exception,
+            HttpServletRequest request) {
+        HttpStatus status = HttpStatus.resolve(exception.getStatusCode().value());
+        if (status == null) {
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+
+        return buildResponse(
+                status,
+                errorCodeFor(status),
+                messageFor(exception, status),
+                request,
+                List.of());
+    }
+
     // Beklenmeyen hatalari loglar ve client'a guvenli 500 response dondurur.
     @ExceptionHandler(Exception.class)
     ResponseEntity<ApiErrorResponse> handleUnexpectedException(Exception exception, HttpServletRequest request) {
@@ -88,5 +121,21 @@ class GlobalExceptionHandler {
                 validationErrors);
         return ResponseEntity.status(status).body(response);
     }
-}
 
+    private static String errorCodeFor(HttpStatus status) {
+        return switch (status) {
+            case BAD_REQUEST -> "INVALID_REQUEST";
+            case UNAUTHORIZED -> "UNAUTHORIZED";
+            case FORBIDDEN -> "ACCESS_DENIED";
+            default -> "REQUEST_FAILED";
+        };
+    }
+
+    private static String messageFor(ResponseStatusException exception, HttpStatus status) {
+        String reason = exception.getReason();
+        if (reason == null || reason.isBlank()) {
+            return status.getReasonPhrase();
+        }
+        return reason;
+    }
+}
