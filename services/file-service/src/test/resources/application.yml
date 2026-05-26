@@ -8,3 +8,8 @@ spring:
     schemas: file_schema
     default-schema: file_schema
     locations: classpath:db/migration
+
+app:
+  security:
+    jwt:
+      enabled: false

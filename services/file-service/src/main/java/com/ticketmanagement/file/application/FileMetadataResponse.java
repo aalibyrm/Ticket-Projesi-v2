@@ -3,6 +3,7 @@ package com.ticketmanagement.file.application;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import com.ticketmanagement.file.domain.FileUploadStatus;
 import com.ticketmanagement.file.domain.FileValidationStatus;
 
 public record FileMetadataResponse(
@@ -14,6 +15,9 @@ public record FileMetadataResponse(
         String contentType,
         long sizeBytes,
         FileValidationStatus validationStatus,
+        FileUploadStatus uploadStatus,
+        OffsetDateTime uploadExpiresAt,
+        OffsetDateTime completedAt,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt) {
 }

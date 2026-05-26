@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: file-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/ticket-management}
   datasource:
     url: ${FILE_DB_URL:jdbc:postgresql://localhost:5432/ticket_platform}
     username: ${FILE_DB_USER:file_app}
@@ -47,6 +52,9 @@ info:
     description: Attachment metadata and object storage integration service
 
 app:
+  security:
+    jwt:
+      enabled: ${FILE_SERVICE_JWT_ENABLED:true}
   storage:
     r2:
       enabled: ${R2_ENABLED:false}

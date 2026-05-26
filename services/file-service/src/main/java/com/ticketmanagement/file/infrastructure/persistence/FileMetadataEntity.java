@@ -3,6 +3,7 @@ package com.ticketmanagement.file.infrastructure.persistence;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import com.ticketmanagement.file.domain.FileUploadStatus;
 import com.ticketmanagement.file.domain.FileValidationStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -48,6 +49,15 @@ public class FileMetadataEntity {
     @Column(nullable = false, length = 40)
     private FileValidationStatus validationStatus;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 40)
+    private FileUploadStatus uploadStatus;
+
+    @Column(nullable = false)
+    private OffsetDateTime uploadExpiresAt;
+
+    private OffsetDateTime completedAt;
+
     @Column(nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
@@ -72,8 +82,43 @@ public class FileMetadataEntity {
         metadata.contentType = contentType;
         metadata.sizeBytes = sizeBytes;
         metadata.validationStatus = FileValidationStatus.PENDING;
+        metadata.uploadStatus = FileUploadStatus.COMPLETED;
+        metadata.uploadExpiresAt = now;
+        metadata.completedAt = now;
         metadata.createdAt = now;
         metadata.updatedAt = now;
         return metadata;
+    }
+
+    public static FileMetadataEntity pendingUpload(
+            UUID id,
+            UUID ticketId,
+            UUID uploaderId,
+            String originalFilename,
+            String objectKey,
+            String contentType,
+            long sizeBytes,
+            OffsetDateTime uploadExpiresAt,
+            OffsetDateTime now) {
+        FileMetadataEntity metadata = new FileMetadataEntity();
+        metadata.id = id;
+        metadata.ticketId = ticketId;
+        metadata.uploaderId = uploaderId;
+        metadata.originalFilename = originalFilename;
+        metadata.objectKey = objectKey;
+        metadata.contentType = contentType;
+        metadata.sizeBytes = sizeBytes;
+        metadata.validationStatus = FileValidationStatus.PENDING;
+        metadata.uploadStatus = FileUploadStatus.PENDING_UPLOAD;
+        metadata.uploadExpiresAt = uploadExpiresAt;
+        metadata.createdAt = now;
+        metadata.updatedAt = now;
+        return metadata;
+    }
+
+    public void completeUpload(OffsetDateTime now) {
+        uploadStatus = FileUploadStatus.COMPLETED;
+        completedAt = now;
+        updatedAt = now;
     }
 }

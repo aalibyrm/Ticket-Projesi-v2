@@ -20,6 +20,6 @@ public class FileMetadataQueryService {
     public FileMetadataResponse getMetadata(UUID id) {
         return fileMetadataRepository.findById(id)
                 .map(fileMetadataMapper::toResponse)
-                .orElseThrow(() -> new IllegalArgumentException("File metadata not found"));
+                .orElseThrow(() -> NotFoundException.fileMetadata(id));
     }
 }

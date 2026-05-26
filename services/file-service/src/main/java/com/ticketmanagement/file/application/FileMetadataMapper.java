@@ -17,6 +17,9 @@ class FileMetadataMapper {
                 metadata.getContentType(),
                 metadata.getSizeBytes(),
                 metadata.getValidationStatus(),
+                metadata.getUploadStatus(),
+                metadata.getUploadExpiresAt(),
+                metadata.getCompletedAt(),
                 metadata.getCreatedAt(),
                 metadata.getUpdatedAt());
     }

@@ -5,10 +5,20 @@ servisi.
 
 ## Kapsam
 
-Bu fazda servis public upload/download API acmaz. `file_schema` altinda dosya
-metadata tablosu, validation status modeli ve application service bootstrap'i
-eklenir. Presigned upload/download ve ownership kontrolleri sonraki sprint 03
-issue'larinda eklenir.
+Servis `file_schema` altinda dosya metadata tablosu, validation status modeli,
+presigned upload URL ve completion akisini yonetir. Download URL ve dosya
+validasyon kurallari sonraki sprint 03 issue'larinda eklenir.
+
+Upload akisi artik iki adimlidir:
+
+1. `POST /api/files/uploads` kisa sureli presigned PUT URL ve UUID tabanli
+   object key uretir.
+2. `POST /api/files/uploads/{id}/complete` upload metadata kaydini ayni actor
+   icin tamamlanmis isaretler.
+
+Service-to-service ticket ownership dogrulamasi sonraki issue'larda
+guclendirilecektir; bu fazda complete islemi upload rezervasyonunu olusturan
+actor ile sinirlanir.
 
 ## Cloudflare R2
 

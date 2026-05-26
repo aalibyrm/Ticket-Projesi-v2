@@ -19,6 +19,7 @@ import com.ticketmanagement.file.application.CreateFileMetadataCommand;
 import com.ticketmanagement.file.application.FileMetadataCommandService;
 import com.ticketmanagement.file.application.FileMetadataQueryService;
 import com.ticketmanagement.file.application.FileMetadataResponse;
+import com.ticketmanagement.file.domain.FileUploadStatus;
 import com.ticketmanagement.file.domain.FileValidationStatus;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -72,6 +73,9 @@ class FileServiceIntegrationTests {
         assertThat(stored.contentType()).isEqualTo("text/plain");
         assertThat(stored.sizeBytes()).isEqualTo(4096);
         assertThat(stored.validationStatus()).isEqualTo(FileValidationStatus.PENDING);
+        assertThat(stored.uploadStatus()).isEqualTo(FileUploadStatus.COMPLETED);
+        assertThat(stored.uploadExpiresAt()).isNotNull();
+        assertThat(stored.completedAt()).isNotNull();
         assertThat(stored.createdAt()).isNotNull();
         assertThat(stored.updatedAt()).isNotNull();
     }
