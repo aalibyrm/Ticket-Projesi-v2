@@ -18,6 +18,10 @@ spring:
             - RemoveRequestHeader=Set-Cookie
             - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
           routes:
+            - id: ticket-service-agent
+              uri: ${TICKET_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/api/agent/tickets/**
             - id: ticket-service
               uri: ${TICKET_SERVICE_URL:http://localhost:8081}
               predicates:

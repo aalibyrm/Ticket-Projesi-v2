@@ -18,6 +18,11 @@ import reactor.core.publisher.Mono;
 @EnableWebFluxSecurity
 class GatewaySecurityConfig {
 
+    private static final String ROLE_ADMIN = "ADMIN";
+    private static final String ROLE_AGENT = "AGENT";
+    private static final String ROLE_CUSTOMER = "CUSTOMER";
+    private static final String ROLE_MANAGER = "MANAGER";
+
     @Bean
     SecurityWebFilterChain securityWebFilterChain(
             ServerHttpSecurity http,
@@ -29,8 +34,22 @@ class GatewaySecurityConfig {
                     .cors(Customizer.withDefaults())
                     .authorizeExchange(exchanges -> exchanges
                             .pathMatchers("/actuator/health", "/actuator/info").permitAll()
-                            .pathMatchers("/actuator/**").hasRole("ADMIN")
-                            .anyExchange().authenticated())
+                            .pathMatchers("/actuator/**").hasRole(ROLE_ADMIN)
+                            .pathMatchers("/api/reports", "/api/reports/**")
+                            .hasAnyRole(ROLE_MANAGER, ROLE_ADMIN)
+                            .pathMatchers("/api/sla", "/api/sla/**")
+                            .hasAnyRole(ROLE_MANAGER, ROLE_ADMIN)
+                            .pathMatchers("/api/workflows", "/api/workflows/**")
+                            .hasAnyRole(ROLE_AGENT, ROLE_ADMIN)
+                            .pathMatchers("/api/agent/tickets", "/api/agent/tickets/**")
+                            .hasAnyRole(ROLE_AGENT, ROLE_ADMIN)
+                            .pathMatchers("/api/tickets", "/api/tickets/**")
+                            .hasAnyRole(ROLE_CUSTOMER, ROLE_ADMIN)
+                            .pathMatchers("/api/products", "/api/products/**")
+                            .hasAnyRole(ROLE_CUSTOMER, ROLE_AGENT, ROLE_MANAGER, ROLE_ADMIN)
+                            .pathMatchers("/api/files", "/api/files/**", "/api/notifications", "/api/notifications/**")
+                            .authenticated()
+                            .anyExchange().denyAll())
                     .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)))
                     .build();
         }

@@ -29,6 +29,21 @@ profil production icin kullanilmaz.
 Keycloak realm rolleri `realm_access.roles` alanindan okunur ve Spring
 Security'de `ROLE_` prefix'i ile authority'ye cevrilir.
 
+Gateway route bazli ilk authorization filtresini uygular:
+
+| Route | Roller |
+| --- | --- |
+| `/api/tickets/**` | `CUSTOMER`, `ADMIN` |
+| `/api/agent/tickets/**` | `AGENT`, `ADMIN` |
+| `/api/workflows/**` | `AGENT`, `ADMIN` |
+| `/api/reports/**` | `MANAGER`, `ADMIN` |
+| `/api/sla/**` | `MANAGER`, `ADMIN` |
+| `/api/products/**` | `CUSTOMER`, `AGENT`, `MANAGER`, `ADMIN` |
+| `/api/files/**`, `/api/notifications/**` | Authenticated user |
+
+Servisler kendi domain authorization kontrollerini ayrica uygular; gateway tek
+guvenlik siniri kabul edilmez.
+
 ## Lokal Calistirma
 
 ```powershell
