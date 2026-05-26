@@ -45,3 +45,14 @@ Realm roles under `realm_access.roles` are mapped to Spring authorities with the
 The `local` profile disables JWT validation for early local development. In that
 profile, `X-Actor-Id` is accepted as a temporary actor header. Production and
 integration flows must use JWT subject as the actor identity.
+
+## Internal Attachment Access
+
+`GET /internal/tickets/{id}/attachment-access` is used by file-service before
+issuing presigned upload or download URLs. The endpoint keeps ticket ownership
+rules inside ticket-service:
+
+- `CUSTOMER` can access only their own ticket attachments.
+- `ADMIN` can access any ticket attachment.
+- `AGENT` and assigned team access stays closed until the assignment model is
+  introduced.

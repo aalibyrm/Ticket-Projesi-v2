@@ -1,8 +1,13 @@
 package com.ticketmanagement.file;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
@@ -27,10 +32,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.ticketmanagement.file.api.dto.ApiErrorResponse;
 import com.ticketmanagement.file.api.dto.CreateUploadUrlRequest;
+import com.ticketmanagement.file.api.dto.DownloadUrlResponse;
 import com.ticketmanagement.file.api.dto.UploadUrlResponse;
 import com.ticketmanagement.file.application.FileMetadataResponse;
+import com.ticketmanagement.file.application.ForbiddenOperationException;
 import com.ticketmanagement.file.application.storage.ObjectStoragePort;
 import com.ticketmanagement.file.application.storage.PresignedObjectOperation;
+import com.ticketmanagement.file.application.ticket.TicketAccessContext;
+import com.ticketmanagement.file.application.ticket.TicketAccessPort;
 import com.ticketmanagement.file.domain.FileUploadStatus;
 import com.ticketmanagement.file.domain.FileValidationStatus;
 
@@ -51,6 +60,9 @@ class FileUploadApiIntegrationTests {
 
     @MockBean
     private ObjectStoragePort objectStoragePort;
+
+    @MockBean
+    private TicketAccessPort ticketAccessPort;
 
     @Test
     void clientRequestsUploadUrlThenCompletesMetadata() {
@@ -117,6 +129,131 @@ class FileUploadApiIntegrationTests {
         assertThat(completeResponse.getBody().errorCode()).isEqualTo("ACCESS_DENIED");
     }
 
+    @Test
+    void clientRequestsDownloadUrlForCompletedMetadata() {
+        UUID actorId = UUID.randomUUID();
+        UUID ticketId = UUID.randomUUID();
+        stubUploadUrl();
+        stubDownloadUrl();
+
+        ResponseEntity<UploadUrlResponse> uploadResponse = restTemplate.exchange(
+                "/api/files/uploads",
+                HttpMethod.POST,
+                new HttpEntity<>(uploadRequest(ticketId), actorHeaders(actorId)),
+                UploadUrlResponse.class);
+        UploadUrlResponse upload = uploadResponse.getBody();
+        assertThat(upload).isNotNull();
+
+        restTemplate.exchange(
+                "/api/files/uploads/{id}/complete",
+                HttpMethod.POST,
+                new HttpEntity<>(actorHeaders(actorId)),
+                FileMetadataResponse.class,
+                upload.fileId());
+
+        ResponseEntity<DownloadUrlResponse> downloadResponse = restTemplate.exchange(
+                "/api/files/{id}/download-url",
+                HttpMethod.POST,
+                new HttpEntity<>(actorHeaders(actorId)),
+                DownloadUrlResponse.class,
+                upload.fileId());
+
+        assertThat(downloadResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        DownloadUrlResponse download = downloadResponse.getBody();
+        assertThat(download).isNotNull();
+        assertThat(download.fileId()).isEqualTo(upload.fileId());
+        assertThat(download.method()).isEqualTo("GET");
+        assertThat(download.downloadUrl().toString()).isEqualTo("https://r2.example/download");
+        assertThat(download.requiredHeaders()).isEmpty();
+        verify(objectStoragePort).createDownloadUrl(upload.objectKey());
+    }
+
+    @Test
+    void authorizationFailurePreventsUploadUrlCreation() {
+        UUID actorId = UUID.randomUUID();
+        UUID ticketId = UUID.randomUUID();
+        doThrow(ForbiddenOperationException.accessDenied())
+                .when(ticketAccessPort)
+                .assertCanAccessAttachment(eq(ticketId), any(TicketAccessContext.class));
+
+        ResponseEntity<ApiErrorResponse> uploadResponse = restTemplate.exchange(
+                "/api/files/uploads",
+                HttpMethod.POST,
+                new HttpEntity<>(uploadRequest(ticketId), actorHeaders(actorId)),
+                ApiErrorResponse.class);
+
+        assertThat(uploadResponse.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(uploadResponse.getBody()).isNotNull();
+        assertThat(uploadResponse.getBody().errorCode()).isEqualTo("ACCESS_DENIED");
+        verify(objectStoragePort, never()).createUploadUrl(anyString(), anyString());
+    }
+
+    @Test
+    void authorizationFailurePreventsDownloadUrlCreation() {
+        UUID actorId = UUID.randomUUID();
+        UUID ticketId = UUID.randomUUID();
+        stubUploadUrl();
+
+        ResponseEntity<UploadUrlResponse> uploadResponse = restTemplate.exchange(
+                "/api/files/uploads",
+                HttpMethod.POST,
+                new HttpEntity<>(uploadRequest(ticketId), actorHeaders(actorId)),
+                UploadUrlResponse.class);
+        UploadUrlResponse upload = uploadResponse.getBody();
+        assertThat(upload).isNotNull();
+
+        restTemplate.exchange(
+                "/api/files/uploads/{id}/complete",
+                HttpMethod.POST,
+                new HttpEntity<>(actorHeaders(actorId)),
+                FileMetadataResponse.class,
+                upload.fileId());
+
+        reset(ticketAccessPort);
+        doThrow(ForbiddenOperationException.accessDenied())
+                .when(ticketAccessPort)
+                .assertCanAccessAttachment(eq(ticketId), any(TicketAccessContext.class));
+
+        ResponseEntity<ApiErrorResponse> downloadResponse = restTemplate.exchange(
+                "/api/files/{id}/download-url",
+                HttpMethod.POST,
+                new HttpEntity<>(actorHeaders(actorId)),
+                ApiErrorResponse.class,
+                upload.fileId());
+
+        assertThat(downloadResponse.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(downloadResponse.getBody()).isNotNull();
+        assertThat(downloadResponse.getBody().errorCode()).isEqualTo("ACCESS_DENIED");
+        verify(objectStoragePort, never()).createDownloadUrl(anyString());
+    }
+
+    @Test
+    void pendingUploadCannotReceiveDownloadUrl() {
+        UUID actorId = UUID.randomUUID();
+        UUID ticketId = UUID.randomUUID();
+        stubUploadUrl();
+
+        ResponseEntity<UploadUrlResponse> uploadResponse = restTemplate.exchange(
+                "/api/files/uploads",
+                HttpMethod.POST,
+                new HttpEntity<>(uploadRequest(ticketId), actorHeaders(actorId)),
+                UploadUrlResponse.class);
+        UploadUrlResponse upload = uploadResponse.getBody();
+        assertThat(upload).isNotNull();
+
+        ResponseEntity<ApiErrorResponse> downloadResponse = restTemplate.exchange(
+                "/api/files/{id}/download-url",
+                HttpMethod.POST,
+                new HttpEntity<>(actorHeaders(actorId)),
+                ApiErrorResponse.class,
+                upload.fileId());
+
+        assertThat(downloadResponse.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(downloadResponse.getBody()).isNotNull();
+        assertThat(downloadResponse.getBody().errorCode()).isEqualTo("FILE_NOT_READY");
+        verify(objectStoragePort, never()).createDownloadUrl(anyString());
+    }
+
     private void stubUploadUrl() {
         when(objectStoragePort.createUploadUrl(anyString(), eq("text/plain")))
                 .thenReturn(new PresignedObjectOperation(
@@ -124,6 +261,15 @@ class FileUploadApiIntegrationTests {
                         URI.create("https://r2.example/upload"),
                         Instant.parse("2030-01-01T00:10:00Z"),
                         Map.of("Content-Type", "text/plain")));
+    }
+
+    private void stubDownloadUrl() {
+        when(objectStoragePort.createDownloadUrl(anyString()))
+                .thenReturn(new PresignedObjectOperation(
+                        "GET",
+                        URI.create("https://r2.example/download"),
+                        Instant.parse("2030-01-01T00:05:00Z"),
+                        Map.of()));
     }
 
     private static CreateUploadUrlRequest uploadRequest(UUID ticketId) {

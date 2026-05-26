@@ -19,3 +19,4 @@ kayitlar `docs/architecture/adr` altindadir.
 | ADR-0012 | Lombok backend standardi | Boilerplate'i azaltmak ve servis kodunu okunur tutmak | Kontrollu kullanim gerekir; JPA entity'lerinde `@Data` yasak |
 | ADR-0013 | Gateway route bazli rol matrisi | Yanlis route kullanimi ve fazla downstream erisimini erken engellemek | Defense-in-depth guclenir, servis tarafinda authorization yine zorunlu kalir |
 | ADR-0014 | Gateway edge hardening | CORS, rate limit ve security header kontrollerini ilk giris noktasinda uygulamak | In-memory limiter lokal icin yeterli; yatay olcekte Redis/platform limiter gerekir |
+| ADR-0015 | Ticket attachment access authority | Dosya erisimi ticket sahipligi karari oldugu icin ticket-service tarafindan belirlenir | File-service presigned URL oncesi internal authorization cagrisi yapar; assigned team kuralina hazir kalir |

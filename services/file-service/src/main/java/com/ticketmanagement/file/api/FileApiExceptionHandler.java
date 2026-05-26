@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.ticketmanagement.file.api.dto.ApiErrorResponse;
+import com.ticketmanagement.file.application.FileNotReadyException;
 import com.ticketmanagement.file.application.ForbiddenOperationException;
 import com.ticketmanagement.file.application.NotFoundException;
 import com.ticketmanagement.file.application.StorageUnavailableException;
+import com.ticketmanagement.file.application.TicketAccessUnavailableException;
 import com.ticketmanagement.file.application.UploadExpiredException;
 
 @RestControllerAdvice
@@ -43,11 +45,29 @@ class FileApiExceptionHandler {
         return buildResponse(HttpStatus.GONE, "UPLOAD_EXPIRED", exception.getMessage(), request);
     }
 
+    @ExceptionHandler(FileNotReadyException.class)
+    ResponseEntity<ApiErrorResponse> handleFileNotReadyException(
+            FileNotReadyException exception,
+            HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "FILE_NOT_READY", exception.getMessage(), request);
+    }
+
     @ExceptionHandler(StorageUnavailableException.class)
     ResponseEntity<ApiErrorResponse> handleStorageUnavailableException(
             StorageUnavailableException exception,
             HttpServletRequest request) {
         return buildResponse(HttpStatus.SERVICE_UNAVAILABLE, "STORAGE_UNAVAILABLE", exception.getMessage(), request);
+    }
+
+    @ExceptionHandler(TicketAccessUnavailableException.class)
+    ResponseEntity<ApiErrorResponse> handleTicketAccessUnavailableException(
+            TicketAccessUnavailableException exception,
+            HttpServletRequest request) {
+        return buildResponse(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                "TICKET_ACCESS_UNAVAILABLE",
+                exception.getMessage(),
+                request);
     }
 
     @ExceptionHandler(ResponseStatusException.class)

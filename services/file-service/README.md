@@ -6,8 +6,8 @@ servisi.
 ## Kapsam
 
 Servis `file_schema` altinda dosya metadata tablosu, validation status modeli,
-presigned upload URL ve completion akisini yonetir. Download URL ve dosya
-validasyon kurallari sonraki sprint 03 issue'larinda eklenir.
+presigned upload URL, presigned download URL ve completion akisini yonetir.
+Dosya validasyon kurallari sonraki sprint 03 issue'larinda eklenir.
 
 Upload akisi artik iki adimlidir:
 
@@ -16,9 +16,18 @@ Upload akisi artik iki adimlidir:
 2. `POST /api/files/uploads/{id}/complete` upload metadata kaydini ayni actor
    icin tamamlanmis isaretler.
 
-Service-to-service ticket ownership dogrulamasi sonraki issue'larda
-guclendirilecektir; bu fazda complete islemi upload rezervasyonunu olusturan
-actor ile sinirlanir.
+Download akisi:
+
+1. `POST /api/files/{id}/download-url` metadata kaydini bulur.
+2. Upload tamamlanmadiysa URL uretmeden `FILE_NOT_READY` doner.
+3. Ticket ownership dogrulamasi icin `ticket-service` internal endpoint'i
+   cagrilir.
+4. Yetki varsa kisa sureli presigned GET URL doner.
+
+Ticket erisim yetkisi ticket-service tarafindan belirlenir. Bu fazda customer
+sadece kendi ticket'ina, admin tum ticket eklerine erisebilir. Assigned
+team/agent erisimi assignment modeli geldiginde ayni internal kontrat uzerinden
+genisletilecektir.
 
 ## Cloudflare R2
 

@@ -52,6 +52,9 @@ info:
     description: Attachment metadata and object storage integration service
 
 app:
+  clients:
+    ticket-service:
+      base-url: ${TICKET_SERVICE_URL:http://localhost:8081}
   security:
     jwt:
       enabled: ${FILE_SERVICE_JWT_ENABLED:true}

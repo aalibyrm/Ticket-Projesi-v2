@@ -108,6 +108,57 @@ class TicketSecurityIntegrationTests {
                 .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
     }
 
+    @Test
+    void customerCanAccessOwnTicketAttachments() throws Exception {
+        UUID customerId = UUID.randomUUID();
+        UUID ticketId = createTicketFor(customerId);
+
+        mockMvc.perform(get("/internal/tickets/{id}/attachment-access", ticketId)
+                        .with(jwtWithRoles(customerId, "CUSTOMER")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ticketId").value(ticketId.toString()))
+                .andExpect(jsonPath("$.actorId").value(customerId.toString()))
+                .andExpect(jsonPath("$.uploadAllowed").value(true))
+                .andExpect(jsonPath("$.downloadAllowed").value(true));
+    }
+
+    @Test
+    void customerCannotAccessOtherTicketAttachments() throws Exception {
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID otherCustomerId = UUID.randomUUID();
+        UUID ticketId = createTicketFor(ownerCustomerId);
+
+        mockMvc.perform(get("/internal/tickets/{id}/attachment-access", ticketId)
+                        .with(jwtWithRoles(otherCustomerId, "CUSTOMER")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+    }
+
+    @Test
+    void adminCanAccessAnyTicketAttachments() throws Exception {
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID adminId = UUID.randomUUID();
+        UUID ticketId = createTicketFor(ownerCustomerId);
+
+        mockMvc.perform(get("/internal/tickets/{id}/attachment-access", ticketId)
+                        .with(jwtWithRoles(adminId, "ADMIN")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ticketId").value(ticketId.toString()))
+                .andExpect(jsonPath("$.actorId").value(adminId.toString()));
+    }
+
+    @Test
+    void agentCannotAccessTicketAttachmentsUntilAssignmentModelExists() throws Exception {
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID agentId = UUID.randomUUID();
+        UUID ticketId = createTicketFor(ownerCustomerId);
+
+        mockMvc.perform(get("/internal/tickets/{id}/attachment-access", ticketId)
+                        .with(jwtWithRoles(agentId, "AGENT")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+    }
+
     private UUID createTicketFor(UUID customerId) throws Exception {
         UUID productId = productRepository.findByActiveTrueOrderByNameAsc().getFirst().getId();
         CreateTicketRequest request = new CreateTicketRequest(
