@@ -2,6 +2,9 @@ package com.ticketmanagement.gateway.config;
 
 import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.mockJwt;
 
+import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -87,6 +90,26 @@ class GatewaySecurityConfigTests {
                 .uri("/api/sla/compliance")
                 .exchange()
                 .expectStatus().is5xxServerError();
+    }
+
+    @Test
+    void managerRealmRoleClaimCanReachReportRoute() {
+        webTestClient.mutateWith(mockJwt()
+                        .jwt(token -> token.claim("realm_access", Map.of("roles", List.of("MANAGER"))))
+                        .authorities(new GatewayJwtRealmRoleConverter()))
+                .get()
+                .uri("/api/reports/status-distribution")
+                .exchange()
+                .expectStatus().is5xxServerError();
+    }
+
+    @Test
+    void customerRoleCannotReachManagerReportRoute() {
+        webTestClient.mutateWith(mockJwt().authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
+                .get()
+                .uri("/api/reports/status-distribution")
+                .exchange()
+                .expectStatus().isForbidden();
     }
 
     @Test

@@ -53,3 +53,15 @@ Spring Boot varsayilan olarak Logback kullanir. Bu projede dokuman isterleri
 nedeniyle backend servislerinde Log4j2 baseline kullanilacaktir. Servisler
 uygulama bagimliliklari eklendikce `spring-boot-starter-log4j2` kullanacak ve
 varsayilan logging starter dislanacaktir.
+
+## Security Test Suite
+
+Yetkilendirme ve edge security regresyonlari CI tarafindan tekrar edilebilir
+sekilde calistirilir. Ana guvenlik paketi su komutla kosulur:
+
+```powershell
+mvn -q -pl services/api-gateway,services/ticket-service -Dtest="*Security*Tests,*JwtRealmRoleConverterTests,*CorsConfigTests,*RateLimitConfigTests" test
+```
+
+Bu suite 401, 403, Keycloak realm role mapping, customer ownership, manager-only
+report access, CORS allowlist ve rate limit davranislarini kapsar.

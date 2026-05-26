@@ -19,6 +19,8 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -62,18 +64,14 @@ class TicketSecurityIntegrationTests {
     @Test
     void acceptsAuthenticatedJwtForProductApiRequest() throws Exception {
         mockMvc.perform(get("/api/products")
-                        .with(jwt().jwt(token -> token
-                                .subject(UUID.randomUUID().toString())
-                                .claim("realm_access", Map.of("roles", List.of("CUSTOMER"))))))
+                        .with(jwtWithRoles(UUID.randomUUID(), "CUSTOMER")))
                 .andExpect(status().isOk());
     }
 
     @Test
     void rejectsAgentRoleOnCustomerTicketEndpoint() throws Exception {
         mockMvc.perform(get("/api/tickets")
-                        .with(jwt().jwt(token -> token
-                                .subject(UUID.randomUUID().toString())
-                                .claim("realm_access", Map.of("roles", List.of("AGENT"))))))
+                        .with(jwtWithRoles(UUID.randomUUID(), "AGENT")))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
     }
@@ -93,10 +91,45 @@ class TicketSecurityIntegrationTests {
                         .header("X-Actor-Id", spoofedActorId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
-                        .with(jwt().jwt(token -> token
-                                .subject(customerId.toString())
-                                .claim("realm_access", Map.of("roles", List.of("CUSTOMER"))))))
+                        .with(jwtWithRoles(customerId, "CUSTOMER")))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.customerId").value(customerId.toString()));
+    }
+
+    @Test
+    void rejectsCrossCustomerTicketDetailWithJwt() throws Exception {
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID otherCustomerId = UUID.randomUUID();
+        UUID ticketId = createTicketFor(ownerCustomerId);
+
+        mockMvc.perform(get("/api/tickets/{id}", ticketId)
+                        .with(jwtWithRoles(otherCustomerId, "CUSTOMER")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+    }
+
+    private UUID createTicketFor(UUID customerId) throws Exception {
+        UUID productId = productRepository.findByActiveTrueOrderByNameAsc().getFirst().getId();
+        CreateTicketRequest request = new CreateTicketRequest(
+                productId,
+                "Cannot download receipt",
+                "Receipt download fails after payment confirmation.",
+                TicketPriority.MEDIUM);
+
+        MvcResult result = mockMvc.perform(post("/api/tickets")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .with(jwtWithRoles(customerId, "CUSTOMER")))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String ticketId = objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asText();
+        return UUID.fromString(ticketId);
+    }
+
+    private static RequestPostProcessor jwtWithRoles(UUID subject, String... roles) {
+        return jwt().jwt(token -> token
+                .subject(subject.toString())
+                .claim("realm_access", Map.of("roles", List.of(roles))));
     }
 }
