@@ -16,8 +16,11 @@ class GatewayCorsConfig {
     @Bean
     CorsWebFilter corsWebFilter(
             @Value("${app.cors.allowed-origins:http://localhost:5173,http://localhost:3000}") String allowedOrigins) {
+        List<String> origins = splitCsv(allowedOrigins);
+        validateAllowlist(origins);
+
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(splitCsv(allowedOrigins));
+        config.setAllowedOrigins(origins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Correlation-Id"));
         config.setExposedHeaders(List.of("X-Correlation-Id"));
@@ -35,5 +38,13 @@ class GatewayCorsConfig {
                 .filter(item -> !item.isBlank())
                 .toList();
     }
-}
 
+    private static void validateAllowlist(List<String> origins) {
+        if (origins.isEmpty()) {
+            throw new IllegalArgumentException("At least one CORS origin must be configured");
+        }
+        if (origins.contains("*")) {
+            throw new IllegalArgumentException("Wildcard CORS origins are not allowed with credentials");
+        }
+    }
+}

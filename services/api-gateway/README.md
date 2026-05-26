@@ -44,6 +44,30 @@ Gateway route bazli ilk authorization filtresini uygular:
 Servisler kendi domain authorization kontrollerini ayrica uygular; gateway tek
 guvenlik siniri kabul edilmez.
 
+## Edge Hardening
+
+CORS allowlist explicit origin listesidir; credential kullandigimiz icin `*`
+origin kabul edilmez.
+
+```properties
+GATEWAY_CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
+```
+
+Rate limiter Redis gerektirmeyen in-memory fixed-window stratejisiyle baslar.
+Bu lokal/demo ortaminda yeterlidir; gateway yatay olceklendiginde Redis/Bucket4j
+veya platform limiter'a tasinmalidir. Client tarafindan spoof edilebilen
+forwarding header'lari varsayilan rate limit kimligi olarak guvenilmez.
+
+```properties
+GATEWAY_RATE_LIMIT_ENABLED=true
+GATEWAY_RATE_LIMIT_CAPACITY=120
+GATEWAY_RATE_LIMIT_WINDOW=PT1M
+```
+
+Gateway tum response'lara temel guvenlik header'larini ekler: CSP, HSTS,
+`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy` ve
+`Permissions-Policy`.
+
 ## Lokal Calistirma
 
 ```powershell

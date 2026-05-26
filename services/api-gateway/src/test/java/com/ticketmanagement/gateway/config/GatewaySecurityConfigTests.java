@@ -21,7 +21,10 @@ class GatewaySecurityConfigTests {
         webTestClient.get()
                 .uri("/actuator/health")
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isOk()
+                .expectHeader().valueEquals("X-Frame-Options", "DENY")
+                .expectHeader().valueEquals("X-Content-Type-Options", "nosniff")
+                .expectHeader().valueEquals("Referrer-Policy", "no-referrer");
     }
 
     @Test
