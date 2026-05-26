@@ -7,7 +7,6 @@ servisi.
 
 Servis `file_schema` altinda dosya metadata tablosu, validation status modeli,
 presigned upload URL, presigned download URL ve completion akisini yonetir.
-Dosya validasyon kurallari sonraki sprint 03 issue'larinda eklenir.
 
 Upload akisi artik iki adimlidir:
 
@@ -28,6 +27,20 @@ Ticket erisim yetkisi ticket-service tarafindan belirlenir. Bu fazda customer
 sadece kendi ticket'ina, admin tum ticket eklerine erisebilir. Assigned
 team/agent erisimi assignment modeli geldiginde ayni internal kontrat uzerinden
 genisletilecektir.
+
+## File Validation
+
+Upload URL verilmeden once dosya metadata'si kontrol edilir:
+
+- Maksimum boyut varsayilan olarak 10 MB.
+- Izinli uzantilar: `log`, `txt`, `png`, `jpg`, `jpeg`, `pdf`.
+- MIME ipucu uzanti ile uyumlu olmalidir.
+- Dosya adinda path separator veya kontrol karakteri kabul edilmez.
+
+Upload tamamlandiktan sonra text/log dosyalari icin object storage'dan sinirli
+preview okunur. Preview icinde `error`, `exception`, `stacktrace`, `traceback`
+veya `failed` keywordlerinden biri varsa dosya `VALIDATED`, yoksa `REJECTED`,
+preview okunamazsa `FAILED` isaretlenir.
 
 ## Cloudflare R2
 

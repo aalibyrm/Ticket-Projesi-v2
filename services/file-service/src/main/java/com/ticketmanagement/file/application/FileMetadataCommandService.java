@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import com.ticketmanagement.file.domain.FileUploadStatus;
+import com.ticketmanagement.file.domain.FileValidationStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,6 +80,18 @@ public class FileMetadataCommandService {
         }
 
         metadata.completeUpload(now);
+        return fileMetadataMapper.toResponse(metadata);
+    }
+
+    // Dosya icerik validasyonu sonucuna gore metadata validation status alanini gunceller.
+    @Transactional
+    public FileMetadataResponse markValidationStatus(UUID metadataId, FileValidationStatus status) {
+        Objects.requireNonNull(metadataId, "metadataId is required");
+        Objects.requireNonNull(status, "status is required");
+        FileMetadataEntity metadata = fileMetadataRepository.findById(metadataId)
+                .orElseThrow(() -> NotFoundException.fileMetadata(metadataId));
+
+        metadata.markValidationStatus(status, OffsetDateTime.now(clock));
         return fileMetadataMapper.toResponse(metadata);
     }
 

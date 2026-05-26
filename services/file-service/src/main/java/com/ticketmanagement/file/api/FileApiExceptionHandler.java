@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.ticketmanagement.file.api.dto.ApiErrorResponse;
 import com.ticketmanagement.file.application.FileNotReadyException;
+import com.ticketmanagement.file.application.FileValidationException;
 import com.ticketmanagement.file.application.ForbiddenOperationException;
 import com.ticketmanagement.file.application.NotFoundException;
 import com.ticketmanagement.file.application.StorageUnavailableException;
@@ -50,6 +51,13 @@ class FileApiExceptionHandler {
             FileNotReadyException exception,
             HttpServletRequest request) {
         return buildResponse(HttpStatus.CONFLICT, "FILE_NOT_READY", exception.getMessage(), request);
+    }
+
+    @ExceptionHandler(FileValidationException.class)
+    ResponseEntity<ApiErrorResponse> handleFileValidationException(
+            FileValidationException exception,
+            HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "FILE_VALIDATION_FAILED", exception.getMessage(), request);
     }
 
     @ExceptionHandler(StorageUnavailableException.class)

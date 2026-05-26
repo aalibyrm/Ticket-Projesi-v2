@@ -121,4 +121,9 @@ public class FileMetadataEntity {
         completedAt = now;
         updatedAt = now;
     }
+
+    public void markValidationStatus(FileValidationStatus status, OffsetDateTime now) {
+        validationStatus = status;
+        updatedAt = now;
+    }
 }

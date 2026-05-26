@@ -55,6 +55,14 @@ app:
   clients:
     ticket-service:
       base-url: ${TICKET_SERVICE_URL:http://localhost:8081}
+  file-validation:
+    max-size-bytes: ${FILE_VALIDATION_MAX_SIZE_BYTES:10485760}
+    preview-max-bytes: ${FILE_VALIDATION_PREVIEW_MAX_BYTES:65536}
+    allowed-extensions: ${FILE_VALIDATION_ALLOWED_EXTENSIONS:log,txt,png,jpg,jpeg,pdf}
+    allowed-content-types: ${FILE_VALIDATION_ALLOWED_CONTENT_TYPES:text/plain,image/png,image/jpeg,application/pdf}
+    text-extensions: ${FILE_VALIDATION_TEXT_EXTENSIONS:log,txt}
+    text-content-types: ${FILE_VALIDATION_TEXT_CONTENT_TYPES:text/plain}
+    log-keywords: ${FILE_VALIDATION_LOG_KEYWORDS:error,exception,stacktrace,traceback,failed}
   security:
     jwt:
       enabled: ${FILE_SERVICE_JWT_ENABLED:true}

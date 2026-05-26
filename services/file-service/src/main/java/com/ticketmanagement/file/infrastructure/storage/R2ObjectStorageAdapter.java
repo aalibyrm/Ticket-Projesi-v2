@@ -9,7 +9,10 @@ import lombok.RequiredArgsConstructor;
 
 import com.ticketmanagement.file.application.storage.ObjectStoragePort;
 import com.ticketmanagement.file.application.storage.PresignedObjectOperation;
+import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
@@ -23,6 +26,7 @@ class R2ObjectStorageAdapter implements ObjectStoragePort {
     private static final String CONTENT_TYPE_HEADER = "Content-Type";
 
     private final S3Presigner presigner;
+    private final S3Client s3Client;
     private final R2StorageProperties properties;
     private final Clock clock;
 
@@ -66,6 +70,22 @@ class R2ObjectStorageAdapter implements ObjectStoragePort {
                 URI.create(presignedRequest.url().toString()),
                 Instant.now(clock).plus(properties.getPresignDownloadTtl()),
                 Map.of());
+    }
+
+    @Override
+    public String readObjectPreview(String objectKey, int maxBytes) {
+        requireObjectKey(objectKey);
+        if (maxBytes < 1) {
+            throw new IllegalArgumentException("maxBytes must be positive");
+        }
+
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(properties.getBucket())
+                .key(objectKey)
+                .range("bytes=0-%d".formatted(maxBytes - 1))
+                .build();
+        ResponseBytes<GetObjectResponse> response = s3Client.getObjectAsBytes(getObjectRequest);
+        return response.asUtf8String();
     }
 
     private static void requireObjectKey(String objectKey) {

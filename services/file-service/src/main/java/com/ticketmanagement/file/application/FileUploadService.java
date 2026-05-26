@@ -24,10 +24,12 @@ public class FileUploadService {
     private final ObjectProvider<ObjectStoragePort> objectStoragePortProvider;
     private final FileMetadataCommandService fileMetadataCommandService;
     private final FileMetadataQueryService fileMetadataQueryService;
+    private final FileValidationService fileValidationService;
     private final TicketAccessPort ticketAccessPort;
 
     // Dosya yukleme icin UUID tabanli object key ve presigned PUT URL uretir.
     public UploadUrlResponse createUploadUrl(TicketAccessContext context, CreateUploadUrlRequest request) {
+        fileValidationService.validateUploadRequest(request);
         ticketAccessPort.assertCanAccessAttachment(request.ticketId(), context);
         String objectKey = "tickets/%s/%s".formatted(request.ticketId(), UUID.randomUUID());
         PresignedObjectOperation operation = objectStoragePort().createUploadUrl(objectKey, request.contentType().trim());
@@ -51,7 +53,10 @@ public class FileUploadService {
 
     // Upload tamamlandiktan sonra metadata kaydini actor sahipligiyle tamamlar.
     public FileMetadataResponse completeUpload(UUID actorId, UUID fileId) {
-        return fileMetadataCommandService.completeUpload(fileId, actorId);
+        FileMetadataResponse completed = fileMetadataCommandService.completeUpload(fileId, actorId);
+        return fileMetadataCommandService.markValidationStatus(
+                completed.id(),
+                fileValidationService.validateCompletedUpload(completed));
     }
 
     // Yetkili kullanici icin kisa sureli presigned GET URL uretir.

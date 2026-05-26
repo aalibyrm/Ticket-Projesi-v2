@@ -2,6 +2,7 @@ package com.ticketmanagement.file;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -69,6 +70,7 @@ class FileUploadApiIntegrationTests {
         UUID actorId = UUID.randomUUID();
         UUID ticketId = UUID.randomUUID();
         stubUploadUrl();
+        stubLogPreviewWithKeyword();
 
         ResponseEntity<UploadUrlResponse> uploadResponse = restTemplate.exchange(
                 "/api/files/uploads",
@@ -99,7 +101,7 @@ class FileUploadApiIntegrationTests {
         assertThat(completed.uploaderId()).isEqualTo(actorId);
         assertThat(completed.objectKey()).isEqualTo(upload.objectKey());
         assertThat(completed.uploadStatus()).isEqualTo(FileUploadStatus.COMPLETED);
-        assertThat(completed.validationStatus()).isEqualTo(FileValidationStatus.PENDING);
+        assertThat(completed.validationStatus()).isEqualTo(FileValidationStatus.VALIDATED);
         assertThat(completed.completedAt()).isNotNull();
     }
 
@@ -135,6 +137,7 @@ class FileUploadApiIntegrationTests {
         UUID ticketId = UUID.randomUUID();
         stubUploadUrl();
         stubDownloadUrl();
+        stubLogPreviewWithKeyword();
 
         ResponseEntity<UploadUrlResponse> uploadResponse = restTemplate.exchange(
                 "/api/files/uploads",
@@ -193,6 +196,7 @@ class FileUploadApiIntegrationTests {
         UUID actorId = UUID.randomUUID();
         UUID ticketId = UUID.randomUUID();
         stubUploadUrl();
+        stubLogPreviewWithKeyword();
 
         ResponseEntity<UploadUrlResponse> uploadResponse = restTemplate.exchange(
                 "/api/files/uploads",
@@ -225,6 +229,120 @@ class FileUploadApiIntegrationTests {
         assertThat(downloadResponse.getBody()).isNotNull();
         assertThat(downloadResponse.getBody().errorCode()).isEqualTo("ACCESS_DENIED");
         verify(objectStoragePort, never()).createDownloadUrl(anyString());
+    }
+
+    @Test
+    void rejectsDisallowedFileExtensionBeforeUploadUrlCreation() {
+        UUID actorId = UUID.randomUUID();
+        UUID ticketId = UUID.randomUUID();
+
+        ResponseEntity<ApiErrorResponse> uploadResponse = restTemplate.exchange(
+                "/api/files/uploads",
+                HttpMethod.POST,
+                new HttpEntity<>(
+                        new CreateUploadUrlRequest(ticketId, "payload.exe", "application/octet-stream", 4096),
+                        actorHeaders(actorId)),
+                ApiErrorResponse.class);
+
+        assertThat(uploadResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(uploadResponse.getBody()).isNotNull();
+        assertThat(uploadResponse.getBody().errorCode()).isEqualTo("FILE_VALIDATION_FAILED");
+        verify(ticketAccessPort, never()).assertCanAccessAttachment(any(UUID.class), any(TicketAccessContext.class));
+        verify(objectStoragePort, never()).createUploadUrl(anyString(), anyString());
+    }
+
+    @Test
+    void rejectsOversizedFileBeforeUploadUrlCreation() {
+        UUID actorId = UUID.randomUUID();
+        UUID ticketId = UUID.randomUUID();
+
+        ResponseEntity<ApiErrorResponse> uploadResponse = restTemplate.exchange(
+                "/api/files/uploads",
+                HttpMethod.POST,
+                new HttpEntity<>(
+                        new CreateUploadUrlRequest(ticketId, "large.log", "text/plain", 10_485_761),
+                        actorHeaders(actorId)),
+                ApiErrorResponse.class);
+
+        assertThat(uploadResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(uploadResponse.getBody()).isNotNull();
+        assertThat(uploadResponse.getBody().errorCode()).isEqualTo("FILE_VALIDATION_FAILED");
+        verify(objectStoragePort, never()).createUploadUrl(anyString(), anyString());
+    }
+
+    @Test
+    void rejectsMimeMismatchBeforeUploadUrlCreation() {
+        UUID actorId = UUID.randomUUID();
+        UUID ticketId = UUID.randomUUID();
+
+        ResponseEntity<ApiErrorResponse> uploadResponse = restTemplate.exchange(
+                "/api/files/uploads",
+                HttpMethod.POST,
+                new HttpEntity<>(
+                        new CreateUploadUrlRequest(ticketId, "screenshot.png", "text/plain", 4096),
+                        actorHeaders(actorId)),
+                ApiErrorResponse.class);
+
+        assertThat(uploadResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(uploadResponse.getBody()).isNotNull();
+        assertThat(uploadResponse.getBody().errorCode()).isEqualTo("FILE_VALIDATION_FAILED");
+        verify(objectStoragePort, never()).createUploadUrl(anyString(), anyString());
+    }
+
+    @Test
+    void marksTextLogRejectedWhenRequiredKeywordIsMissing() {
+        UUID actorId = UUID.randomUUID();
+        UUID ticketId = UUID.randomUUID();
+        stubUploadUrl();
+        when(objectStoragePort.readObjectPreview(anyString(), anyInt()))
+                .thenReturn("normal startup completed without diagnostic terms");
+
+        ResponseEntity<UploadUrlResponse> uploadResponse = restTemplate.exchange(
+                "/api/files/uploads",
+                HttpMethod.POST,
+                new HttpEntity<>(uploadRequest(ticketId), actorHeaders(actorId)),
+                UploadUrlResponse.class);
+        UploadUrlResponse upload = uploadResponse.getBody();
+        assertThat(upload).isNotNull();
+
+        ResponseEntity<FileMetadataResponse> completeResponse = restTemplate.exchange(
+                "/api/files/uploads/{id}/complete",
+                HttpMethod.POST,
+                new HttpEntity<>(actorHeaders(actorId)),
+                FileMetadataResponse.class,
+                upload.fileId());
+
+        assertThat(completeResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(completeResponse.getBody()).isNotNull();
+        assertThat(completeResponse.getBody().validationStatus()).isEqualTo(FileValidationStatus.REJECTED);
+    }
+
+    @Test
+    void marksTextLogFailedWhenStoragePreviewCannotBeRead() {
+        UUID actorId = UUID.randomUUID();
+        UUID ticketId = UUID.randomUUID();
+        stubUploadUrl();
+        when(objectStoragePort.readObjectPreview(anyString(), anyInt()))
+                .thenThrow(new RuntimeException("preview unavailable"));
+
+        ResponseEntity<UploadUrlResponse> uploadResponse = restTemplate.exchange(
+                "/api/files/uploads",
+                HttpMethod.POST,
+                new HttpEntity<>(uploadRequest(ticketId), actorHeaders(actorId)),
+                UploadUrlResponse.class);
+        UploadUrlResponse upload = uploadResponse.getBody();
+        assertThat(upload).isNotNull();
+
+        ResponseEntity<FileMetadataResponse> completeResponse = restTemplate.exchange(
+                "/api/files/uploads/{id}/complete",
+                HttpMethod.POST,
+                new HttpEntity<>(actorHeaders(actorId)),
+                FileMetadataResponse.class,
+                upload.fileId());
+
+        assertThat(completeResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(completeResponse.getBody()).isNotNull();
+        assertThat(completeResponse.getBody().validationStatus()).isEqualTo(FileValidationStatus.FAILED);
     }
 
     @Test
@@ -270,6 +388,11 @@ class FileUploadApiIntegrationTests {
                         URI.create("https://r2.example/download"),
                         Instant.parse("2030-01-01T00:05:00Z"),
                         Map.of()));
+    }
+
+    private void stubLogPreviewWithKeyword() {
+        when(objectStoragePort.readObjectPreview(anyString(), anyInt()))
+                .thenReturn("Exception stacktrace captured during checkout flow");
     }
 
     private static CreateUploadUrlRequest uploadRequest(UUID ticketId) {
