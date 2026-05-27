@@ -43,5 +43,16 @@ class TicketServiceMigrationTests {
                 Integer.class);
 
         assertThat(outboxTableCount).isEqualTo(1);
+
+        Integer processingStatusAllowed = jdbcTemplate.queryForObject(
+                """
+                        select count(*)
+                        from pg_constraint
+                        where conname = 'outbox_events_status_check'
+                          and pg_get_constraintdef(oid) like '%PROCESSING%'
+                        """,
+                Integer.class);
+
+        assertThat(processingStatusAllowed).isEqualTo(1);
     }
 }

@@ -32,6 +32,14 @@ spring:
     default-schema: ticket_schema
     table: flyway_schema_history
     locations: classpath:db/migration
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      properties:
+        enable.idempotence: true
 
 management:
   endpoints:
@@ -52,6 +60,16 @@ info:
     description: Core ticket domain service
 
 app:
+  outbox:
+    publisher:
+      enabled: ${OUTBOX_PUBLISHER_ENABLED:true}
+      batch-size: ${OUTBOX_PUBLISHER_BATCH_SIZE:50}
+      max-retries: ${OUTBOX_PUBLISHER_MAX_RETRIES:5}
+      fixed-delay-ms: ${OUTBOX_PUBLISHER_FIXED_DELAY_MS:5000}
+      initial-delay-ms: ${OUTBOX_PUBLISHER_INITIAL_DELAY_MS:10000}
+      retry-backoff-ms: ${OUTBOX_PUBLISHER_RETRY_BACKOFF_MS:30000}
+      processing-timeout-ms: ${OUTBOX_PUBLISHER_PROCESSING_TIMEOUT_MS:300000}
+      send-timeout-ms: ${OUTBOX_PUBLISHER_SEND_TIMEOUT_MS:10000}
   clients:
     file-service:
       base-url: ${FILE_SERVICE_URL:http://localhost:8082}

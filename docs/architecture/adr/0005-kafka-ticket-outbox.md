@@ -28,3 +28,13 @@ Bu karar, publisher servisinin pending kayitlari filtreleyebilmesi ve payload
 icerigini minimum veri ilkesiyle saklamasi icin verildi. Ticket write use-case'i
 outbox kaydini ayni `@Transactional` kapsamda yazar. Boylece ticket kaydi basarili
 olup event kaydinin kayboldugu durum engellenir.
+
+Publisher job at-least-once calisir. Kayitlar `FOR UPDATE SKIP LOCKED` ile claim
+edilir, `PROCESSING` durumuna alinir ve gecici lease `next_attempt_at` uzerinden
+tutulur. Kafka publish basarili olursa kayit `PUBLISHED` olur. Hata durumunda
+retry sayisi artar, backoff zamani yazilir ve kayit `FAILED` olarak yeniden
+claim edilebilir hale gelir.
+
+Bu tercih duplicate Kafka mesajini tamamen imkansiz hale getirmez; ancak outbox
+state'inin bozulmasini ve ayni row'un ayni anda birden fazla worker tarafindan
+islenmesini engeller. Consumer servisler `eventId` ile idempotent davranmalidir.

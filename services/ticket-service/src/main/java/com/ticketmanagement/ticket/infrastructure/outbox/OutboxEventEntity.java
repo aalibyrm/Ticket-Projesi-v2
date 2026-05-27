@@ -102,6 +102,11 @@ public class OutboxEventEntity {
         return event;
     }
 
+    public void markProcessing(OffsetDateTime lockedUntil) {
+        this.status = OutboxEventStatus.PROCESSING;
+        this.nextAttemptAt = Objects.requireNonNull(lockedUntil, "lockedUntil must not be null");
+    }
+
     public void markPublished(OffsetDateTime publishedAt) {
         this.status = OutboxEventStatus.PUBLISHED;
         this.publishedAt = Objects.requireNonNull(publishedAt, "publishedAt must not be null");
