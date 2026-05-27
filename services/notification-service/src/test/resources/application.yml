@@ -1,0 +1,13 @@
+spring:
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    schemas: notification_schema
+    default-schema: notification_schema
+    locations: classpath:db/migration
+  kafka:
+    listener:
+      auto-startup: false
