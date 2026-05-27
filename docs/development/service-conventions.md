@@ -71,6 +71,10 @@ List<TicketResponse> listOwnTickets(UUID customerId) {
 
 ## Event Standartlari
 
+Kafka event sozlesmesinin canonical kaynagi `libs/event-contract` module'udur.
+Producer ve consumer servisler topic, event type, envelope ve version kurallarini
+bu module uzerinden paylasir.
+
 Kafka eventleri minimum veri tasir:
 
 - `eventId`
@@ -78,7 +82,9 @@ Kafka eventleri minimum veri tasir:
 - `version`
 - `occurredAt`
 - `actorId`
+- `aggregateType`
 - `aggregateId`
+- `correlationId`
 - `payload`
 
 Hassas veri, dosya icerigi, access token veya presigned URL event icine

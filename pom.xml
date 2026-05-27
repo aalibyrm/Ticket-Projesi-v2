@@ -19,6 +19,7 @@
   <description>Parent build for the Ticket Management microservices platform.</description>
 
   <modules>
+    <module>libs/event-contract</module>
     <module>services/api-gateway</module>
     <module>services/ticket-service</module>
     <module>services/workflow-sla-service</module>
