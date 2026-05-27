@@ -25,6 +25,13 @@ Issue #34 kapsaminda ticket yasam dongusu `workflow-sla-service` icinde
 `CLOSED` terminal status olarak tasarlandi; kapatilan ticket tekrar acilmaz.
 Yeni sorun icin yeni ticket olusturulur.
 
+## Uygulama Entegrasyonu
+
+`ticket-service`, status degisikliklerini `TicketWorkflowPort` uzerinden
+dogrular. Adapter, bu tablodaki izinli gecisleri ve BPMN signal adlarini kaynak
+alir. Gecis izinliyse mevcut `ticket.status-changed` outbox eventi uretilir;
+gecis izinli degilse status degismez ve event yazilmaz.
+
 ## Mermaid Ozeti
 
 ```mermaid

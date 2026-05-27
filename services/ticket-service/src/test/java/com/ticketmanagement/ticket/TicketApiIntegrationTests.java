@@ -262,6 +262,27 @@ class TicketApiIntegrationTests {
     }
 
     @Test
+    void invalidStatusTransitionIsRejectedWithoutStatusEvent() {
+        UUID customerId = UUID.randomUUID();
+        UUID agentId = UUID.randomUUID();
+        TicketResponse created = createTicket(customerId);
+
+        ResponseEntity<ApiErrorResponse> response = restTemplate.exchange(
+                "/api/agent/tickets/{id}/status",
+                HttpMethod.PATCH,
+                new HttpEntity<>(new ChangeTicketStatusRequest(TicketStatus.CLOSED), actorHeaders(agentId)),
+                ApiErrorResponse.class,
+                created.id());
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().errorCode()).isEqualTo("INVALID_TICKET_OPERATION");
+        assertThat(response.getBody().message()).contains("NEW -> CLOSED");
+        assertThat(ticketStatusFor(created.id())).isEqualTo("NEW");
+        assertThat(outboxCountFor(created.id())).isEqualTo(1);
+    }
+
+    @Test
     void publisherMarksOutboxEventPublishedAfterKafkaSend() {
         UUID customerId = UUID.randomUUID();
         TicketResponse created = createTicket(customerId);
@@ -400,6 +421,13 @@ class TicketApiIntegrationTests {
         return jdbcTemplate.queryForObject(
                 "select count(*) from ticket_schema.outbox_events where aggregate_id = ?",
                 Integer.class,
+                ticketId);
+    }
+
+    private String ticketStatusFor(UUID ticketId) {
+        return jdbcTemplate.queryForObject(
+                "select status from ticket_schema.tickets where id = ?",
+                String.class,
                 ticketId);
     }
 

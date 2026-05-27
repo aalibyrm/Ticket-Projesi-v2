@@ -13,7 +13,6 @@ import com.ticketmanagement.ticket.api.dto.ChangeTicketStatusRequest;
 import com.ticketmanagement.ticket.api.dto.TicketCommentResponse;
 import com.ticketmanagement.ticket.api.dto.TicketResponse;
 import com.ticketmanagement.ticket.api.dto.TicketWorklogResponse;
-import com.ticketmanagement.ticket.domain.TicketStatus;
 import com.ticketmanagement.ticket.infrastructure.persistence.TicketCommentEntity;
 import com.ticketmanagement.ticket.infrastructure.persistence.TicketCommentJpaRepository;
 import com.ticketmanagement.ticket.infrastructure.persistence.TicketEntity;
@@ -30,18 +29,23 @@ public class TicketAgentCommandService {
     private final TicketWorklogJpaRepository ticketWorklogRepository;
     private final TicketMapper ticketMapper;
     private final TicketOutboxService ticketOutboxService;
+    private final TicketWorkflowPort ticketWorkflowPort;
 
     // Agent tarafindan ticket status bilgisini degistirir ve event uretir.
     @Transactional
     public TicketResponse changeStatus(UUID actorId, UUID ticketId, ChangeTicketStatusRequest request) {
         TicketEntity ticket = findTicketForUpdate(ticketId);
-        TicketStatus previousStatus = ticket.getStatus();
-        if (previousStatus == request.status()) {
-            throw InvalidTicketOperationException.statusMustChange();
-        }
+        TicketStatusTransition transition = ticketWorkflowPort.authorizeStatusTransition(
+                ticketId,
+                ticket.getStatus(),
+                request.status());
 
-        ticket.changeStatus(request.status());
-        ticketOutboxService.saveTicketStatusChanged(ticket, actorId, previousStatus, request.status());
+        ticket.changeStatus(transition.newStatus());
+        ticketOutboxService.saveTicketStatusChanged(
+                ticket,
+                actorId,
+                transition.previousStatus(),
+                transition.newStatus());
         return ticketMapper.toResponse(ticket);
     }
 
