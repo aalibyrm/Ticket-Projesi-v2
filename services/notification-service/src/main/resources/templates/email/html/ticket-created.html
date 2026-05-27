@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Ticket created</title>
+</head>
+<body>
+  <p>Hello <span th:text="${customerName}">customer</span>,</p>
+  <p>
+    Ticket <strong th:text="${ticketNumber}">TCK-0000</strong> was created.
+  </p>
+  <ul>
+    <li>Priority: <span th:text="${priority}">NORMAL</span></li>
+    <li>Status: <span th:text="${status}">NEW</span></li>
+  </ul>
+  <p th:if="${ticketUrl != null and !#strings.isEmpty(ticketUrl)}">
+    <a th:href="${ticketUrl}">Open ticket</a>
+  </p>
+</body>
+</html>

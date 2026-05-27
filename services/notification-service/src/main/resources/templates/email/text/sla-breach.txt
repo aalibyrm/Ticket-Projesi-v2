@@ -1,0 +1,6 @@
+Hello [[${recipientName}]],
+
+Ticket [[${ticketNumber}]] breached its SLA.
+Breach reason: [[${breachReason}]]
+SLA deadline: [[${slaDeadline}]]
+Ticket link: [[${ticketUrl}]]

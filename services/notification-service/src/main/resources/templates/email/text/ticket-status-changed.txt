@@ -1,0 +1,6 @@
+Hello [[${recipientName}]],
+
+Ticket [[${ticketNumber}]] status changed.
+Previous status: [[${previousStatus}]]
+New status: [[${newStatus}]]
+Ticket link: [[${ticketUrl}]]

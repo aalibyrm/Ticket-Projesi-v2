@@ -1,0 +1,6 @@
+Hello [[${recipientName}]],
+
+Ticket [[${ticketNumber}]] was assigned.
+Assignee: [[${assigneeName}]]
+Team: [[${assignedTeamName}]]
+Ticket link: [[${ticketUrl}]]

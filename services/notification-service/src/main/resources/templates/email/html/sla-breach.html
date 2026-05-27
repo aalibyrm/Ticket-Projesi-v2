@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>SLA breach</title>
+</head>
+<body>
+  <p>Hello <span th:text="${recipientName}">recipient</span>,</p>
+  <p>
+    Ticket <strong th:text="${ticketNumber}">TCK-0000</strong> breached its SLA.
+  </p>
+  <ul>
+    <li>Breach reason: <span th:text="${breachReason}">breach reason</span></li>
+    <li>SLA deadline: <span th:text="${slaDeadline}">deadline</span></li>
+  </ul>
+  <p th:if="${ticketUrl != null and !#strings.isEmpty(ticketUrl)}">
+    <a th:href="${ticketUrl}">Open ticket</a>
+  </p>
+</body>
+</html>

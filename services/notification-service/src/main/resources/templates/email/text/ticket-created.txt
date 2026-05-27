@@ -1,0 +1,6 @@
+Hello [[${customerName}]],
+
+Ticket [[${ticketNumber}]] was created.
+Priority: [[${priority}]]
+Status: [[${status}]]
+Ticket link: [[${ticketUrl}]]

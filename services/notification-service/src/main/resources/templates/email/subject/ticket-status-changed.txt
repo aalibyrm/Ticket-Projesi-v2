@@ -1,0 +1,1 @@
+Ticket [[${ticketNumber}]] status changed to [[${newStatus}]]

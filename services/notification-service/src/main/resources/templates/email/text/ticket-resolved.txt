@@ -1,0 +1,6 @@
+Hello [[${recipientName}]],
+
+Ticket [[${ticketNumber}]] was resolved.
+Resolution summary: [[${resolutionSummary}]]
+Resolved at: [[${resolvedAt}]]
+Ticket link: [[${ticketUrl}]]

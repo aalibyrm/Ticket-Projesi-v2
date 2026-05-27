@@ -1,0 +1,6 @@
+Hello [[${recipientName}]],
+
+A new external comment was added to ticket [[${ticketNumber}]].
+Author: [[${commentAuthorName}]]
+Comment preview: [[${commentPreview}]]
+Ticket link: [[${ticketUrl}]]

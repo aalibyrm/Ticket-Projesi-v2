@@ -1,0 +1,5 @@
+Hello [[${recipientName}]],
+
+Ticket [[${ticketNumber}]] was closed.
+Closed at: [[${closedAt}]]
+Ticket link: [[${ticketUrl}]]

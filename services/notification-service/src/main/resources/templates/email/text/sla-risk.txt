@@ -1,0 +1,6 @@
+Hello [[${recipientName}]],
+
+Ticket [[${ticketNumber}]] is at SLA risk.
+Risk reason: [[${riskReason}]]
+SLA deadline: [[${slaDeadline}]]
+Ticket link: [[${ticketUrl}]]

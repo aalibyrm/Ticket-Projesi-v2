@@ -1,0 +1,1 @@
+New external comment on ticket [[${ticketNumber}]]

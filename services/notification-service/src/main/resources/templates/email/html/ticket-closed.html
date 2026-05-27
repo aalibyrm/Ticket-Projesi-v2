@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Ticket closed</title>
+</head>
+<body>
+  <p>Hello <span th:text="${recipientName}">recipient</span>,</p>
+  <p>
+    Ticket <strong th:text="${ticketNumber}">TCK-0000</strong> was closed.
+  </p>
+  <p>Closed at: <span th:text="${closedAt}">timestamp</span></p>
+  <p th:if="${ticketUrl != null and !#strings.isEmpty(ticketUrl)}">
+    <a th:href="${ticketUrl}">Open ticket</a>
+  </p>
+</body>
+</html>
