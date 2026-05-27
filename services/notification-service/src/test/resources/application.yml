@@ -19,6 +19,15 @@ app:
   security:
     jwt:
       enabled: false
+  email:
+    delivery:
+      retry:
+        enabled: false
+        fixed-delay-ms: 30000
+        batch-size: 10
+        max-attempts: 3
+        backoff: 0
+        processing-lease: 1000
 
 management:
   health:

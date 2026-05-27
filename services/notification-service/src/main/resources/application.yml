@@ -63,6 +63,14 @@ app:
     sender:
       from-address: ${NOTIFICATION_EMAIL_FROM:no-reply@ticket.local}
       from-name: ${NOTIFICATION_EMAIL_FROM_NAME:Ticket Management}
+    delivery:
+      retry:
+        enabled: ${NOTIFICATION_EMAIL_RETRY_ENABLED:true}
+        fixed-delay-ms: ${NOTIFICATION_EMAIL_RETRY_FIXED_DELAY_MS:30000}
+        batch-size: ${NOTIFICATION_EMAIL_RETRY_BATCH_SIZE:25}
+        max-attempts: ${NOTIFICATION_EMAIL_RETRY_MAX_ATTEMPTS:3}
+        backoff: ${NOTIFICATION_EMAIL_RETRY_BACKOFF_MS:60000}
+        processing-lease: ${NOTIFICATION_EMAIL_RETRY_PROCESSING_LEASE_MS:300000}
 
 management:
   endpoints:

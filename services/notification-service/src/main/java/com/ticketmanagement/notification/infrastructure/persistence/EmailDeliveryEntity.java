@@ -2,6 +2,7 @@ package com.ticketmanagement.notification.infrastructure.persistence;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -78,13 +79,18 @@ public class EmailDeliveryEntity {
         EmailDeliveryEntity delivery = new EmailDeliveryEntity();
         delivery.id = Objects.requireNonNull(id, "id must not be null");
         delivery.sourceEventId = Objects.requireNonNull(sourceEventId, "sourceEventId must not be null");
-        delivery.recipientEmail = requireText(recipientEmail, "recipientEmail");
+        delivery.recipientEmail = requireText(recipientEmail, "recipientEmail").toLowerCase(Locale.ROOT);
         delivery.subject = requireText(subject, "subject");
         delivery.templateKey = requireText(templateKey, "templateKey");
         delivery.templateModel = Objects.requireNonNull(templateModel, "templateModel must not be null");
         delivery.status = EmailDeliveryStatus.PENDING;
         delivery.retryCount = 0;
         return delivery;
+    }
+
+    public void markRetrying(OffsetDateTime leaseExpiresAt) {
+        this.status = EmailDeliveryStatus.RETRYING;
+        this.nextAttemptAt = Objects.requireNonNull(leaseExpiresAt, "leaseExpiresAt must not be null");
     }
 
     public void markSent(OffsetDateTime sentAt) {
