@@ -25,3 +25,4 @@ kayitlar `docs/architecture/adr` altindadir.
 | ADR-0018 | Shared Java event contract | Java-only, compile-time guvenli ve asiri surec maliyeti olmayan event sozlesmesi gerekir | `libs/event-contract` topic, envelope, event type, version ve payload policy kurallarini paylasir |
 | ADR-0019 | Ticket lifecycle action model | Eventleri doguran gercek status, assignment, external comment ve worklog aksiyonlari gerekir | Ticket-service sade operasyon modeliyle agent endpointleri ve transactional outbox eventleri uretir |
 | ADR-0020 | Consumer idempotency pattern | Kafka at-least-once delivery duplicate side effect uretebilir | Consumer'lar `(event_id, consumer_name)` kaydi ile side effect'i yalnizca ilk delivery icin calistirir |
+| ADR-0021 | Eventing test strategy | Outbox, Kafka publish, retry ve consumer idempotency guvencesi birlikte kanitlanmali | Embedded Kafka + PostgreSQL Testcontainers + deterministik mock failure testleri kullanilir |
