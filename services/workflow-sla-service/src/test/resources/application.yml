@@ -1,0 +1,15 @@
+spring:
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    schemas: workflow_schema
+    default-schema: workflow_schema
+    locations: classpath:db/migration
+
+app:
+  security:
+    jwt:
+      enabled: false

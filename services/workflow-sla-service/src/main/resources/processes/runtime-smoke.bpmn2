@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                   xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                   xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                   xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                   xmlns:drools="http://www.jboss.org/drools"
+                   id="runtimeSmokeDefinitions"
+                   targetNamespace="https://ticketmanagement.local/workflow">
+  <bpmn2:process id="runtimeSmoke" name="Runtime Smoke" isExecutable="true" drools:packageName="com.ticketmanagement.workflow.process">
+    <bpmn2:startEvent id="runtimeSmokeStart" name="Start">
+      <bpmn2:outgoing>runtimeSmokeFlow</bpmn2:outgoing>
+    </bpmn2:startEvent>
+    <bpmn2:endEvent id="runtimeSmokeEnd" name="End">
+      <bpmn2:incoming>runtimeSmokeFlow</bpmn2:incoming>
+    </bpmn2:endEvent>
+    <bpmn2:sequenceFlow id="runtimeSmokeFlow" sourceRef="runtimeSmokeStart" targetRef="runtimeSmokeEnd"/>
+  </bpmn2:process>
+  <bpmndi:BPMNDiagram id="runtimeSmokeDiagram">
+    <bpmndi:BPMNPlane id="runtimeSmokePlane" bpmnElement="runtimeSmoke">
+      <bpmndi:BPMNShape id="runtimeSmokeStartShape" bpmnElement="runtimeSmokeStart">
+        <dc:Bounds x="100" y="100" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="runtimeSmokeEndShape" bpmnElement="runtimeSmokeEnd">
+        <dc:Bounds x="220" y="100" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="runtimeSmokeFlowEdge" bpmnElement="runtimeSmokeFlow">
+        <di:waypoint x="136" y="118"/>
+        <di:waypoint x="220" y="118"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn2:definitions>

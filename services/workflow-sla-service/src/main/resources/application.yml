@@ -1,0 +1,57 @@
+server:
+  port: ${WORKFLOW_SERVICE_PORT:8083}
+
+spring:
+  application:
+    name: workflow-sla-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/ticket-management}
+  datasource:
+    url: ${WORKFLOW_DB_URL:jdbc:postgresql://localhost:5432/ticket_platform}
+    username: ${WORKFLOW_DB_USER:workflow_app}
+    password: ${WORKFLOW_DB_PASSWORD:workflow_dev_password}
+    hikari:
+      pool-name: workflow-sla-service-pool
+      maximum-pool-size: ${WORKFLOW_DB_POOL_MAX_SIZE:10}
+      minimum-idle: ${WORKFLOW_DB_POOL_MIN_IDLE:2}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: workflow_schema
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    schemas: workflow_schema
+    default-schema: workflow_schema
+    table: flyway_schema_history
+    locations: classpath:db/migration
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: workflow-sla-service
+    description: BPMN workflow and SLA tracking service
+
+app:
+  security:
+    jwt:
+      enabled: ${WORKFLOW_SERVICE_JWT_ENABLED:true}
