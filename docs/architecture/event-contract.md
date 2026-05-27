@@ -79,6 +79,23 @@ Ornek:
 - Consumer servisler bilmedigi version'i sessizce islememeli; loglayip
   idempotency kaydiyla reddetmelidir.
 
+## Ticket Event Payloadlari
+
+### `ticket.created`
+
+`TicketCreatedPayload` sadece routing ve consumer kararlarini destekleyen
+minimum alani tasir:
+
+- `ticketId`
+- `ticketNumber`
+- `customerId`
+- `productId`
+- `priority`
+- `status`
+
+Ticket `summary` ve `description` event payload'ina koyulmaz. Bu alanlar
+kullanici tarafindan yazildigi icin PII veya hassas veri icerebilir.
+
 ## Minimal Payload Politikasi
 
 Event payload sadece consumer'in karar vermesi icin gereken minimum veriyi

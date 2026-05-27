@@ -22,6 +22,7 @@ public class TicketCommandService {
     private final TicketJpaRepository ticketRepository;
     private final TicketMapper ticketMapper;
     private final TicketNumberGenerator ticketNumberGenerator;
+    private final TicketOutboxService ticketOutboxService;
 
     // Musteri adina yeni ticket kaydi olusturur.
     @Transactional
@@ -38,6 +39,9 @@ public class TicketCommandService {
                 request.description().trim(),
                 request.priority() == null ? TicketPriority.MEDIUM : request.priority());
 
-        return ticketMapper.toResponse(ticketRepository.save(ticket));
+        TicketEntity savedTicket = ticketRepository.save(ticket);
+        ticketOutboxService.saveTicketCreated(savedTicket, customerId);
+
+        return ticketMapper.toResponse(savedTicket);
     }
 }

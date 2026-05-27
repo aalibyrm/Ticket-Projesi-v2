@@ -23,6 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -53,6 +54,9 @@ class TicketApiIntegrationTests {
     @Autowired
     private TestRestTemplate restTemplate;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @MockBean
     private TicketAttachmentPort ticketAttachmentPort;
 
@@ -81,6 +85,7 @@ class TicketApiIntegrationTests {
         assertThat(created.status()).isEqualTo(TicketStatus.NEW);
         assertThat(created.priority()).isEqualTo(TicketPriority.HIGH);
         assertThat(created.ticketNumber()).startsWith("TCK-");
+        assertTicketCreatedOutboxEvent(created, customerId);
 
         ResponseEntity<java.util.List<TicketResponse>> ownList = restTemplate.exchange(
                 "/api/tickets",
@@ -160,6 +165,43 @@ class TicketApiIntegrationTests {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotEmpty();
         return response.getBody()[0];
+    }
+
+    private void assertTicketCreatedOutboxEvent(TicketResponse created, UUID actorId) {
+        java.util.Map<String, Object> outbox = jdbcTemplate.queryForMap(
+                """
+                        select topic_name,
+                               event_type,
+                               event_version,
+                               aggregate_type,
+                               aggregate_id::text,
+                               actor_id::text,
+                               status,
+                               retry_count,
+                               payload ->> 'ticketId' as payload_ticket_id,
+                               payload ->> 'ticketNumber' as payload_ticket_number,
+                               payload ->> 'priority' as payload_priority,
+                               payload ->> 'status' as payload_status,
+                               payload::text as payload_json
+                        from ticket_schema.outbox_events
+                        where aggregate_id = ?
+                        """,
+                created.id());
+
+        assertThat(outbox.get("topic_name")).isEqualTo("ticket.events.v1");
+        assertThat(outbox.get("event_type")).isEqualTo("ticket.created");
+        assertThat(outbox.get("event_version")).isEqualTo(1);
+        assertThat(outbox.get("aggregate_type")).isEqualTo("ticket");
+        assertThat(outbox.get("aggregate_id")).isEqualTo(created.id().toString());
+        assertThat(outbox.get("actor_id")).isEqualTo(actorId.toString());
+        assertThat(outbox.get("status")).isEqualTo("PENDING");
+        assertThat(outbox.get("retry_count")).isEqualTo(0);
+        assertThat(outbox.get("payload_ticket_id")).isEqualTo(created.id().toString());
+        assertThat(outbox.get("payload_ticket_number")).isEqualTo(created.ticketNumber());
+        assertThat(outbox.get("payload_priority")).isEqualTo("HIGH");
+        assertThat(outbox.get("payload_status")).isEqualTo("NEW");
+        assertThat(outbox.get("payload_json").toString()).doesNotContain(created.summary());
+        assertThat(outbox.get("payload_json").toString()).doesNotContain(created.description());
     }
 
     private static TicketAttachmentResponse attachmentFor(UUID ticketId) {
