@@ -18,6 +18,8 @@ public record TicketResponse(
         String description,
         TicketPriority priority,
         TicketStatus status,
+        UUID assigneeId,
+        UUID assignedTeamId,
         List<TicketAttachmentResponse> attachments,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt) {

@@ -96,6 +96,49 @@ minimum alani tasir:
 Ticket `summary` ve `description` event payload'ina koyulmaz. Bu alanlar
 kullanici tarafindan yazildigi icin PII veya hassas veri icerebilir.
 
+### `ticket.status-changed`
+
+`TicketStatusChangedPayload` alanlari:
+
+- `ticketId`
+- `ticketNumber`
+- `previousStatus`
+- `newStatus`
+
+### `ticket.assigned`
+
+`TicketAssignedPayload` alanlari:
+
+- `ticketId`
+- `ticketNumber`
+- `assigneeId`
+- `assignedTeamId`
+
+### `ticket.external-comment-added`
+
+`ExternalCommentAddedPayload` alanlari:
+
+- `ticketId`
+- `ticketNumber`
+- `commentId`
+- `authorId`
+
+Yorum metni event payload'ina koyulmaz. Consumer gerekirse ticket-service API'si
+uzerinden yetkili okuma yapmalidir.
+
+### `ticket.worklog-added`
+
+`WorklogAddedPayload` alanlari:
+
+- `ticketId`
+- `ticketNumber`
+- `worklogId`
+- `agentId`
+- `workDate`
+- `durationMinutes`
+
+Worklog aciklamasi event payload'ina koyulmaz.
+
 ## Minimal Payload Politikasi
 
 Event payload sadece consumer'in karar vermesi icin gereken minimum veriyi

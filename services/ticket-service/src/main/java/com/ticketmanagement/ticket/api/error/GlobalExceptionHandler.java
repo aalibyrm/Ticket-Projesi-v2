@@ -13,6 +13,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.server.ResponseStatusException;
 
 import com.ticketmanagement.ticket.application.ForbiddenOperationException;
+import com.ticketmanagement.ticket.application.InvalidTicketOperationException;
 import com.ticketmanagement.ticket.application.NotFoundException;
 import com.ticketmanagement.ticket.infrastructure.web.CorrelationIdFilter;
 
@@ -71,6 +72,19 @@ class GlobalExceptionHandler {
         return buildResponse(
                 HttpStatus.FORBIDDEN,
                 "ACCESS_DENIED",
+                exception.getMessage(),
+                request,
+                List.of());
+    }
+
+    // Gecersiz ticket is aksiyonlarini standart 400 response formatina cevirir.
+    @ExceptionHandler(InvalidTicketOperationException.class)
+    ResponseEntity<ApiErrorResponse> handleInvalidTicketOperationException(
+            InvalidTicketOperationException exception,
+            HttpServletRequest request) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                "INVALID_TICKET_OPERATION",
                 exception.getMessage(),
                 request,
                 List.of());

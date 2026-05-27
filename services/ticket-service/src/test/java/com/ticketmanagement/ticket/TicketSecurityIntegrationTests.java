@@ -2,6 +2,7 @@ package com.ticketmanagement.ticket;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -26,6 +27,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ticketmanagement.ticket.api.dto.AssignTicketRequest;
 import com.ticketmanagement.ticket.api.dto.CreateTicketRequest;
 import com.ticketmanagement.ticket.domain.TicketPriority;
 import com.ticketmanagement.ticket.infrastructure.persistence.ProductJpaRepository;
@@ -148,15 +150,37 @@ class TicketSecurityIntegrationTests {
     }
 
     @Test
-    void agentCannotAccessTicketAttachmentsUntilAssignmentModelExists() throws Exception {
+    void assignedAgentCanAccessTicketAttachments() throws Exception {
         UUID ownerCustomerId = UUID.randomUUID();
         UUID agentId = UUID.randomUUID();
         UUID ticketId = createTicketFor(ownerCustomerId);
 
+        assignTicketTo(ticketId, agentId, null, agentId);
+
         mockMvc.perform(get("/internal/tickets/{id}/attachment-access", ticketId)
                         .with(jwtWithRoles(agentId, "AGENT")))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ticketId").value(ticketId.toString()))
+                .andExpect(jsonPath("$.actorId").value(agentId.toString()))
+                .andExpect(jsonPath("$.uploadAllowed").value(true))
+                .andExpect(jsonPath("$.downloadAllowed").value(true));
+    }
+
+    @Test
+    void assignedTeamMemberCanAccessTicketAttachments() throws Exception {
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID assignedAgentId = UUID.randomUUID();
+        UUID teamMemberId = UUID.randomUUID();
+        UUID teamId = UUID.randomUUID();
+        UUID ticketId = createTicketFor(ownerCustomerId);
+
+        assignTicketTo(ticketId, assignedAgentId, teamId, assignedAgentId);
+
+        mockMvc.perform(get("/internal/tickets/{id}/attachment-access", ticketId)
+                        .with(jwtWithRolesAndTeams(teamMemberId, List.of(teamId), "AGENT")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ticketId").value(ticketId.toString()))
+                .andExpect(jsonPath("$.actorId").value(teamMemberId.toString()));
     }
 
     private UUID createTicketFor(UUID customerId) throws Exception {
@@ -178,9 +202,26 @@ class TicketSecurityIntegrationTests {
         return UUID.fromString(ticketId);
     }
 
+    private void assignTicketTo(UUID ticketId, UUID assigneeId, UUID teamId, UUID actorId) throws Exception {
+        AssignTicketRequest request = new AssignTicketRequest(assigneeId, teamId);
+
+        mockMvc.perform(patch("/api/agent/tickets/{id}/assignment", ticketId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .with(jwtWithRoles(actorId, "AGENT")))
+                .andExpect(status().isOk());
+    }
+
     private static RequestPostProcessor jwtWithRoles(UUID subject, String... roles) {
         return jwt().jwt(token -> token
                 .subject(subject.toString())
                 .claim("realm_access", Map.of("roles", List.of(roles))));
+    }
+
+    private static RequestPostProcessor jwtWithRolesAndTeams(UUID subject, List<UUID> teamIds, String... roles) {
+        return jwt().jwt(token -> token
+                .subject(subject.toString())
+                .claim("realm_access", Map.of("roles", List.of(roles)))
+                .claim("team_ids", teamIds.stream().map(UUID::toString).toList()));
     }
 }

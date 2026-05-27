@@ -54,5 +54,28 @@ class TicketServiceMigrationTests {
                 Integer.class);
 
         assertThat(processingStatusAllowed).isEqualTo(1);
+
+        Integer lifecycleTableCount = jdbcTemplate.queryForObject(
+                """
+                        select count(*)
+                        from information_schema.tables
+                        where table_schema = 'ticket_schema'
+                          and table_name in ('ticket_comments', 'ticket_worklogs')
+                        """,
+                Integer.class);
+
+        assertThat(lifecycleTableCount).isEqualTo(2);
+
+        Integer assignmentColumnCount = jdbcTemplate.queryForObject(
+                """
+                        select count(*)
+                        from information_schema.columns
+                        where table_schema = 'ticket_schema'
+                          and table_name = 'tickets'
+                          and column_name in ('assignee_id', 'assigned_team_id')
+                        """,
+                Integer.class);
+
+        assertThat(assignmentColumnCount).isEqualTo(2);
     }
 }

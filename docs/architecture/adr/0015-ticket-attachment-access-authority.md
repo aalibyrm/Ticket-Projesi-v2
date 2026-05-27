@@ -10,8 +10,8 @@ Ilk uygulamada su kurallar gecerlidir:
 
 - `CUSTOMER` sadece kendi ticket'ina dosya ekleyebilir ve dosya indirebilir.
 - `ADMIN` tum ticket eklerine erisebilir.
-- `AGENT` ve assigned team erisimi, assignment modeli eklenene kadar kapali
-  tutulur.
+- `AGENT` erisimi assignment modeliyle birlikte sadece assigned agent veya
+  actor'un `team_ids` claim'i icindeki assigned team icin acilir.
 
 ## Neden
 

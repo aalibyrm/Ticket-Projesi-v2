@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
@@ -36,10 +37,16 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import com.ticketmanagement.ticket.api.dto.AddExternalCommentRequest;
+import com.ticketmanagement.ticket.api.dto.AddWorklogRequest;
+import com.ticketmanagement.ticket.api.dto.AssignTicketRequest;
+import com.ticketmanagement.ticket.api.dto.ChangeTicketStatusRequest;
 import com.ticketmanagement.ticket.api.dto.CreateTicketRequest;
 import com.ticketmanagement.ticket.api.dto.ProductResponse;
 import com.ticketmanagement.ticket.api.dto.TicketAttachmentResponse;
+import com.ticketmanagement.ticket.api.dto.TicketCommentResponse;
 import com.ticketmanagement.ticket.api.dto.TicketResponse;
+import com.ticketmanagement.ticket.api.dto.TicketWorklogResponse;
 import com.ticketmanagement.ticket.api.error.ApiErrorResponse;
 import com.ticketmanagement.ticket.application.AttachmentLookupContext;
 import com.ticketmanagement.ticket.application.TicketAttachmentPort;
@@ -78,6 +85,8 @@ class TicketApiIntegrationTests {
     @BeforeEach
     void cleanTicketData() {
         jdbcTemplate.update("delete from ticket_schema.outbox_events");
+        jdbcTemplate.update("delete from ticket_schema.ticket_comments");
+        jdbcTemplate.update("delete from ticket_schema.ticket_worklogs");
         jdbcTemplate.update("delete from ticket_schema.tickets");
     }
 
@@ -179,6 +188,77 @@ class TicketApiIntegrationTests {
         assertThat(response.getBody().validationErrors())
                 .extracting(error -> error.field())
                 .contains("productId", "summary", "description");
+    }
+
+    @Test
+    void agentActionsCreateVersionedOutboxEvents() {
+        UUID customerId = UUID.randomUUID();
+        UUID agentId = UUID.randomUUID();
+        UUID teamId = UUID.randomUUID();
+        TicketResponse created = createTicket(customerId);
+
+        ResponseEntity<TicketResponse> statusResponse = restTemplate.exchange(
+                "/api/agent/tickets/{id}/status",
+                HttpMethod.PATCH,
+                new HttpEntity<>(new ChangeTicketStatusRequest(TicketStatus.IN_PROGRESS), actorHeaders(agentId)),
+                TicketResponse.class,
+                created.id());
+
+        assertThat(statusResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(statusResponse.getBody()).isNotNull();
+        assertThat(statusResponse.getBody().status()).isEqualTo(TicketStatus.IN_PROGRESS);
+
+        ResponseEntity<TicketResponse> assignmentResponse = restTemplate.exchange(
+                "/api/agent/tickets/{id}/assignment",
+                HttpMethod.PATCH,
+                new HttpEntity<>(new AssignTicketRequest(agentId, teamId), actorHeaders(agentId)),
+                TicketResponse.class,
+                created.id());
+
+        assertThat(assignmentResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(assignmentResponse.getBody()).isNotNull();
+        assertThat(assignmentResponse.getBody().assigneeId()).isEqualTo(agentId);
+        assertThat(assignmentResponse.getBody().assignedTeamId()).isEqualTo(teamId);
+
+        ResponseEntity<TicketCommentResponse> commentResponse = restTemplate.exchange(
+                "/api/agent/tickets/{id}/comments/external",
+                HttpMethod.POST,
+                new HttpEntity<>(new AddExternalCommentRequest("Customer-visible investigation update."), actorHeaders(agentId)),
+                TicketCommentResponse.class,
+                created.id());
+
+        assertThat(commentResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(commentResponse.getBody()).isNotNull();
+        assertThat(commentResponse.getBody().ticketId()).isEqualTo(created.id());
+        assertThat(commentResponse.getBody().visibility().name()).isEqualTo("EXTERNAL");
+
+        ResponseEntity<TicketWorklogResponse> worklogResponse = restTemplate.exchange(
+                "/api/agent/tickets/{id}/worklogs",
+                HttpMethod.POST,
+                new HttpEntity<>(new AddWorklogRequest(
+                        LocalDate.parse("2026-05-27"),
+                        45,
+                        "Investigated dashboard authentication logs."),
+                        actorHeaders(agentId)),
+                TicketWorklogResponse.class,
+                created.id());
+
+        assertThat(worklogResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(worklogResponse.getBody()).isNotNull();
+        assertThat(worklogResponse.getBody().ticketId()).isEqualTo(created.id());
+        assertThat(worklogResponse.getBody().durationMinutes()).isEqualTo(45);
+
+        assertThat(outboxCountFor(created.id())).isEqualTo(5);
+        assertLifecycleEvent(created.id(), "ticket.created", "status", "NEW");
+        assertLifecycleEvent(created.id(), "ticket.status-changed", "newStatus", "IN_PROGRESS");
+        assertLifecycleEvent(created.id(), "ticket.assigned", "assigneeId", agentId.toString());
+        assertLifecycleEvent(created.id(), "ticket.external-comment-added", "commentId", commentResponse.getBody().id().toString());
+        assertLifecycleEvent(created.id(), "ticket.worklog-added", "worklogId", worklogResponse.getBody().id().toString());
+
+        assertThat(outboxPayloadFor(created.id(), "ticket.external-comment-added"))
+                .doesNotContain("Customer-visible investigation update.");
+        assertThat(outboxPayloadFor(created.id(), "ticket.worklog-added"))
+                .doesNotContain("Investigated dashboard authentication logs.");
     }
 
     @Test
@@ -321,6 +401,40 @@ class TicketApiIntegrationTests {
                 "select count(*) from ticket_schema.outbox_events where aggregate_id = ?",
                 Integer.class,
                 ticketId);
+    }
+
+    private void assertLifecycleEvent(UUID ticketId, String eventType, String payloadField, String payloadValue) {
+        Map<String, Object> event = jdbcTemplate.queryForMap(
+                """
+                        select topic_name,
+                               event_version,
+                               status,
+                               payload ->> ? as payload_value
+                        from ticket_schema.outbox_events
+                        where aggregate_id = ?
+                          and event_type = ?
+                        """,
+                payloadField,
+                ticketId,
+                eventType);
+
+        assertThat(event.get("topic_name")).isEqualTo("ticket.events.v1");
+        assertThat(event.get("event_version")).isEqualTo(1);
+        assertThat(event.get("status")).isEqualTo("PENDING");
+        assertThat(event.get("payload_value")).isEqualTo(payloadValue);
+    }
+
+    private String outboxPayloadFor(UUID ticketId, String eventType) {
+        return jdbcTemplate.queryForObject(
+                """
+                        select payload::text
+                        from ticket_schema.outbox_events
+                        where aggregate_id = ?
+                          and event_type = ?
+                        """,
+                String.class,
+                ticketId,
+                eventType);
     }
 
     private static TicketAttachmentResponse attachmentFor(UUID ticketId) {

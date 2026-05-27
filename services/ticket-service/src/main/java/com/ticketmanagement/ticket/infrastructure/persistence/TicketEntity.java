@@ -1,6 +1,7 @@
 package com.ticketmanagement.ticket.infrastructure.persistence;
 
 import java.time.OffsetDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
@@ -57,6 +58,10 @@ public class TicketEntity {
     @Column(nullable = false, length = 40)
     private TicketStatus status;
 
+    private UUID assigneeId;
+
+    private UUID assignedTeamId;
+
     @Setter(AccessLevel.NONE)
     @Column(nullable = false, updatable = false)
     private OffsetDateTime createdAt;
@@ -83,6 +88,18 @@ public class TicketEntity {
         ticket.setPriority(priority);
         ticket.setStatus(TicketStatus.NEW);
         return ticket;
+    }
+
+    public TicketStatus changeStatus(TicketStatus newStatus) {
+        Objects.requireNonNull(newStatus, "newStatus must not be null");
+        TicketStatus previousStatus = status;
+        status = newStatus;
+        return previousStatus;
+    }
+
+    public void assignTo(UUID assigneeId, UUID assignedTeamId) {
+        this.assigneeId = Objects.requireNonNull(assigneeId, "assigneeId must not be null");
+        this.assignedTeamId = assignedTeamId;
     }
 
     @PrePersist
