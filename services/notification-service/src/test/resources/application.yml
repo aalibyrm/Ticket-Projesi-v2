@@ -11,3 +11,8 @@ spring:
   kafka:
     listener:
       auto-startup: false
+
+app:
+  security:
+    jwt:
+      enabled: false

@@ -61,6 +61,10 @@ public class NotificationEntity {
         return notification;
     }
 
+    public void markRead() {
+        this.read = true;
+    }
+
     @PrePersist
     void prePersist() {
         createdAt = OffsetDateTime.now(ZoneOffset.UTC);

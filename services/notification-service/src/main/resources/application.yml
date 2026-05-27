@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: notification-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/ticket-management}
   datasource:
     url: ${NOTIFICATION_DB_URL:jdbc:postgresql://localhost:5432/ticket_platform}
     username: ${NOTIFICATION_DB_USER:notification_app}
@@ -40,6 +45,9 @@ app:
   kafka:
     topics:
       ticket-events: ${TICKET_EVENTS_TOPIC:ticket.events.v1}
+  security:
+    jwt:
+      enabled: ${NOTIFICATION_SERVICE_JWT_ENABLED:true}
 
 management:
   endpoints:
