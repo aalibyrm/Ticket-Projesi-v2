@@ -30,3 +30,4 @@ kayitlar `docs/architecture/adr` altindadir.
 | ADR-0023 | DB tabanli e-posta retry | E-posta delivery state notification-service sahipliginde ve duplicate riskini DB ile kontrol etmek yeterli | Kafka retry topic/DLQ karmasasi eklenmeden PENDING, RETRYING, SENT ve FAILED akisi kurulur |
 | ADR-0024 | Notification e-posta entegrasyon testleri | SMTP pipeline lokalde ve CI'da dis provider kullanmadan kanitlanmali | Testcontainers PostgreSQL + Mailpit ile tekrar edilebilir test akisi saglanir |
 | ADR-0025 | Workflow/SLA Kogito bootstrap | ADR-0006 Kogito karari Spring Boot platformunu bozmadan uygulanmali | Kogito 10.2.0 workflow-sla-service seviyesinde explicit tutulur ve BPMN runtime smoke test ile dogrulanir |
+| ADR-0026 | Ticket lifecycle BPMN modeli | Ticket status gecisleri BPMN uzerinde gorunur ve adapter entegrasyonuna hazir olmali | Signal tabanli `ticketLifecycle` process'i izinli gecisleri ve terminal `CLOSED` kararini dokumante eder |

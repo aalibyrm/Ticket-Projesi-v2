@@ -47,7 +47,7 @@ class WorkflowSlaServiceBootstrapTests {
         assertThat(tableExists("service_metadata")).isEqualTo(1);
         assertThat(metadataValue("service_name")).isEqualTo("workflow-sla-service");
         assertThat(metadataValue("workflow_runtime")).isEqualTo("kogito");
-        assertThat(processes.processIds()).contains("runtimeSmoke");
+        assertThat(processes.processIds()).contains("runtimeSmoke", "ticketLifecycle");
     }
 
     private Integer tableExists(String tableName) {

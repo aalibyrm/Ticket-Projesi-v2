@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                   xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                   xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                   xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                   xmlns:drools="http://www.jboss.org/drools"
+                   id="ticketLifecycleDefinitions"
+                   targetNamespace="https://ticketmanagement.local/workflow">
+  <bpmn2:signal id="startProgressSignal" name="START_PROGRESS"/>
+  <bpmn2:signal id="requestCustomerInfoSignal" name="REQUEST_CUSTOMER_INFO"/>
+  <bpmn2:signal id="customerRespondedSignal" name="CUSTOMER_RESPONDED"/>
+  <bpmn2:signal id="resolveTicketSignal" name="RESOLVE_TICKET"/>
+  <bpmn2:signal id="closeTicketSignal" name="CLOSE_TICKET"/>
+  <bpmn2:signal id="reopenTicketSignal" name="REOPEN_TICKET"/>
+
+  <bpmn2:process id="ticketLifecycle" name="Ticket Lifecycle" isExecutable="true" drools:packageName="com.ticketmanagement.workflow.process">
+    <bpmn2:startEvent id="ticketCreated" name="Ticket Created">
+      <bpmn2:outgoing>flowCreatedToNew</bpmn2:outgoing>
+    </bpmn2:startEvent>
+
+    <bpmn2:intermediateCatchEvent id="statusNew" name="NEW">
+      <bpmn2:incoming>flowCreatedToNew</bpmn2:incoming>
+      <bpmn2:outgoing>flowNewToInProgress</bpmn2:outgoing>
+      <bpmn2:signalEventDefinition id="startProgressSignalEvent" signalRef="startProgressSignal"/>
+    </bpmn2:intermediateCatchEvent>
+
+    <bpmn2:exclusiveGateway id="enterInProgress" name="Enter IN_PROGRESS" gatewayDirection="Converging">
+      <bpmn2:incoming>flowNewToInProgress</bpmn2:incoming>
+      <bpmn2:incoming>flowCustomerRespondedToInProgress</bpmn2:incoming>
+      <bpmn2:incoming>flowReopenToInProgress</bpmn2:incoming>
+      <bpmn2:outgoing>flowEnterInProgressToStatus</bpmn2:outgoing>
+    </bpmn2:exclusiveGateway>
+
+    <bpmn2:eventBasedGateway id="statusInProgress" name="IN_PROGRESS" gatewayDirection="Diverging">
+      <bpmn2:incoming>flowEnterInProgressToStatus</bpmn2:incoming>
+      <bpmn2:outgoing>flowInProgressToCustomerRequest</bpmn2:outgoing>
+      <bpmn2:outgoing>flowInProgressToResolve</bpmn2:outgoing>
+    </bpmn2:eventBasedGateway>
+
+    <bpmn2:intermediateCatchEvent id="requestCustomerInfo" name="REQUEST_CUSTOMER_INFO">
+      <bpmn2:incoming>flowInProgressToCustomerRequest</bpmn2:incoming>
+      <bpmn2:outgoing>flowCustomerRequestToWaiting</bpmn2:outgoing>
+      <bpmn2:signalEventDefinition id="requestCustomerInfoSignalEvent" signalRef="requestCustomerInfoSignal"/>
+    </bpmn2:intermediateCatchEvent>
+
+    <bpmn2:intermediateCatchEvent id="statusWaitingForCustomer" name="WAITING_FOR_CUSTOMER">
+      <bpmn2:incoming>flowCustomerRequestToWaiting</bpmn2:incoming>
+      <bpmn2:outgoing>flowCustomerRespondedToInProgress</bpmn2:outgoing>
+      <bpmn2:signalEventDefinition id="customerRespondedSignalEvent" signalRef="customerRespondedSignal"/>
+    </bpmn2:intermediateCatchEvent>
+
+    <bpmn2:intermediateCatchEvent id="resolveTicket" name="RESOLVE_TICKET">
+      <bpmn2:incoming>flowInProgressToResolve</bpmn2:incoming>
+      <bpmn2:outgoing>flowResolveToResolved</bpmn2:outgoing>
+      <bpmn2:signalEventDefinition id="resolveTicketSignalEvent" signalRef="resolveTicketSignal"/>
+    </bpmn2:intermediateCatchEvent>
+
+    <bpmn2:eventBasedGateway id="statusResolved" name="RESOLVED" gatewayDirection="Diverging">
+      <bpmn2:incoming>flowResolveToResolved</bpmn2:incoming>
+      <bpmn2:outgoing>flowResolvedToClose</bpmn2:outgoing>
+      <bpmn2:outgoing>flowResolvedToReopen</bpmn2:outgoing>
+    </bpmn2:eventBasedGateway>
+
+    <bpmn2:intermediateCatchEvent id="closeTicket" name="CLOSE_TICKET">
+      <bpmn2:incoming>flowResolvedToClose</bpmn2:incoming>
+      <bpmn2:outgoing>flowCloseToClosed</bpmn2:outgoing>
+      <bpmn2:signalEventDefinition id="closeTicketSignalEvent" signalRef="closeTicketSignal"/>
+    </bpmn2:intermediateCatchEvent>
+
+    <bpmn2:intermediateCatchEvent id="reopenTicket" name="REOPEN_TICKET">
+      <bpmn2:incoming>flowResolvedToReopen</bpmn2:incoming>
+      <bpmn2:outgoing>flowReopenToInProgress</bpmn2:outgoing>
+      <bpmn2:signalEventDefinition id="reopenTicketSignalEvent" signalRef="reopenTicketSignal"/>
+    </bpmn2:intermediateCatchEvent>
+
+    <bpmn2:endEvent id="statusClosed" name="CLOSED">
+      <bpmn2:incoming>flowCloseToClosed</bpmn2:incoming>
+    </bpmn2:endEvent>
+
+    <bpmn2:sequenceFlow id="flowCreatedToNew" sourceRef="ticketCreated" targetRef="statusNew"/>
+    <bpmn2:sequenceFlow id="flowNewToInProgress" sourceRef="statusNew" targetRef="enterInProgress"/>
+    <bpmn2:sequenceFlow id="flowEnterInProgressToStatus" sourceRef="enterInProgress" targetRef="statusInProgress"/>
+    <bpmn2:sequenceFlow id="flowInProgressToCustomerRequest" sourceRef="statusInProgress" targetRef="requestCustomerInfo"/>
+    <bpmn2:sequenceFlow id="flowCustomerRequestToWaiting" sourceRef="requestCustomerInfo" targetRef="statusWaitingForCustomer"/>
+    <bpmn2:sequenceFlow id="flowCustomerRespondedToInProgress" sourceRef="statusWaitingForCustomer" targetRef="enterInProgress"/>
+    <bpmn2:sequenceFlow id="flowInProgressToResolve" sourceRef="statusInProgress" targetRef="resolveTicket"/>
+    <bpmn2:sequenceFlow id="flowResolveToResolved" sourceRef="resolveTicket" targetRef="statusResolved"/>
+    <bpmn2:sequenceFlow id="flowResolvedToClose" sourceRef="statusResolved" targetRef="closeTicket"/>
+    <bpmn2:sequenceFlow id="flowCloseToClosed" sourceRef="closeTicket" targetRef="statusClosed"/>
+    <bpmn2:sequenceFlow id="flowResolvedToReopen" sourceRef="statusResolved" targetRef="reopenTicket"/>
+    <bpmn2:sequenceFlow id="flowReopenToInProgress" sourceRef="reopenTicket" targetRef="enterInProgress"/>
+  </bpmn2:process>
+
+  <bpmndi:BPMNDiagram id="ticketLifecycleDiagram">
+    <bpmndi:BPMNPlane id="ticketLifecyclePlane" bpmnElement="ticketLifecycle">
+      <bpmndi:BPMNShape id="ticketCreatedShape" bpmnElement="ticketCreated">
+        <dc:Bounds x="80" y="160" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="statusNewShape" bpmnElement="statusNew">
+        <dc:Bounds x="160" y="160" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="enterInProgressShape" bpmnElement="enterInProgress">
+        <dc:Bounds x="235" y="153" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="statusInProgressShape" bpmnElement="statusInProgress">
+        <dc:Bounds x="320" y="153" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="requestCustomerInfoShape" bpmnElement="requestCustomerInfo">
+        <dc:Bounds x="380" y="80" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="statusWaitingForCustomerShape" bpmnElement="statusWaitingForCustomer">
+        <dc:Bounds x="500" y="80" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="resolveTicketShape" bpmnElement="resolveTicket">
+        <dc:Bounds x="380" y="240" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="statusResolvedShape" bpmnElement="statusResolved">
+        <dc:Bounds x="500" y="233" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="closeTicketShape" bpmnElement="closeTicket">
+        <dc:Bounds x="630" y="240" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="reopenTicketShape" bpmnElement="reopenTicket">
+        <dc:Bounds x="630" y="153" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="statusClosedShape" bpmnElement="statusClosed">
+        <dc:Bounds x="730" y="240" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn2:definitions>
