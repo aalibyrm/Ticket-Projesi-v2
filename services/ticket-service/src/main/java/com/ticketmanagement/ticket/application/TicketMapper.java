@@ -1,7 +1,10 @@
 package com.ticketmanagement.ticket.application;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
+import com.ticketmanagement.ticket.api.dto.TicketAttachmentResponse;
 import com.ticketmanagement.ticket.api.dto.TicketResponse;
 import com.ticketmanagement.ticket.infrastructure.persistence.ProductEntity;
 import com.ticketmanagement.ticket.infrastructure.persistence.TicketEntity;
@@ -10,6 +13,10 @@ import com.ticketmanagement.ticket.infrastructure.persistence.TicketEntity;
 class TicketMapper {
 
     TicketResponse toResponse(TicketEntity ticket) {
+        return toResponse(ticket, List.of());
+    }
+
+    TicketResponse toResponse(TicketEntity ticket, List<TicketAttachmentResponse> attachments) {
         ProductEntity product = ticket.getProduct();
         return new TicketResponse(
                 ticket.getId(),
@@ -22,8 +29,8 @@ class TicketMapper {
                 ticket.getDescription(),
                 ticket.getPriority(),
                 ticket.getStatus(),
+                attachments,
                 ticket.getCreatedAt(),
                 ticket.getUpdatedAt());
     }
 }
-

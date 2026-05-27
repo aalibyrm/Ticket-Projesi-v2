@@ -7,6 +7,7 @@ import java.util.UUID;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -22,6 +23,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.ticketmanagement.ticket.api.dto.CreateTicketRequest;
 import com.ticketmanagement.ticket.api.dto.TicketResponse;
+import com.ticketmanagement.ticket.application.AttachmentLookupContext;
 import com.ticketmanagement.ticket.application.ForbiddenOperationException;
 import com.ticketmanagement.ticket.application.TicketCommandService;
 import com.ticketmanagement.ticket.application.TicketQueryService;
@@ -67,9 +69,11 @@ class TicketController {
     TicketResponse getOwnTicket(
             @AuthenticationPrincipal Jwt jwt,
             @RequestHeader(value = "X-Actor-Id", required = false) UUID localActorId,
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorizationHeader,
             @PathVariable UUID id) {
         UUID customerId = resolveCustomerId(jwt, localActorId);
-        return ticketQueryService.getTicketForCustomer(customerId, id);
+        return ticketQueryService.getTicketForCustomer(customerId, id, new AttachmentLookupContext(
+                resolveBearerToken(authorizationHeader)));
     }
 
     // JWT subject degerinden veya local test header'indan musteri kimligini cozer.
@@ -82,6 +86,18 @@ class TicketController {
             return localActorId;
         }
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing authenticated user");
+    }
+
+    // Authorization header icinden ham bearer token degerini cikarir.
+    private String resolveBearerToken(String authorizationHeader) {
+        if (authorizationHeader == null || authorizationHeader.isBlank()) {
+            return null;
+        }
+        String bearerPrefix = "Bearer ";
+        if (!authorizationHeader.regionMatches(true, 0, bearerPrefix, 0, bearerPrefix.length())) {
+            return null;
+        }
+        return authorizationHeader.substring(bearerPrefix.length()).trim();
     }
 
     // Customer endpointlerini sadece CUSTOMER rolune sahip JWT'lere acar.

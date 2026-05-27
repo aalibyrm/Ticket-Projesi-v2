@@ -15,6 +15,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import com.ticketmanagement.file.api.dto.AttachmentMetadataResponse;
 import com.ticketmanagement.file.application.CreateFileMetadataCommand;
 import com.ticketmanagement.file.application.FileMetadataCommandService;
 import com.ticketmanagement.file.application.FileMetadataQueryService;
@@ -78,5 +79,31 @@ class FileServiceIntegrationTests {
         assertThat(stored.completedAt()).isNotNull();
         assertThat(stored.createdAt()).isNotNull();
         assertThat(stored.updatedAt()).isNotNull();
+    }
+
+    @Test
+    void listsCompletedAttachmentMetadataForTicket() {
+        UUID ticketId = UUID.randomUUID();
+        UUID uploaderId = UUID.randomUUID();
+        FileMetadataResponse created = commandService.createPendingMetadata(new CreateFileMetadataCommand(
+                ticketId,
+                uploaderId,
+                "error-log.txt",
+                "tickets/%s/error-log.txt".formatted(ticketId),
+                "text/plain",
+                4096));
+
+        ResponseEntity<AttachmentMetadataResponse[]> response = restTemplate.getForEntity(
+                "/internal/tickets/{ticketId}/attachments",
+                AttachmentMetadataResponse[].class,
+                ticketId);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).hasSize(1);
+        assertThat(response.getBody()[0].id()).isEqualTo(created.id());
+        assertThat(response.getBody()[0].ticketId()).isEqualTo(ticketId);
+        assertThat(response.getBody()[0].originalFilename()).isEqualTo("error-log.txt");
+        assertThat(response.getBody()[0].uploadStatus()).isEqualTo(FileUploadStatus.COMPLETED);
     }
 }

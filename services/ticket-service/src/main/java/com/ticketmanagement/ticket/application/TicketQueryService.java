@@ -17,6 +17,7 @@ public class TicketQueryService {
 
     private final TicketJpaRepository ticketRepository;
     private final TicketMapper ticketMapper;
+    private final TicketAttachmentPort ticketAttachmentPort;
 
     // Musterinin kendi ticket listesini en yeni kayitlar once gelecek sekilde getirir.
     @Transactional(readOnly = true)
@@ -29,7 +30,7 @@ public class TicketQueryService {
 
     // Musterinin sadece kendisine ait ticket detayini getirir.
     @Transactional(readOnly = true)
-    public TicketResponse getTicketForCustomer(UUID customerId, UUID ticketId) {
+    public TicketResponse getTicketForCustomer(UUID customerId, UUID ticketId, AttachmentLookupContext context) {
         TicketEntity ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> NotFoundException.ticket(ticketId));
 
@@ -37,6 +38,6 @@ public class TicketQueryService {
             throw ForbiddenOperationException.accessDenied();
         }
 
-        return ticketMapper.toResponse(ticket);
+        return ticketMapper.toResponse(ticket, ticketAttachmentPort.listAttachments(ticketId, context));
     }
 }

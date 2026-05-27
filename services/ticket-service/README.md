@@ -56,3 +56,10 @@ rules inside ticket-service:
 - `ADMIN` can access any ticket attachment.
 - `AGENT` and assigned team access stays closed until the assignment model is
   introduced.
+
+## Attachment Metadata Composition
+
+Ticket detail responses include attachment metadata by calling file-service's
+internal metadata endpoint after ticket-service authorizes the ticket owner. This
+is API composition only: ticket-service does not own file metadata tables,
+presigned URL generation, validation, object keys, or storage credentials.

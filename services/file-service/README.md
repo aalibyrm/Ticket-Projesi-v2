@@ -28,6 +28,13 @@ sadece kendi ticket'ina, admin tum ticket eklerine erisebilir. Assigned
 team/agent erisimi assignment modeli geldiginde ayni internal kontrat uzerinden
 genisletilecektir.
 
+## Internal Metadata API
+
+`GET /internal/tickets/{ticketId}/attachments` ticket-service tarafindan ticket
+detail response'unu zenginlestirmek icin kullanilir. Endpoint yalnizca
+tamamlanmis upload metadata'sini dondurur; object key, presigned URL veya
+storage credential bilgisi dondurmez.
+
 ## File Validation
 
 Upload URL verilmeden once dosya metadata'si kontrol edilir:

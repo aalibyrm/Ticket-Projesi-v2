@@ -1,6 +1,7 @@
 package com.ticketmanagement.ticket.api.dto;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import com.ticketmanagement.ticket.domain.TicketPriority;
@@ -17,7 +18,7 @@ public record TicketResponse(
         String description,
         TicketPriority priority,
         TicketStatus status,
+        List<TicketAttachmentResponse> attachments,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt) {
 }
-

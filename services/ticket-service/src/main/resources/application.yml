@@ -52,6 +52,9 @@ info:
     description: Core ticket domain service
 
 app:
+  clients:
+    file-service:
+      base-url: ${FILE_SERVICE_URL:http://localhost:8082}
   security:
     jwt:
       enabled: ${TICKET_SERVICE_JWT_ENABLED:true}
