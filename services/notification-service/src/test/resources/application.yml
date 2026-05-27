@@ -11,8 +11,16 @@ spring:
   kafka:
     listener:
       auto-startup: false
+  mail:
+    host: localhost
+    port: 1025
 
 app:
   security:
     jwt:
+      enabled: false
+
+management:
+  health:
+    mail:
       enabled: false

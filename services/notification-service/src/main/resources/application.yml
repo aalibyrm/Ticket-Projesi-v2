@@ -40,6 +40,17 @@ spring:
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: earliest
       enable-auto-commit: false
+  mail:
+    host: ${NOTIFICATION_SMTP_HOST:localhost}
+    port: ${NOTIFICATION_SMTP_PORT:1025}
+    username: ${NOTIFICATION_SMTP_USERNAME:}
+    password: ${NOTIFICATION_SMTP_PASSWORD:}
+    properties:
+      mail.smtp.auth: ${NOTIFICATION_SMTP_AUTH:false}
+      mail.smtp.starttls.enable: ${NOTIFICATION_SMTP_STARTTLS_ENABLE:false}
+      mail.smtp.connectiontimeout: ${NOTIFICATION_SMTP_CONNECTION_TIMEOUT_MS:5000}
+      mail.smtp.timeout: ${NOTIFICATION_SMTP_READ_TIMEOUT_MS:5000}
+      mail.smtp.writetimeout: ${NOTIFICATION_SMTP_WRITE_TIMEOUT_MS:5000}
 
 app:
   kafka:
@@ -48,6 +59,10 @@ app:
   security:
     jwt:
       enabled: ${NOTIFICATION_SERVICE_JWT_ENABLED:true}
+  email:
+    sender:
+      from-address: ${NOTIFICATION_EMAIL_FROM:no-reply@ticket.local}
+      from-name: ${NOTIFICATION_EMAIL_FROM_NAME:Ticket Management}
 
 management:
   endpoints:

@@ -22,3 +22,6 @@ zorunludur.
 E-posta delivery kayitlari rendered HTML body yerine `template_key` ve
 `template_model` saklar. Bu tercih gereksiz PII/HTML saklama yuzeyini azaltir;
 render ve escaping email adapter katmaninda yapilir.
+
+Ilk adapter Spring `JavaMailSender` uzerinden SMTP kullanir. Lokal profil
+Mailpit'e gider; prod credential'lari sadece env/secret olarak verilir.

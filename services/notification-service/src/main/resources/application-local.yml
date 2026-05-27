@@ -1,0 +1,15 @@
+spring:
+  mail:
+    host: ${MAILPIT_HOST:localhost}
+    port: ${MAILPIT_SMTP_PORT:1025}
+    username: ${NOTIFICATION_SMTP_USERNAME:}
+    password: ${NOTIFICATION_SMTP_PASSWORD:}
+    properties:
+      mail.smtp.auth: ${NOTIFICATION_SMTP_AUTH:false}
+      mail.smtp.starttls.enable: ${NOTIFICATION_SMTP_STARTTLS_ENABLE:false}
+
+app:
+  email:
+    sender:
+      from-address: ${NOTIFICATION_EMAIL_FROM:no-reply@ticket.local}
+      from-name: ${NOTIFICATION_EMAIL_FROM_NAME:Ticket Management}
