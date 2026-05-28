@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.ticketmanagement.reporting.api.dto.AgentPerformanceReportResponse;
 import com.ticketmanagement.reporting.api.dto.ClosedTicketDateRangeResponse;
 import com.ticketmanagement.reporting.api.dto.TicketStatusDistributionResponse;
 import com.ticketmanagement.reporting.application.InvalidReportRangeException;
@@ -53,6 +54,13 @@ class ReportController {
         } catch (InvalidReportRangeException exception) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage(), exception);
         }
+    }
+
+    // Manager dashboard icin agent performans tablosunu dondurur.
+    @GetMapping("/agents/performance")
+    AgentPerformanceReportResponse getAgentPerformanceReport(@AuthenticationPrincipal Jwt jwt) {
+        ensureReportViewerRole(jwt);
+        return AgentPerformanceReportResponse.from(reportingQueryService.getAgentPerformanceReport());
     }
 
     // JWT varsa rapor endpointlerini sadece MANAGER veya ADMIN rolune acar.

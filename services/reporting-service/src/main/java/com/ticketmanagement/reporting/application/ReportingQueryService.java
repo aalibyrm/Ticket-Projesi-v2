@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ticketmanagement.reporting.domain.ProjectionPriority;
 import com.ticketmanagement.reporting.domain.ProjectionTicketStatus;
+import com.ticketmanagement.reporting.infrastructure.persistence.AgentPerformanceReportJdbcRepository;
 import com.ticketmanagement.reporting.infrastructure.persistence.ClosedTicketReportJdbcRepository;
 import com.ticketmanagement.reporting.infrastructure.persistence.TicketReportProjectionJpaRepository;
 
@@ -30,6 +31,7 @@ public class ReportingQueryService {
 
     private final TicketReportProjectionJpaRepository ticketReportProjectionRepository;
     private final ClosedTicketReportJdbcRepository closedTicketReportRepository;
+    private final AgentPerformanceReportJdbcRepository agentPerformanceReportRepository;
 
     // Acik ticket sayilarini status bazinda stabil sirayla raporlar.
     @Transactional(readOnly = true)
@@ -74,6 +76,14 @@ public class ReportingQueryService {
                 averageResolutionMinutes,
                 dailyCounts,
                 priorityCounts,
+                OffsetDateTime.now(ZoneOffset.UTC));
+    }
+
+    // Agent bazli atanmis/cozulmus ticket ve worklog surelerini manager raporu olarak dondurur.
+    @Transactional(readOnly = true)
+    public AgentPerformanceReport getAgentPerformanceReport() {
+        return new AgentPerformanceReport(
+                agentPerformanceReportRepository.agentPerformanceRows(),
                 OffsetDateTime.now(ZoneOffset.UTC));
     }
 

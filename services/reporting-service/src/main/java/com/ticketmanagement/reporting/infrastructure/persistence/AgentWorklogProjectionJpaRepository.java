@@ -1,0 +1,8 @@
+package com.ticketmanagement.reporting.infrastructure.persistence;
+
+import java.util.UUID;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface AgentWorklogProjectionJpaRepository extends JpaRepository<AgentWorklogProjectionEntity, UUID> {
+}

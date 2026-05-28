@@ -14,6 +14,8 @@ Baslangic projection modeli:
 - `agent_performance_daily_projection`: agent performans metrikleri
 - `sla_compliance_daily_projection`: SLA uyum metrikleri
 - `processed_events`: reporting consumer idempotency altyapisi
+- `agent_worklog_projection`: worklog surelerini worklog event'inin `agentId`
+  alanina gore saklayan agent bazli projection
 
 Guncel status distribution raporu `ticket_report_projection` snapshot
 tablosundan hesaplanir ve `CLOSED` haricindeki status'leri sabit sirayla,
@@ -23,6 +25,11 @@ Kapali ticket tarih araligi raporu `closed_at` alanini UTC gun sinirlariyla
 filtreler. Aralik en fazla 366 gun olabilir; bu limit manager dashboard
 sorgularinin operasyonel read model uzerinde pahali full scan'e donmesini
 engellemek icin secildi.
+
+Agent performance raporu resolved ticket sayisini ticket assignee uzerinden,
+worklog suresini ise ayri `agent_worklog_projection` tablosundan hesaplar.
+Bu ayrim, bir ticket'a farkli agent'lar worklog yazdiginda surelerin guncel
+assignee'ye yanlis yazilmasini engeller.
 
 ## Degerlendirilen Secenekler
 

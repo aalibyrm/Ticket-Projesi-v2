@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -29,7 +28,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import com.ticketmanagement.reporting.api.dto.ClosedTicketDateRangeResponse;
+import com.ticketmanagement.reporting.api.dto.AgentPerformanceReportResponse;
+import com.ticketmanagement.reporting.application.AgentWorklogProjectionCommand;
 import com.ticketmanagement.reporting.application.ReportingProjectionService;
 import com.ticketmanagement.reporting.application.TicketProjectionUpsertCommand;
 import com.ticketmanagement.reporting.domain.ProjectionPriority;
@@ -41,7 +41,7 @@ import com.ticketmanagement.reporting.domain.ProjectionTicketStatus;
         properties = "app.security.jwt.enabled=true")
 @AutoConfigureMockMvc
 @Testcontainers(disabledWithoutDocker = true)
-class ReportingClosedTicketReportApiTests {
+class ReportingAgentPerformanceApiTests {
 
     @Container
     @ServiceConnection
@@ -85,96 +85,106 @@ class ReportingClosedTicketReportApiTests {
     }
 
     @Test
-    void managerCanRetrieveClosedTicketAggregatesForValidDateRange() throws Exception {
-        createClosedProjection("TCK-4101", ProjectionPriority.LOW, "2026-05-27T08:00:00Z", "2026-05-27T10:00:00Z");
-        createClosedProjection("TCK-4102", ProjectionPriority.MEDIUM, "2026-05-27T09:00:00Z", "2026-05-27T10:00:00Z");
-        createClosedProjection("TCK-4103", ProjectionPriority.HIGH, "2026-05-28T09:00:00Z", "2026-05-28T11:00:00Z");
-        createClosedProjection("TCK-4104", ProjectionPriority.HIGH, "2026-05-29T09:00:00Z", "2026-05-29T11:00:00Z");
-        createOpenProjection("TCK-4105", ProjectionPriority.HIGH);
+    void managerCanRetrieveAgentPerformanceTable() throws Exception {
+        UUID agentOne = UUID.randomUUID();
+        UUID agentTwo = UUID.randomUUID();
+        UUID agentThree = UUID.randomUUID();
+        UUID closedTicketForAgentOne = createTicketProjection(
+                "TCK-4201",
+                agentOne,
+                ProjectionTicketStatus.CLOSED,
+                "2026-05-27T08:00:00Z",
+                "2026-05-27T10:00:00Z");
+        UUID resolvedTicketForAgentOne = createTicketProjection(
+                "TCK-4202",
+                agentOne,
+                ProjectionTicketStatus.RESOLVED,
+                "2026-05-27T08:00:00Z",
+                null);
+        createTicketProjection(
+                "TCK-4203",
+                agentOne,
+                ProjectionTicketStatus.IN_PROGRESS,
+                "2026-05-27T08:00:00Z",
+                null);
+        createTicketProjection(
+                "TCK-4204",
+                agentTwo,
+                ProjectionTicketStatus.CLOSED,
+                "2026-05-27T08:00:00Z",
+                "2026-05-27T09:00:00Z");
 
-        String responseBody = mockMvc.perform(get("/api/reports/tickets/closed")
-                        .with(managerJwt())
-                        .param("fromDate", "2026-05-27")
-                        .param("toDate", "2026-05-28"))
+        createWorklog("TCK-4201", closedTicketForAgentOne, agentOne, 30);
+        createWorklog("TCK-4202", resolvedTicketForAgentOne, agentOne, 45);
+        createWorklog("TCK-4201", closedTicketForAgentOne, agentTwo, 15);
+        createWorklog("TCK-4201", closedTicketForAgentOne, agentThree, 60);
+
+        String responseBody = mockMvc.perform(get("/api/reports/agents/performance")
+                        .with(managerJwt()))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        ClosedTicketDateRangeResponse response = objectMapper.readValue(
+        AgentPerformanceReportResponse response = objectMapper.readValue(
                 responseBody,
-                ClosedTicketDateRangeResponse.class);
+                AgentPerformanceReportResponse.class);
 
-        assertThat(response.fromDate()).isEqualTo(LocalDate.parse("2026-05-27"));
-        assertThat(response.toDate()).isEqualTo(LocalDate.parse("2026-05-28"));
-        assertThat(response.totalClosedTickets()).isEqualTo(3);
-        assertThat(response.averageResolutionMinutes()).isEqualByComparingTo("100.00");
-        assertThat(response.dailyCounts())
-                .extracting(count -> count.date() + "=" + count.count())
-                .containsExactly("2026-05-27=2", "2026-05-28=1");
-        assertThat(response.priorityCounts())
-                .extracting(count -> count.priority() + "=" + count.count())
-                .containsExactly("LOW=1", "MEDIUM=1", "HIGH=1");
+        assertThat(response.rows())
+                .extracting(row -> row.agentId()
+                        + "|assigned=" + row.assignedTicketCount()
+                        + "|resolved=" + row.resolvedTicketCount()
+                        + "|worklog=" + row.totalWorklogMinutes()
+                        + "|avg=" + row.averageResolutionMinutes())
+                .containsExactly(
+                        agentOne + "|assigned=3|resolved=2|worklog=75|avg=120.00",
+                        agentTwo + "|assigned=1|resolved=1|worklog=15|avg=60.00",
+                        agentThree + "|assigned=0|resolved=0|worklog=60|avg=0.00");
         assertThat(response.generatedAt()).isNotNull();
     }
 
     @Test
-    void invalidDateRangeReturnsBadRequest() throws Exception {
-        mockMvc.perform(get("/api/reports/tickets/closed")
-                        .with(managerJwt())
-                        .param("fromDate", "2026-05-29")
-                        .param("toDate", "2026-05-28"))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void customerJwtCannotRetrieveClosedTicketReport() throws Exception {
-        mockMvc.perform(get("/api/reports/tickets/closed")
-                        .with(customerJwt())
-                        .param("fromDate", "2026-05-27")
-                        .param("toDate", "2026-05-28"))
+    void customerJwtCannotRetrieveAgentPerformanceTable() throws Exception {
+        mockMvc.perform(get("/api/reports/agents/performance")
+                        .with(customerJwt()))
                 .andExpect(status().isForbidden());
     }
 
-    private void createClosedProjection(
+    private UUID createTicketProjection(
             String ticketNumber,
-            ProjectionPriority priority,
+            UUID assigneeId,
+            ProjectionTicketStatus status,
             String openedAt,
             String closedAt) {
+        UUID ticketId = UUID.randomUUID();
         OffsetDateTime opened = OffsetDateTime.parse(openedAt);
-        OffsetDateTime closed = OffsetDateTime.parse(closedAt);
+        OffsetDateTime closed = closedAt == null ? null : OffsetDateTime.parse(closedAt);
+        OffsetDateTime updatedAt = closed == null ? opened.plusMinutes(10) : closed;
         reportingProjectionService.upsertTicketProjection(new TicketProjectionUpsertCommand(
-                UUID.randomUUID(),
+                ticketId,
                 ticketNumber,
                 UUID.randomUUID(),
                 UUID.randomUUID(),
-                priority,
-                ProjectionTicketStatus.CLOSED,
-                UUID.randomUUID(),
+                ProjectionPriority.HIGH,
+                status,
+                assigneeId,
                 UUID.randomUUID(),
                 opened,
+                updatedAt,
                 closed,
-                closed,
-                opened.plusHours(24),
-                ProjectionSlaStatus.MET));
+                opened.plusHours(8),
+                status == ProjectionTicketStatus.CLOSED ? ProjectionSlaStatus.MET : ProjectionSlaStatus.ACTIVE));
+        return ticketId;
     }
 
-    private void createOpenProjection(String ticketNumber, ProjectionPriority priority) {
-        OffsetDateTime openedAt = OffsetDateTime.parse("2026-05-27T12:00:00Z");
-        reportingProjectionService.upsertTicketProjection(new TicketProjectionUpsertCommand(
+    private void createWorklog(String ticketNumber, UUID ticketId, UUID agentId, int durationMinutes) {
+        reportingProjectionService.upsertAgentWorklogProjection(new AgentWorklogProjectionCommand(
                 UUID.randomUUID(),
+                ticketId,
                 ticketNumber,
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                priority,
-                ProjectionTicketStatus.IN_PROGRESS,
-                null,
-                null,
-                openedAt,
-                openedAt.plusMinutes(5),
-                null,
-                openedAt.plusHours(24),
-                ProjectionSlaStatus.ACTIVE));
+                agentId,
+                LocalDate.parse("2026-05-27"),
+                durationMinutes));
     }
 
     private static org.springframework.test.web.servlet.request.RequestPostProcessor managerJwt() {

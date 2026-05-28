@@ -50,6 +50,7 @@ class ReportingServiceBootstrapTests {
 
     @BeforeEach
     void cleanReportingData() {
+        jdbcTemplate.update("delete from reporting_schema.agent_worklog_projection");
         jdbcTemplate.update("delete from reporting_schema.sla_compliance_daily_projection");
         jdbcTemplate.update("delete from reporting_schema.agent_performance_daily_projection");
         jdbcTemplate.update("delete from reporting_schema.ticket_status_daily_projection");
@@ -68,6 +69,7 @@ class ReportingServiceBootstrapTests {
         assertThat(tableExists("ticket_status_daily_projection")).isEqualTo(1);
         assertThat(tableExists("agent_performance_daily_projection")).isEqualTo(1);
         assertThat(tableExists("sla_compliance_daily_projection")).isEqualTo(1);
+        assertThat(tableExists("agent_worklog_projection")).isEqualTo(1);
         assertThat(serviceName()).isEqualTo("reporting-service");
     }
 

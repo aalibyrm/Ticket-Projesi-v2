@@ -50,6 +50,7 @@ class ReportingStatusDistributionApiTests {
 
     @BeforeEach
     void cleanReportingData() {
+        jdbcTemplate.update("delete from reporting_schema.agent_worklog_projection");
         jdbcTemplate.update("delete from reporting_schema.sla_compliance_daily_projection");
         jdbcTemplate.update("delete from reporting_schema.agent_performance_daily_projection");
         jdbcTemplate.update("delete from reporting_schema.ticket_status_daily_projection");
