@@ -23,6 +23,7 @@ OpenTelemetry, OpenSearch ve gercek e-posta gonderimi uzerine kurulacaktir.
 - [Environment](docs/development/environment.md)
 - [Service Conventions](docs/development/service-conventions.md)
 - [Backend Build](docs/development/backend-build.md)
+- [CI](docs/development/ci.md)
 
 ## Lokal Altyapi
 

@@ -39,3 +39,4 @@ kayitlar `docs/architecture/adr` altindadir.
 | ADR-0032 | OTel Java Agent tracing | HTTP, Kafka ve DB span'lerini servis koduna SDK baglamadan toplamak | Servisler Java Agent ile OTLP collector'a yazar; local trace incelemesi Jaeger UI uzerinden yapilir |
 | ADR-0033 | Dashboard source artifact | OpenSearch exportlari surum ve data view id'lerine hassas oldugu icin panel kontrati stabil tutulmali | Core metrics dashboard panelleri JSON artifact ve runbook olarak versiyonlanir |
 | ADR-0034 | Docker Compose profilleri | Minimal gelistirme ile observability dahil stack farkli kaynak ihtiyacina sahip | `local`, `dev` ve `full` profilleri ayni compose dosyasinda tutulur; secret'lar `.env` disinda versiyonlanmaz |
+| ADR-0035 | GitHub Actions kalite kapilari | PR'larda backend, frontend, compose ve guvenlik kontrolleri tekrar edilebilir olmali | Maven testleri, compose config, conditional frontend checks, secret scan ve dependency review workflow'a alinir |

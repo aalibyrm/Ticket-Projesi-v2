@@ -1,0 +1,154 @@
+name: Quality Gates
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-gates-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend build and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Run Maven tests
+        run: mvn -B -ntp test
+
+  compose:
+    name: Docker Compose config
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate local profile
+        run: docker compose --env-file .env.example -f infra/docker/docker-compose.yml --profile local config
+
+      - name: Validate dev profile
+        run: docker compose --env-file .env.example -f infra/docker/docker-compose.yml --profile dev config
+
+      - name: Validate full profile
+        run: docker compose --env-file .env.example -f infra/docker/docker-compose.yml --profile full config
+
+  frontend:
+    name: Frontend checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect frontend manifests
+        id: manifests
+        shell: bash
+        run: |
+          set -euo pipefail
+          has_node=false
+          for app in apps/web apps/mobile; do
+            if [ -f "$app/package.json" ]; then
+              has_node=true
+            fi
+          done
+          echo "has_node=$has_node" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Node
+        if: steps.manifests.outputs.has_node == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Cache npm downloads
+        if: steps.manifests.outputs.has_node == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('apps/**/package-lock.json', 'apps/**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Run frontend lint, test, and build
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ steps.manifests.outputs.has_node }}" != "true" ]; then
+            echo "No frontend package.json files yet; skipping frontend checks."
+            exit 0
+          fi
+
+          for app in apps/web apps/mobile; do
+            if [ ! -f "$app/package.json" ]; then
+              echo "$app has no package.json; skipping."
+              continue
+            fi
+
+            pushd "$app"
+            if [ -f package-lock.json ]; then
+              npm ci
+            else
+              npm install
+            fi
+            npm run lint --if-present
+            npm test --if-present -- --watch=false
+            npm run build --if-present
+            popd
+          done
+
+  secret-scan:
+    name: Basic secret scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Scan for high-risk secret patterns
+        shell: bash
+        run: |
+          set -euo pipefail
+          patterns='(-----BEGIN (RSA|DSA|EC|OPENSSH) PRIVATE KEY-----|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9_]{36,}|xox[baprs]-[A-Za-z0-9-]+)'
+          if git grep -n -E "$patterns" -- ':!target/**' ':!node_modules/**'; then
+            echo "Potential secret-like content found. Remove it or add a reviewed exception."
+            exit 1
+          fi
+          echo "No high-risk secret patterns found."
+
+  dependency-review:
+    name: Dependency review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Review dependency changes
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
