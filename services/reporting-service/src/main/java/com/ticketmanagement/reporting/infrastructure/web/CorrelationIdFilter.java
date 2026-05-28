@@ -1,4 +1,4 @@
-package com.ticketmanagement.ticket.infrastructure.web;
+package com.ticketmanagement.reporting.infrastructure.web;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -24,7 +24,7 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
             HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
-        String correlationId = resolveCorrelationId(request);
+        String correlationId = resolveCorrelationId(request.getHeader(HEADER_NAME));
         ThreadContext.put(CONTEXT_KEY, correlationId);
         response.setHeader(HEADER_NAME, correlationId);
         try {
@@ -39,8 +39,7 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
         return correlationId == null || correlationId.isBlank() ? "unknown" : correlationId;
     }
 
-    private static String resolveCorrelationId(HttpServletRequest request) {
-        String headerValue = request.getHeader(HEADER_NAME);
+    private static String resolveCorrelationId(String headerValue) {
         if (headerValue == null || headerValue.isBlank()) {
             return UUID.randomUUID().toString();
         }

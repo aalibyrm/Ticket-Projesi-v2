@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout pattern='{"timestamp":"%d{yyyy-MM-dd&apos;T&apos;HH:mm:ss.SSSXXX}","level":"%p","serviceName":"workflow-sla-service","traceId":"%X{traceId}","spanId":"%X{spanId}","correlationId":"%X{correlationId}","message":"%enc{%m}{JSON}","exception":"%enc{%throwable}{JSON}"}%n'/>
+    </Console>
+  </Appenders>
+  <Loggers>
+    <Root level="INFO">
+      <AppenderRef ref="Console"/>
+    </Root>
+  </Loggers>
+</Configuration>
