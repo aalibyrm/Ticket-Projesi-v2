@@ -15,6 +15,10 @@ Baslangic projection modeli:
 - `sla_compliance_daily_projection`: SLA uyum metrikleri
 - `processed_events`: reporting consumer idempotency altyapisi
 
+Guncel status distribution raporu `ticket_report_projection` snapshot
+tablosundan hesaplanir ve `CLOSED` haricindeki status'leri sabit sirayla,
+zero-count dahil olacak sekilde dondurur.
+
 ## Degerlendirilen Secenekler
 
 - Ticket-service tablolarindan senkron rapor sorgusu: En hizli baslangictir,
