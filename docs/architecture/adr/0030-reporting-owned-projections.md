@@ -31,6 +31,11 @@ worklog suresini ise ayri `agent_worklog_projection` tablosundan hesaplar.
 Bu ayrim, bir ticket'a farkli agent'lar worklog yazdiginda surelerin guncel
 assignee'ye yanlis yazilmasini engeller.
 
+SLA compliance raporu `ticket_report_projection.sla_status` snapshot'ini temel
+alir. Compliance yuzdesi `MET / (MET + BREACHED)` seklinde hesaplanir; `ACTIVE`
+ve `AT_RISK` durumlari operasyonel takip icin ayri sayilir, fakat tamamlanmis
+SLA sonucu olmadiklari icin paydaya dahil edilmez.
+
 ## Degerlendirilen Secenekler
 
 - Ticket-service tablolarindan senkron rapor sorgusu: En hizli baslangictir,

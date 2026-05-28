@@ -17,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.ticketmanagement.reporting.api.dto.AgentPerformanceReportResponse;
 import com.ticketmanagement.reporting.api.dto.ClosedTicketDateRangeResponse;
+import com.ticketmanagement.reporting.api.dto.SlaComplianceReportResponse;
 import com.ticketmanagement.reporting.api.dto.TicketStatusDistributionResponse;
 import com.ticketmanagement.reporting.application.InvalidReportRangeException;
 import com.ticketmanagement.reporting.application.ReportingQueryService;
@@ -61,6 +62,13 @@ class ReportController {
     AgentPerformanceReportResponse getAgentPerformanceReport(@AuthenticationPrincipal Jwt jwt) {
         ensureReportViewerRole(jwt);
         return AgentPerformanceReportResponse.from(reportingQueryService.getAgentPerformanceReport());
+    }
+
+    // Manager dashboard icin SLA compliance yuzdesini ve priority kirilimini dondurur.
+    @GetMapping("/sla/compliance")
+    SlaComplianceReportResponse getSlaComplianceReport(@AuthenticationPrincipal Jwt jwt) {
+        ensureReportViewerRole(jwt);
+        return SlaComplianceReportResponse.from(reportingQueryService.getSlaComplianceReport());
     }
 
     // JWT varsa rapor endpointlerini sadece MANAGER veya ADMIN rolune acar.
