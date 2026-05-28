@@ -1,0 +1,15 @@
+spring:
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    schemas: reporting_schema
+    default-schema: reporting_schema
+    locations: classpath:db/migration
+
+app:
+  security:
+    jwt:
+      enabled: false

@@ -36,6 +36,7 @@ Servis URL'leri:
 - Mailpit: `http://localhost:8025`
 - Mailpit SMTP: `localhost:1025`
 - Kafka external listener: `localhost:9094`
+- Reporting-service: `http://localhost:8085`
 - OpenTelemetry OTLP gRPC: `localhost:4317`
 - OpenTelemetry OTLP HTTP: `localhost:4318`
 
