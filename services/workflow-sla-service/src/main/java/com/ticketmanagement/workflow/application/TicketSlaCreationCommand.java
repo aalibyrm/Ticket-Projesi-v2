@@ -9,6 +9,7 @@ import com.ticketmanagement.workflow.domain.SlaPriority;
 public record TicketSlaCreationCommand(
         UUID ticketId,
         String ticketNumber,
+        UUID customerId,
         SlaPriority priority,
         OffsetDateTime openedAt) {
 
@@ -18,6 +19,7 @@ public record TicketSlaCreationCommand(
             throw new IllegalArgumentException("ticketNumber must not be blank");
         }
         ticketNumber = ticketNumber.trim();
+        customerId = Objects.requireNonNull(customerId, "customerId must not be null");
         priority = Objects.requireNonNull(priority, "priority must not be null");
         openedAt = Objects.requireNonNull(openedAt, "openedAt must not be null");
     }

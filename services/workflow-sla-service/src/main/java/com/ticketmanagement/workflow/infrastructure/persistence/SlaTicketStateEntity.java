@@ -36,6 +36,13 @@ public class SlaTicketStateEntity {
     @Column(nullable = false, length = 20)
     private SlaPriority priority;
 
+    @Column(nullable = false)
+    private UUID customerId;
+
+    private UUID assigneeId;
+
+    private UUID assignedTeamId;
+
     @Column(nullable = false, updatable = false)
     private OffsetDateTime openedAt;
 
@@ -45,6 +52,10 @@ public class SlaTicketStateEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 40)
     private SlaStatus status;
+
+    private OffsetDateTime riskDetectedAt;
+
+    private OffsetDateTime breachedAt;
 
     @Setter(AccessLevel.NONE)
     @Column(nullable = false, updatable = false)
@@ -58,16 +69,45 @@ public class SlaTicketStateEntity {
             UUID ticketId,
             String ticketNumber,
             SlaPriority priority,
+            UUID customerId,
             OffsetDateTime openedAt,
             OffsetDateTime targetResolutionAt) {
         SlaTicketStateEntity state = new SlaTicketStateEntity();
         state.ticketId = ticketId;
         state.ticketNumber = ticketNumber;
         state.priority = priority;
+        state.customerId = customerId;
         state.openedAt = openedAt;
         state.targetResolutionAt = targetResolutionAt;
         state.status = SlaStatus.ACTIVE;
         return state;
+    }
+
+    public void updateAssignment(UUID assigneeId, UUID assignedTeamId) {
+        this.assigneeId = assigneeId;
+        this.assignedTeamId = assignedTeamId;
+    }
+
+    public boolean markAtRisk(OffsetDateTime detectedAt) {
+        if (status != SlaStatus.ACTIVE) {
+            return false;
+        }
+        status = SlaStatus.AT_RISK;
+        riskDetectedAt = detectedAt;
+        return true;
+    }
+
+    public boolean markBreached(OffsetDateTime detectedAt) {
+        if (status == SlaStatus.BREACHED || status == SlaStatus.MET) {
+            return false;
+        }
+        status = SlaStatus.BREACHED;
+        breachedAt = detectedAt;
+        return true;
+    }
+
+    public UUID alertRecipientId() {
+        return assigneeId == null ? customerId : assigneeId;
     }
 
     @PrePersist

@@ -56,6 +56,7 @@ app:
   kafka:
     topics:
       ticket-events: ${TICKET_EVENTS_TOPIC:ticket.events.v1}
+      workflow-events: ${WORKFLOW_EVENTS_TOPIC:workflow.events.v1}
   security:
     jwt:
       enabled: ${NOTIFICATION_SERVICE_JWT_ENABLED:true}

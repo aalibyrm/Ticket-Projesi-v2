@@ -13,6 +13,9 @@ spring:
       auto-startup: false
 
 app:
+  outbox:
+    publisher:
+      enabled: false
   security:
     jwt:
       enabled: false
@@ -21,3 +24,8 @@ app:
       low-target-resolution: PT72H
       medium-target-resolution: PT24H
       high-target-resolution: PT8H
+    detection:
+      enabled: false
+      low-risk-window: PT12H
+      medium-risk-window: PT4H
+      high-risk-window: PT2H

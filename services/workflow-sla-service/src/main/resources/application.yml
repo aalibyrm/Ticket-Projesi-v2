@@ -40,6 +40,12 @@ spring:
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: earliest
       enable-auto-commit: false
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      properties:
+        enable.idempotence: true
 
 management:
   endpoints:
@@ -63,6 +69,17 @@ app:
   kafka:
     topics:
       ticket-events: ${TICKET_EVENTS_TOPIC:ticket.events.v1}
+      workflow-events: ${WORKFLOW_EVENTS_TOPIC:workflow.events.v1}
+  outbox:
+    publisher:
+      enabled: ${OUTBOX_PUBLISHER_ENABLED:true}
+      batch-size: ${OUTBOX_PUBLISHER_BATCH_SIZE:50}
+      max-retries: ${OUTBOX_PUBLISHER_MAX_RETRIES:5}
+      fixed-delay-ms: ${OUTBOX_PUBLISHER_FIXED_DELAY_MS:5000}
+      initial-delay-ms: ${OUTBOX_PUBLISHER_INITIAL_DELAY_MS:10000}
+      retry-backoff-ms: ${OUTBOX_PUBLISHER_RETRY_BACKOFF_MS:30000}
+      processing-timeout-ms: ${OUTBOX_PUBLISHER_PROCESSING_TIMEOUT_MS:300000}
+      send-timeout-ms: ${OUTBOX_PUBLISHER_SEND_TIMEOUT_MS:10000}
   security:
     jwt:
       enabled: ${WORKFLOW_SERVICE_JWT_ENABLED:true}
@@ -71,3 +88,12 @@ app:
       low-target-resolution: ${SLA_LOW_TARGET_RESOLUTION:PT72H}
       medium-target-resolution: ${SLA_MEDIUM_TARGET_RESOLUTION:PT24H}
       high-target-resolution: ${SLA_HIGH_TARGET_RESOLUTION:PT8H}
+    detection:
+      enabled: ${SLA_DETECTION_ENABLED:true}
+      batch-size: ${SLA_DETECTION_BATCH_SIZE:50}
+      fixed-delay-ms: ${SLA_DETECTION_FIXED_DELAY_MS:60000}
+      initial-delay-ms: ${SLA_DETECTION_INITIAL_DELAY_MS:15000}
+      low-risk-window: ${SLA_LOW_RISK_WINDOW:PT12H}
+      medium-risk-window: ${SLA_MEDIUM_RISK_WINDOW:PT4H}
+      high-risk-window: ${SLA_HIGH_RISK_WINDOW:PT2H}
+      system-actor-id: ${SLA_SYSTEM_ACTOR_ID:00000000-0000-0000-0000-000000000000}

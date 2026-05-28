@@ -8,6 +8,7 @@ public enum EventType {
     TICKET_EXTERNAL_COMMENT_ADDED("ticket.external-comment-added", EventTopic.TICKET_EVENTS, 1, "ticket"),
     TICKET_WORKLOG_ADDED("ticket.worklog-added", EventTopic.TICKET_EVENTS, 1, "ticket"),
     FILE_ATTACHMENT_ADDED("file.attachment-added", EventTopic.FILE_EVENTS, 1, "attachment"),
+    WORKFLOW_SLA_RISK_DETECTED("workflow.sla-risk-detected", EventTopic.WORKFLOW_EVENTS, 1, "sla"),
     WORKFLOW_SLA_BREACH_DETECTED("workflow.sla-breach-detected", EventTopic.WORKFLOW_EVENTS, 1, "sla"),
     NOTIFICATION_EMAIL_SENT("notification.email-sent", EventTopic.NOTIFICATION_EVENTS, 1, "notification"),
     NOTIFICATION_EMAIL_FAILED("notification.email-failed", EventTopic.NOTIFICATION_EVENTS, 1, "notification");

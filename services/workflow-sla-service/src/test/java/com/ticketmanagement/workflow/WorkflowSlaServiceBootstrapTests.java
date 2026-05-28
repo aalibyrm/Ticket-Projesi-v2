@@ -47,6 +47,7 @@ class WorkflowSlaServiceBootstrapTests {
         assertThat(tableExists("service_metadata")).isEqualTo(1);
         assertThat(tableExists("processed_events")).isEqualTo(1);
         assertThat(tableExists("sla_ticket_states")).isEqualTo(1);
+        assertThat(tableExists("outbox_events")).isEqualTo(1);
         assertThat(metadataValue("service_name")).isEqualTo("workflow-sla-service");
         assertThat(metadataValue("workflow_runtime")).isEqualTo("kogito");
         assertThat(processes.processIds()).contains("runtimeSmoke", "ticketLifecycle");

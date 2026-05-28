@@ -61,6 +61,30 @@ public class NotificationEntity {
         return notification;
     }
 
+    public static NotificationEntity slaRisk(UUID id, UUID sourceEventId, UUID recipientId, String ticketNumber) {
+        NotificationEntity notification = new NotificationEntity();
+        notification.id = id;
+        notification.sourceEventId = sourceEventId;
+        notification.recipientId = recipientId;
+        notification.type = NotificationType.SLA_RISK;
+        notification.title = "SLA risk detected";
+        notification.message = "Ticket " + ticketNumber + " is approaching its SLA deadline.";
+        notification.read = false;
+        return notification;
+    }
+
+    public static NotificationEntity slaBreach(UUID id, UUID sourceEventId, UUID recipientId, String ticketNumber) {
+        NotificationEntity notification = new NotificationEntity();
+        notification.id = id;
+        notification.sourceEventId = sourceEventId;
+        notification.recipientId = recipientId;
+        notification.type = NotificationType.SLA_BREACH;
+        notification.title = "SLA breached";
+        notification.message = "Ticket " + ticketNumber + " missed its SLA deadline.";
+        notification.read = false;
+        return notification;
+    }
+
     public void markRead() {
         this.read = true;
     }

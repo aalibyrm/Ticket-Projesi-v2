@@ -22,7 +22,19 @@ public class SlaTicketStateService {
                         command.ticketId(),
                         command.ticketNumber(),
                         command.priority(),
+                        command.customerId(),
                         command.openedAt(),
                         slaPolicyService.targetResolutionAt(command.priority(), command.openedAt()))));
+    }
+
+    // Ticket assignment eventinden SLA state uzerindeki alert hedefini gunceller.
+    @Transactional
+    public boolean updateAssignment(TicketAssignmentCommand command) {
+        return slaTicketStateRepository.findById(command.ticketId())
+                .map(state -> {
+                    state.updateAssignment(command.assigneeId(), command.assignedTeamId());
+                    return true;
+                })
+                .orElse(false);
     }
 }

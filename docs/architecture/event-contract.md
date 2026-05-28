@@ -139,6 +139,38 @@ uzerinden yetkili okuma yapmalidir.
 
 Worklog aciklamasi event payload'ina koyulmaz.
 
+## Workflow/SLA Event Payloadlari
+
+### `workflow.sla-risk-detected`
+
+`SlaRiskDetectedPayload` alanlari:
+
+- `ticketId`
+- `ticketNumber`
+- `recipientId`
+- `priority`
+- `targetResolutionAt`
+- `detectedAt`
+- `riskReason`
+
+Risk eventi ticket icerigini tasimaz; notification-service sadece hedef
+kullanici ve template modeli icin gerekli minimum alanlari alir.
+
+### `workflow.sla-breach-detected`
+
+`SlaBreachedPayload` alanlari:
+
+- `ticketId`
+- `ticketNumber`
+- `recipientId`
+- `priority`
+- `targetResolutionAt`
+- `detectedAt`
+- `breachReason`
+
+Breach eventi ticket aciklamasi, yorum, internal note veya dosya bilgisini
+tasimaz.
+
 ## Minimal Payload Politikasi
 
 Event payload sadece consumer'in karar vermesi icin gereken minimum veriyi
