@@ -1,9 +1,19 @@
 name: ${COMPOSE_PROJECT_NAME:-ticket-v2}
 
+x-core-profiles: &core-profiles
+  - local
+  - dev
+  - full
+
+x-observability-profiles: &observability-profiles
+  - dev
+  - full
+
 services:
   postgres:
     image: postgres:17-alpine
     container_name: ticket-postgres
+    profiles: *core-profiles
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-ticket_platform}
       POSTGRES_USER: ${POSTGRES_ADMIN_USER:-postgres}
@@ -29,6 +39,7 @@ services:
   kafka:
     image: apache/kafka:3.9.0
     container_name: ticket-kafka
+    profiles: *core-profiles
     environment:
       KAFKA_NODE_ID: ${KAFKA_NODE_ID:-1}
       KAFKA_PROCESS_ROLES: broker,controller
@@ -56,6 +67,7 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.2
     container_name: ticket-v2-keycloak
+    profiles: *core-profiles
     command: ["start-dev", "--import-realm"]
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-admin}
@@ -77,6 +89,7 @@ services:
   opensearch:
     image: opensearchproject/opensearch:2.19.0
     container_name: ticket-opensearch
+    profiles: *observability-profiles
     environment:
       discovery.type: single-node
       bootstrap.memory_lock: "true"
@@ -105,6 +118,7 @@ services:
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:2.19.0
     container_name: ticket-opensearch-dashboards
+    profiles: *observability-profiles
     environment:
       OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
       DISABLE_SECURITY_DASHBOARDS_PLUGIN: "true"
@@ -119,6 +133,7 @@ services:
   jaeger:
     image: jaegertracing/all-in-one:1.62.0
     container_name: ticket-jaeger
+    profiles: *observability-profiles
     environment:
       COLLECTOR_OTLP_ENABLED: "true"
       SPAN_STORAGE_TYPE: memory
@@ -130,6 +145,7 @@ services:
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.118.0
     container_name: ticket-otel-collector
+    profiles: *observability-profiles
     command: ["--config=/etc/otelcol-contrib/config.yml"]
     volumes:
       - ../observability/otel-collector-config.yml:/etc/otelcol-contrib/config.yml:ro
@@ -147,6 +163,7 @@ services:
   mailpit:
     image: axllent/mailpit:v1.22
     container_name: ticket-mailpit
+    profiles: *core-profiles
     ports:
       - "${MAILPIT_SMTP_PORT:-1025}:1025"
       - "${MAILPIT_WEB_PORT:-8025}:8025"

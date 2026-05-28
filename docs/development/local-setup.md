@@ -22,9 +22,23 @@ Bu proje Docker Compose tabanli lokal gelistirme akisiyle baslayacak.
 
 ```powershell
 Copy-Item .env.example .env
-docker compose --env-file .env -f infra/docker/docker-compose.yml config
-docker compose --env-file .env -f infra/docker/docker-compose.yml up -d
-docker compose --env-file .env -f infra/docker/docker-compose.yml ps
+docker compose --env-file .env -f infra/docker/docker-compose.yml --profile local config
+docker compose --env-file .env -f infra/docker/docker-compose.yml --profile local up -d
+docker compose --env-file .env -f infra/docker/docker-compose.yml --profile local ps
+```
+
+Profil secimi:
+
+- `local`: PostgreSQL, Kafka, Keycloak ve Mailpit.
+- `dev`: `local` + OpenSearch, OpenSearch Dashboards, Jaeger ve OTel
+  Collector.
+- `full`: `dev` ile ayni altyapi; ileride app container'lari eklendiginde
+  uctan uca demo profili olarak genisletilecek.
+
+Observability dahil gelistirme icin:
+
+```powershell
+docker compose --env-file .env -f infra/docker/docker-compose.yml --profile dev up -d
 ```
 
 Servis URL'leri:
@@ -43,6 +57,9 @@ Servis URL'leri:
 
 Trace kurulumu ve servislerin OpenTelemetry Java Agent ile calistirilmasi icin
 `docs/development/observability.md` dosyasini takip edin.
+
+Environment degiskenleri ve secret kurallari icin
+`docs/development/environment.md` dosyasini takip edin.
 
 ## Guvenlik Kurali
 
