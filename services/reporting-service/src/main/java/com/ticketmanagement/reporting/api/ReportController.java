@@ -1,18 +1,23 @@
 package com.ticketmanagement.reporting.api;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.ticketmanagement.reporting.api.dto.ClosedTicketDateRangeResponse;
 import com.ticketmanagement.reporting.api.dto.TicketStatusDistributionResponse;
+import com.ticketmanagement.reporting.application.InvalidReportRangeException;
 import com.ticketmanagement.reporting.application.ReportingQueryService;
 
 @RestController
@@ -32,6 +37,22 @@ class ReportController {
     TicketStatusDistributionResponse getOpenTicketStatusDistribution(@AuthenticationPrincipal Jwt jwt) {
         ensureReportViewerRole(jwt);
         return TicketStatusDistributionResponse.from(reportingQueryService.getOpenTicketStatusDistribution());
+    }
+
+    // Manager dashboard icin kapali ticket metriklerini tarih araligina gore dondurur.
+    @GetMapping("/tickets/closed")
+    ClosedTicketDateRangeResponse getClosedTicketDateRangeReport(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
+        ensureReportViewerRole(jwt);
+        try {
+            return ClosedTicketDateRangeResponse.from(reportingQueryService.getClosedTicketDateRangeReport(
+                    fromDate,
+                    toDate));
+        } catch (InvalidReportRangeException exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage(), exception);
+        }
     }
 
     // JWT varsa rapor endpointlerini sadece MANAGER veya ADMIN rolune acar.
