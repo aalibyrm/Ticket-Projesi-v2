@@ -32,8 +32,20 @@ spring:
     default-schema: reporting_schema
     table: flyway_schema_history
     locations: classpath:db/migration
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
+    consumer:
+      group-id: ${REPORTING_KAFKA_GROUP_ID:reporting-service}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: false
 
 app:
+  kafka:
+    topics:
+      ticket-events: ${TICKET_EVENTS_TOPIC:ticket.events.v1}
+      workflow-events: ${WORKFLOW_EVENTS_TOPIC:workflow.events.v1}
   security:
     jwt:
       enabled: ${REPORTING_SERVICE_JWT_ENABLED:true}

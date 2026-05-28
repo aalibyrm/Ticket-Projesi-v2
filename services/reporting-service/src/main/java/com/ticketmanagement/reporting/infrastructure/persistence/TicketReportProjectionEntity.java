@@ -96,6 +96,29 @@ public class TicketReportProjectionEntity {
         projectedAt = OffsetDateTime.now(ZoneOffset.UTC);
     }
 
+    public void updateAssignment(UUID assigneeId, UUID assignedTeamId, OffsetDateTime updatedAt) {
+        this.assigneeId = Objects.requireNonNull(assigneeId, "assigneeId must not be null");
+        this.assignedTeamId = assignedTeamId;
+        this.updatedAt = utc(updatedAt);
+        projectedAt = OffsetDateTime.now(ZoneOffset.UTC);
+    }
+
+    public void updateStatus(ProjectionTicketStatus status, OffsetDateTime updatedAt) {
+        this.status = Objects.requireNonNull(status, "status must not be null");
+        this.updatedAt = utc(updatedAt);
+        if (status == ProjectionTicketStatus.CLOSED) {
+            closedAt = utc(updatedAt);
+        }
+        projectedAt = OffsetDateTime.now(ZoneOffset.UTC);
+    }
+
+    public void updateSla(ProjectionSlaStatus slaStatus, OffsetDateTime slaTargetResolutionAt, OffsetDateTime updatedAt) {
+        this.slaStatus = Objects.requireNonNull(slaStatus, "slaStatus must not be null");
+        this.slaTargetResolutionAt = utcOrNull(slaTargetResolutionAt);
+        this.updatedAt = utc(updatedAt);
+        projectedAt = OffsetDateTime.now(ZoneOffset.UTC);
+    }
+
     private static OffsetDateTime utc(OffsetDateTime value) {
         return Objects.requireNonNull(value, "time value must not be null").withOffsetSameInstant(ZoneOffset.UTC);
     }

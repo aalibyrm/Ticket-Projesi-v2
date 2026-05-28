@@ -2,6 +2,7 @@ package com.ticketmanagement.reporting.application;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.time.OffsetDateTime;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,8 @@ import com.ticketmanagement.reporting.infrastructure.persistence.TicketReportPro
 import com.ticketmanagement.reporting.infrastructure.persistence.TicketReportProjectionJpaRepository;
 import com.ticketmanagement.reporting.infrastructure.persistence.AgentWorklogProjectionEntity;
 import com.ticketmanagement.reporting.infrastructure.persistence.AgentWorklogProjectionJpaRepository;
+import com.ticketmanagement.reporting.domain.ProjectionSlaStatus;
+import com.ticketmanagement.reporting.domain.ProjectionTicketStatus;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +37,47 @@ public class ReportingProjectionService {
     @Transactional(readOnly = true)
     public Optional<TicketReportProjectionEntity> findTicketProjection(UUID ticketId) {
         return ticketReportProjectionRepository.findById(ticketId);
+    }
+
+    // Ticket assignment eventini projection snapshot kaydina uygular.
+    @Transactional
+    public boolean updateTicketAssignment(
+            UUID ticketId,
+            UUID assigneeId,
+            UUID assignedTeamId,
+            OffsetDateTime updatedAt) {
+        return ticketReportProjectionRepository.findById(ticketId)
+                .map(projection -> {
+                    projection.updateAssignment(assigneeId, assignedTeamId, updatedAt);
+                    return true;
+                })
+                .orElse(false);
+    }
+
+    // Ticket status eventini projection snapshot kaydina uygular.
+    @Transactional
+    public boolean updateTicketStatus(UUID ticketId, ProjectionTicketStatus status, OffsetDateTime updatedAt) {
+        return ticketReportProjectionRepository.findById(ticketId)
+                .map(projection -> {
+                    projection.updateStatus(status, updatedAt);
+                    return true;
+                })
+                .orElse(false);
+    }
+
+    // Workflow SLA eventini projection snapshot kaydina uygular.
+    @Transactional
+    public boolean updateTicketSlaStatus(
+            UUID ticketId,
+            ProjectionSlaStatus slaStatus,
+            OffsetDateTime targetResolutionAt,
+            OffsetDateTime updatedAt) {
+        return ticketReportProjectionRepository.findById(ticketId)
+                .map(projection -> {
+                    projection.updateSla(slaStatus, targetResolutionAt, updatedAt);
+                    return true;
+                })
+                .orElse(false);
     }
 
     // Agent worklog projection kaydini worklogId bazinda idempotent olarak olusturur veya gunceller.

@@ -36,6 +36,12 @@ alir. Compliance yuzdesi `MET / (MET + BREACHED)` seklinde hesaplanir; `ACTIVE`
 ve `AT_RISK` durumlari operasyonel takip icin ayri sayilir, fakat tamamlanmis
 SLA sonucu olmadiklari icin paydaya dahil edilmez.
 
+Reporting consumer'lari Kafka at-least-once delivery varsayimiyla calisir.
+Her consumer `(event_id, consumer_name)` anahtarini `processed_events`
+tablosuna once yazar; duplicate event geldiginde projection side effect'i ikinci
+kez calismaz. Worklog projection ayrica `worklog_id` primary key'iyle dogal
+idempotency saglar.
+
 ## Degerlendirilen Secenekler
 
 - Ticket-service tablolarindan senkron rapor sorgusu: En hizli baslangictir,
