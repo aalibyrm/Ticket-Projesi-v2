@@ -33,12 +33,16 @@ Servis URL'leri:
 - Keycloak realm: `http://localhost:8080/realms/ticket-management`
 - OpenSearch: `http://localhost:9200`
 - OpenSearch Dashboards: `http://localhost:5601`
+- Jaeger: `http://localhost:16686`
 - Mailpit: `http://localhost:8025`
 - Mailpit SMTP: `localhost:1025`
 - Kafka external listener: `localhost:9094`
 - Reporting-service: `http://localhost:8085`
 - OpenTelemetry OTLP gRPC: `localhost:4317`
 - OpenTelemetry OTLP HTTP: `localhost:4318`
+
+Trace kurulumu ve servislerin OpenTelemetry Java Agent ile calistirilmasi icin
+`docs/development/observability.md` dosyasini takip edin.
 
 ## Guvenlik Kurali
 

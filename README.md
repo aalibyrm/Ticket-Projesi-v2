@@ -19,6 +19,7 @@ OpenTelemetry, OpenSearch ve gercek e-posta gonderimi uzerine kurulacaktir.
 - [Sprint Plan](docs/architecture/sprint-plan.md)
 - [Commit Policy](docs/architecture/commit-policy.md)
 - [Local Setup](docs/development/local-setup.md)
+- [Observability](docs/development/observability.md)
 - [Service Conventions](docs/development/service-conventions.md)
 - [Backend Build](docs/development/backend-build.md)
 
