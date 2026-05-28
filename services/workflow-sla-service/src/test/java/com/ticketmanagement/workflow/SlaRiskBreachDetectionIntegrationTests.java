@@ -136,6 +136,40 @@ class SlaRiskBreachDetectionIntegrationTests {
         }
     }
 
+    @Test
+    void priorityRiskWindowsAreInclusiveAndDoNotAlertEarly() throws Exception {
+        OffsetDateTime detectedAt = OffsetDateTime.parse("2026-05-28T12:00:00Z");
+        UUID highTicketId = consumeTicketCreated(
+                "TCK-HIGH-RISK",
+                "HIGH",
+                detectedAt.minusHours(6).toInstant(),
+                UUID.randomUUID());
+        UUID mediumTicketId = consumeTicketCreated(
+                "TCK-MED-RISK",
+                "MEDIUM",
+                detectedAt.minusHours(20).toInstant(),
+                UUID.randomUUID());
+        UUID lowTicketId = consumeTicketCreated(
+                "TCK-LOW-RISK",
+                "LOW",
+                detectedAt.minusHours(60).toInstant(),
+                UUID.randomUUID());
+        UUID earlyMediumTicketId = consumeTicketCreated(
+                "TCK-MED-EARLY",
+                "MEDIUM",
+                detectedAt.minusHours(19).plusMinutes(59).toInstant(),
+                UUID.randomUUID());
+
+        int detectedCount = slaDetectionService.detectDueSlaEvents(detectedAt);
+
+        assertThat(detectedCount).isEqualTo(3);
+        assertThat(stateStatusFor(highTicketId)).isEqualTo("AT_RISK");
+        assertThat(stateStatusFor(mediumTicketId)).isEqualTo("AT_RISK");
+        assertThat(stateStatusFor(lowTicketId)).isEqualTo("AT_RISK");
+        assertThat(stateStatusFor(earlyMediumTicketId)).isEqualTo("ACTIVE");
+        assertThat(outboxCount()).isEqualTo(3);
+    }
+
     private UUID consumeTicketCreated(
             String ticketNumber,
             String priority,
