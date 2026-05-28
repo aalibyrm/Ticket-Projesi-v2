@@ -37,3 +37,4 @@ kayitlar `docs/architecture/adr` altindadir.
 | ADR-0030 | Reporting sahipli projection read model | Manager raporlarini operasyonel servis DB'lerine baglamadan hazirlamak | Reporting-service kendi read modelini tutar; raporlar event gecikmesi kadar eventual consistent olur |
 | ADR-0031 | Structured JSON logging ve correlation ID | OpenSearch dashboard ve request takibi icin log alanlari stabil olmali | Tum backend servisleri ayni JSON alanlarini yazar; guvensiz correlation header degerleri yenilenir |
 | ADR-0032 | OTel Java Agent tracing | HTTP, Kafka ve DB span'lerini servis koduna SDK baglamadan toplamak | Servisler Java Agent ile OTLP collector'a yazar; local trace incelemesi Jaeger UI uzerinden yapilir |
+| ADR-0033 | Dashboard source artifact | OpenSearch exportlari surum ve data view id'lerine hassas oldugu icin panel kontrati stabil tutulmali | Core metrics dashboard panelleri JSON artifact ve runbook olarak versiyonlanir |

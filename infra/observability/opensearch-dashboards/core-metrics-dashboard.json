@@ -1,0 +1,121 @@
+{
+  "dashboardId": "ticket-platform-core-metrics",
+  "title": "Ticket Platform Core Metrics",
+  "version": 1,
+  "description": "OpenSearch dashboard source artifact for API response time, error rate, request volume, and service health.",
+  "opensearch": {
+    "dataView": "ticket-observability-*",
+    "timeField": "@timestamp",
+    "defaultTimeRange": "Last 15 minutes",
+    "refreshInterval": "30 seconds"
+  },
+  "requiredFields": [
+    { "name": "@timestamp", "type": "date", "source": "collector" },
+    { "name": "deployment.environment", "type": "keyword", "source": "otel.resource.attributes" },
+    { "name": "service.name", "type": "keyword", "source": "otel.resource.attributes" },
+    { "name": "event.kind", "type": "keyword", "source": "normalizer", "values": ["span", "health", "log"] },
+    { "name": "span.kind", "type": "keyword", "source": "otel.span", "values": ["SERVER", "CLIENT", "PRODUCER", "CONSUMER", "INTERNAL"] },
+    { "name": "trace.id", "type": "keyword", "source": "otel.span" },
+    { "name": "span.id", "type": "keyword", "source": "otel.span" },
+    { "name": "duration.ms", "type": "double", "source": "otel.span.duration" },
+    { "name": "http.request.method", "type": "keyword", "source": "otel.http.attributes" },
+    { "name": "url.path", "type": "keyword", "source": "otel.http.attributes" },
+    { "name": "http.response.status_code", "type": "integer", "source": "otel.http.attributes" },
+    { "name": "service.health.status", "type": "keyword", "source": "actuator.health", "values": ["UP", "DOWN", "UNKNOWN"] },
+    { "name": "log.level", "type": "keyword", "source": "log4j2.json" },
+    { "name": "correlation.id", "type": "keyword", "source": "log4j2.json" }
+  ],
+  "globalFilters": [
+    {
+      "field": "deployment.environment",
+      "operator": "is",
+      "defaultValue": "local"
+    }
+  ],
+  "panels": [
+    {
+      "id": "api-response-time",
+      "title": "API response time",
+      "type": "time_series_line",
+      "queryLanguage": "lucene",
+      "query": "event.kind:span AND span.kind:SERVER AND http.response.status_code:*",
+      "dateHistogram": {
+        "field": "@timestamp",
+        "fixedInterval": "1m"
+      },
+      "metrics": [
+        { "label": "p95", "aggregation": "percentiles", "field": "duration.ms", "percent": 95 },
+        { "label": "p50", "aggregation": "percentiles", "field": "duration.ms", "percent": 50 },
+        { "label": "avg", "aggregation": "avg", "field": "duration.ms" }
+      ],
+      "splitBy": "service.name",
+      "thresholds": [
+        { "label": "warning", "valueMs": 500 },
+        { "label": "critical", "valueMs": 1000 }
+      ]
+    },
+    {
+      "id": "api-error-rate",
+      "title": "API error rate",
+      "type": "metric_and_time_series",
+      "queryLanguage": "lucene",
+      "denominatorQuery": "event.kind:span AND span.kind:SERVER AND http.response.status_code:*",
+      "numeratorQuery": "event.kind:span AND span.kind:SERVER AND http.response.status_code:[500 TO 599]",
+      "formula": "numerator_count / denominator_count * 100",
+      "unit": "percent",
+      "dateHistogram": {
+        "field": "@timestamp",
+        "fixedInterval": "1m"
+      },
+      "splitBy": "service.name",
+      "thresholds": [
+        { "label": "warning", "valuePercent": 1 },
+        { "label": "critical", "valuePercent": 5 }
+      ]
+    },
+    {
+      "id": "request-volume",
+      "title": "Request volume",
+      "type": "vertical_bar",
+      "queryLanguage": "lucene",
+      "query": "event.kind:span AND span.kind:SERVER AND http.response.status_code:*",
+      "dateHistogram": {
+        "field": "@timestamp",
+        "fixedInterval": "1m"
+      },
+      "metric": {
+        "label": "requests",
+        "aggregation": "count"
+      },
+      "splitBy": "service.name"
+    },
+    {
+      "id": "service-health",
+      "title": "Service health",
+      "type": "data_table",
+      "queryLanguage": "lucene",
+      "query": "event.kind:health AND service.health.status:*",
+      "groupBy": "service.name",
+      "columns": [
+        { "label": "service", "field": "service.name", "aggregation": "terms" },
+        { "label": "latest_status", "field": "service.health.status", "aggregation": "top_hits", "sort": "@timestamp:desc", "size": 1 },
+        { "label": "last_seen", "field": "@timestamp", "aggregation": "max" }
+      ],
+      "statusColors": {
+        "UP": "green",
+        "DOWN": "red",
+        "UNKNOWN": "yellow"
+      }
+    }
+  ],
+  "fallbackPanels": [
+    {
+      "id": "application-errors",
+      "title": "Application error logs",
+      "queryLanguage": "lucene",
+      "query": "event.kind:log AND log.level:ERROR",
+      "metric": "count",
+      "splitBy": "service.name"
+    }
+  ]
+}

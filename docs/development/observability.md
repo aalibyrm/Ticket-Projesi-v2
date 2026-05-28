@@ -16,6 +16,7 @@ Trace UI:
 - Jaeger: `http://localhost:16686`
 - OTel gRPC endpoint: `localhost:4317`
 - OTel HTTP endpoint: `localhost:4318`
+- OpenSearch Dashboards: `http://localhost:5601`
 
 ## Java Agent'i Indir
 
@@ -59,6 +60,13 @@ OpenTelemetry Java Agent asagidaki span'leri otomatik uretir:
 
 Jaeger UI'da servis adina gore arama yapildiginda gateway'den downstream
 servislere, Kafka eventlerine ve DB islemlerine uzanan trace agaci gorulmelidir.
+
+## OpenSearch Dashboard Artefact'i
+
+Core metrics dashboard kaynak tanimi
+`infra/observability/opensearch-dashboards/core-metrics-dashboard.json`
+dosyasindadir. Bu artefact API response time, error rate, request volume ve
+service health panelleri icin beklenen index alanlarini ve sorgulari tanimlar.
 
 ## Guvenlik
 

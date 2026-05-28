@@ -49,7 +49,7 @@ services/
 infra/
   docker/          Compose ve container yardimci dosyalari
   keycloak/        Realm export ve seed kullanicilar
-  observability/   OpenTelemetry ve OpenSearch konfigurasyonu
+  observability/   OpenTelemetry, OpenSearch ve dashboard konfigurasyonu
 docs/
   architecture/
   api/
