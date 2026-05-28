@@ -32,6 +32,14 @@ spring:
     default-schema: workflow_schema
     table: flyway_schema_history
     locations: classpath:db/migration
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
+    consumer:
+      group-id: ${WORKFLOW_KAFKA_GROUP_ID:workflow-sla-service}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: false
 
 management:
   endpoints:
@@ -52,6 +60,14 @@ info:
     description: BPMN workflow and SLA tracking service
 
 app:
+  kafka:
+    topics:
+      ticket-events: ${TICKET_EVENTS_TOPIC:ticket.events.v1}
   security:
     jwt:
       enabled: ${WORKFLOW_SERVICE_JWT_ENABLED:true}
+  sla:
+    policies:
+      low-target-resolution: ${SLA_LOW_TARGET_RESOLUTION:PT72H}
+      medium-target-resolution: ${SLA_MEDIUM_TARGET_RESOLUTION:PT24H}
+      high-target-resolution: ${SLA_HIGH_TARGET_RESOLUTION:PT8H}

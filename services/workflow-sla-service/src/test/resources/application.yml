@@ -8,8 +8,16 @@ spring:
     schemas: workflow_schema
     default-schema: workflow_schema
     locations: classpath:db/migration
+  kafka:
+    listener:
+      auto-startup: false
 
 app:
   security:
     jwt:
       enabled: false
+  sla:
+    policies:
+      low-target-resolution: PT72H
+      medium-target-resolution: PT24H
+      high-target-resolution: PT8H
