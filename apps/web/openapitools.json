@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/@openapitools/openapi-generator-cli/config.schema.json",
+  "generator-cli": {
+    "version": "7.16.0",
+    "generators": {
+      "ticket-management-api": {
+        "generatorName": "typescript-axios",
+        "inputSpec": "../../docs/api/openapi.yaml",
+        "output": "app/generated/api",
+        "additionalProperties": {
+          "apiPackage": "apis",
+          "enumPropertyNaming": "UPPERCASE",
+          "modelPackage": "models",
+          "supportsES6": true,
+          "withSeparateModelsAndApi": true
+        }
+      }
+    }
+  }
+}

@@ -21,6 +21,7 @@ build/
 node_modules/
 dist/
 coverage/
+.react-router/
 .expo/
 .metro-cache/
 
@@ -41,4 +42,3 @@ logs/
 .docker/
 data/
 tmp/
-

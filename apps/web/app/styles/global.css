@@ -1,0 +1,35 @@
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: #f9f9fe;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.app-hydrate {
+  align-items: center;
+  background: #f9f9fe;
+  color: #1a1c1f;
+  display: flex;
+  font-family: "DM Sans", Arial, sans-serif;
+  inset: 0;
+  justify-content: center;
+  position: fixed;
+}
