@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Agent Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;600&amp;family=Outfit:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+            "p-red": "#AA1101",
+            "p-black": "#111111",
+            "p-gray": "#737373",
+            "p-border": "#E5E5EA",
+            "p-bg": "#FCFCFC",
+            "p-white": "#FFFFFF",
+            "p-gray-light": "#F4F4F5"
+        },
+        fontFamily: {
+            "outfit": ["Outfit", "sans-serif"],
+            "dm-sans": ["DM Sans", "sans-serif"]
+        }
+      }
+    }
+  }
+</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Custom Scrollbar for dense lists */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #E5E5EA;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #737373;
+        }
+    </style>
+</head>
+<body class="bg-p-bg text-p-black font-dm-sans min-h-screen overflow-hidden flex">
+<!-- SideNavBar (Shared Component JSON) -->
+<!-- Active State: Inbox (mapped to agent intent for assigned tickets) -->
+<nav class="fixed left-0 top-0 h-full w-[72px] bg-p-bg border-r border-p-border flex flex-col items-center py-4 z-50">
+<!-- Brand Logo Area (Condensed for 72px width) -->
+<div class="mb-6 flex h-12 w-12 items-center justify-center rounded-lg bg-p-gray-light text-p-red font-outfit text-xl">
+<span class="material-symbols-outlined icon-fill">support_agent</span>
+</div>
+<div class="flex flex-col w-full">
+<!-- Dashboard (Inactive) -->
+<a class="flex flex-col items-center justify-center w-full h-16 text-p-gray hover:bg-p-gray-light transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+</a>
+<!-- Inbox (Active) -->
+<a class="flex flex-col items-center justify-center w-full h-16 text-p-red border-l-4 border-p-red bg-p-gray-light transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined icon-fill">inbox</span>
+</a>
+<!-- Analytics (Inactive) -->
+<a class="flex flex-col items-center justify-center w-full h-16 text-p-gray hover:bg-p-gray-light transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">analytics</span>
+</a>
+<!-- Customers (Inactive) -->
+<a class="flex flex-col items-center justify-center w-full h-16 text-p-gray hover:bg-p-gray-light transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">settings</span>
+</a>
+</div>
+<div class="mt-auto flex flex-col items-center w-full pb-4">
+<!-- User Avatar -->
+<button class="h-10 w-10 rounded-full bg-p-gray-light overflow-hidden border border-p-border flex items-center justify-center">
+<span class="material-symbols-outlined text-p-gray text-[20px]">person</span>
+</button>
+</div>
+</nav>
+<!-- Main Workspace Layout -->
+<main class="ml-[72px] flex h-screen w-full">
+<!-- Queue Panel (Left) -->
+<aside class="w-[300px] shrink-0 border-r border-p-border bg-p-white flex flex-col h-full">
+<!-- Queue Header & Filters -->
+<div class="p-5 shrink-0">
+<div class="flex justify-between items-center mb-4">
+<h2 class="font-outfit text-[20px] font-medium text-p-black">Atanan Biletler</h2>
+<span class="text-p-gray font-dm-sans text-[13px]">12 Open</span>
+</div>
+<div class="mb-4">
+<input class="w-full bg-transparent border-0 border-b border-p-border p-0 pb-2 text-[15px] font-dm-sans text-p-black focus:ring-0 focus:border-p-red placeholder:text-p-gray" placeholder="Ara..." type="text"/>
+</div>
+<!-- Chips -->
+<div class="flex gap-2 overflow-x-auto pb-1">
+<button class="shrink-0 px-3 py-1 bg-p-gray-light text-p-black font-dm-sans text-[13px] rounded-full">Tümü</button>
+<button class="shrink-0 px-3 py-1 bg-p-white text-p-red border border-p-border font-dm-sans text-[13px] rounded-full">Yüksek</button>
+<button class="shrink-0 px-3 py-1 bg-p-white text-p-black border border-p-border font-dm-sans text-[13px] rounded-full">Normal</button>
+<button class="shrink-0 px-3 py-1 bg-p-white text-p-black border border-p-border font-dm-sans text-[13px] rounded-full">Düşük</button>
+</div>
+</div>
+<!-- Queue List -->
+<div class="flex-1 overflow-y-auto">
+<!-- Ticket Row: High Priority (Active) -->
+<button class="w-full text-left py-3 px-4 border-b border-p-border bg-p-gray-light border-l-4 !border-l-p-red flex flex-col gap-1">
+<div class="flex justify-between items-start w-full">
+<span class="font-dm-sans text-[15px] font-medium text-p-black truncate">Ödeme sayfası yüklenmiyor</span>
+<span class="font-dm-sans text-[13px] text-p-gray whitespace-nowrap ml-2">2m ago</span>
+</div>
+<div class="flex justify-between items-center w-full">
+<span class="font-dm-sans text-[13px] text-p-gray">John Doe</span>
+<span class="text-p-red font-dm-sans text-[13px] flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">warning</span> Yüksek</span>
+</div>
+</button>
+<!-- Ticket Row: Normal -->
+<button class="w-full text-left py-3 px-4 border-b border-p-border bg-p-white hover:bg-p-gray-light transition-colors border-l-4 border-l-transparent flex flex-col gap-1">
+<div class="flex justify-between items-start w-full">
+<span class="font-dm-sans text-[15px] font-medium text-p-black truncate">How to update billing address?</span>
+<span class="font-dm-sans text-[13px] text-p-gray whitespace-nowrap ml-2">15m ago</span>
+</div>
+<div class="flex justify-between items-center w-full">
+<span class="font-dm-sans text-[13px] text-p-gray">Alice Smith</span>
+</div>
+</button>
+<!-- Ticket Row: Normal -->
+<button class="w-full text-left py-3 px-4 border-b border-p-border bg-p-white hover:bg-p-gray-light transition-colors border-l-4 border-l-transparent flex flex-col gap-1">
+<div class="flex justify-between items-start w-full">
+<span class="font-dm-sans text-[15px] font-medium text-p-black truncate">Account locked out, need reset</span>
+<span class="font-dm-sans text-[13px] text-p-gray whitespace-nowrap ml-2">1h ago</span>
+</div>
+<div class="flex justify-between items-center w-full">
+<span class="font-dm-sans text-[13px] text-p-gray">Bob Jones</span>
+</div>
+</button>
+</div>
+</aside>
+<!-- Detail Area (Right Canvas) -->
+<section class="flex-1 flex flex-col h-full bg-p-bg relative">
+<!-- Detail Top Bar -->
+<div class="h-[64px] shrink-0 border-b border-p-border bg-p-bg px-8 flex justify-between items-center">
+<div class="flex items-center gap-4">
+<span class="font-dm-sans text-[13px] text-p-gray">#TKT-4821</span>
+<h2 class="font-outfit text-[18px] font-medium text-p-black">Ödeme sayfası yüklenmiyor</h2>
+</div>
+<div class="flex items-center gap-4">
+<span class="px-3 py-1 bg-p-gray-light text-p-red font-dm-sans text-[13px] rounded-full">
+        Yüksek
+    </span>
+<button class="w-8 h-8 flex items-center justify-center text-p-gray hover:bg-p-gray-light rounded-full transition-colors">
+<span class="material-symbols-outlined text-[20px]">info</span>
+</button>
+</div>
+</div>
+<!-- Chat / Thread Area -->
+<div class="flex-1 overflow-y-auto p-8 flex flex-col gap-6">
+<!-- System Note -->
+<div class="flex justify-center w-full">
+<span class="px-3 py-1 bg-p-gray-light text-p-gray font-dm-sans text-[13px] rounded-full">
+                        Ticket created via Web Form • Oct 24, 10:42 AM
+                    </span>
+</div>
+<!-- User Message -->
+<div class="flex gap-4 max-w-3xl">
+<div class="w-10 h-10 shrink-0 rounded-full bg-p-gray-light flex items-center justify-center border border-p-border">
+<span class="font-dm-sans text-[15px] font-medium text-p-black">JD</span>
+</div>
+<div class="flex flex-col gap-1 w-full">
+<div class="flex items-baseline gap-2">
+<span class="font-dm-sans text-[15px] font-medium text-p-black">John Doe</span>
+<span class="font-dm-sans text-[13px] text-p-gray">10:42 AM</span>
+</div>
+<div class="p-4 bg-p-gray-light rounded-lg font-dm-sans text-[15px] text-p-black">
+                            Hi support team, I'm trying to complete my purchase for the annual plan but my credit card keeps getting declined with a generic error code. I've verified the funds are available. Can you please look into this urgently? I need this active for a project starting tomorrow.
+                        </div>
+</div>
+</div>
+<!-- Agent Message (Previous) -->
+<div class="flex gap-4 max-w-3xl self-end flex-row-reverse">
+<div class="w-10 h-10 shrink-0 rounded-full bg-p-white border border-p-border text-p-black flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">support_agent</span>
+</div>
+<div class="flex flex-col gap-1 w-full items-end">
+<div class="flex items-baseline gap-2 flex-row-reverse">
+<span class="font-dm-sans text-[15px] font-medium text-p-black">Agent Sarah</span>
+<span class="font-dm-sans text-[13px] text-p-gray">10:48 AM</span>
+</div>
+<div class="p-4 bg-p-white border border-p-border rounded-lg font-dm-sans text-[15px] text-p-black text-right">
+                            Hello John, I apologize for the inconvenience. I'm looking into our payment gateway logs right now. It appears there might be a mismatch with the billing zip code on file. Could you please confirm if the zip code you entered matches exactly with what your bank has?
+                        </div>
+</div>
+</div>
+<!-- User Message -->
+<div class="flex gap-4 max-w-3xl">
+<div class="w-10 h-10 shrink-0 rounded-full bg-p-gray-light flex items-center justify-center border border-p-border">
+<span class="font-dm-sans text-[15px] font-medium text-p-black">JD</span>
+</div>
+<div class="flex flex-col gap-1 w-full">
+<div class="flex items-baseline gap-2">
+<span class="font-dm-sans text-[15px] font-medium text-p-black">John Doe</span>
+<span class="font-dm-sans text-[13px] text-p-gray">10:55 AM</span>
+</div>
+<div class="p-4 bg-p-gray-light rounded-lg font-dm-sans text-[15px] text-p-black">
+                            Ah, you are correct. I recently moved and used my new zip code, but the bank still has my old one. Let me try again with the old zip code.
+                        </div>
+</div>
+</div>
+</div>
+<!-- Response Composer Area -->
+<div class="shrink-0 bg-p-bg p-8 pt-0">
+<div class="flex flex-col gap-2 relative">
+<!-- Text Area matching "underline-bottom" style spec -->
+<div class="relative group w-full border-b border-p-border focus-within:border-p-red transition-all">
+<textarea class="w-full bg-transparent border-none focus:ring-0 p-0 font-dm-sans text-[15px] text-p-black resize-none min-h-[80px] placeholder:text-p-gray" placeholder="Type your reply to John Doe..."></textarea>
+</div>
+<!-- Composer Toolbar & Actions -->
+<div class="flex justify-between items-center mt-2">
+<!-- Toolbar -->
+<div class="flex items-center gap-2 text-p-gray">
+<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-p-gray-light transition-colors" title="Bold">
+<span class="material-symbols-outlined text-[20px]">format_bold</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-p-gray-light transition-colors" title="Italic">
+<span class="material-symbols-outlined text-[20px]">format_italic</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-p-gray-light transition-colors" title="Link">
+<span class="material-symbols-outlined text-[20px]">link</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-p-gray-light transition-colors" title="Attach file">
+<span class="material-symbols-outlined text-[20px]">attach_file</span>
+</button>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-3">
+<!-- Primary Button matching style spec -->
+<button class="px-6 py-2 bg-p-red text-p-white font-dm-sans text-[15px] font-medium rounded-lg hover:opacity-90 transition-opacity border-none">
+                                Yanıtla
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+</body></html>

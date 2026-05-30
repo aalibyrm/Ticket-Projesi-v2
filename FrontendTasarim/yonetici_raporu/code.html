@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Manager Reporting Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&amp;family=Outfit:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#f3f3f8",
+                        "inverse-on-surface": "#f0f0f5",
+                        "on-tertiary-fixed-variant": "#464747",
+                        "tertiary-fixed": "#e3e2e2",
+                        "on-secondary-fixed-variant": "#474646",
+                        "surface-tint": "#b91e0b",
+                        "secondary": "#5f5e5e",
+                        "inverse-surface": "#2f3034",
+                        "tertiary-container": "#545454",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed-dim": "#c7c6c6",
+                        "on-tertiary-fixed": "#1b1c1c",
+                        "secondary-fixed-dim": "#c8c6c5",
+                        "primary-fixed-dim": "#ffb4a7",
+                        "surface-container-lowest": "#ffffff",
+                        "surface": "#f9f9fe",
+                        "primary-fixed": "#ffdad4",
+                        "on-secondary-fixed": "#1c1b1b",
+                        "primary-container": "#aa1101",
+                        "surface-container": "#ededf2",
+                        "secondary-fixed": "#e5e2e1",
+                        "surface-container-high": "#e8e8ed",
+                        "outline-variant": "#e4beb7",
+                        "surface-dim": "#d9dade",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#e2e2e7",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#400200",
+                        "inverse-primary": "#ffb4a7",
+                        "on-surface": "#1a1c1f",
+                        "secondary-container": "#e5e2e1",
+                        "on-primary": "#ffffff",
+                        "outline": "#90706a",
+                        "on-error": "#ffffff",
+                        "on-primary-container": "#ffb8ab",
+                        "on-primary-fixed-variant": "#910b00",
+                        "on-secondary-container": "#656464",
+                        "on-surface-variant": "#5b403b",
+                        "on-error-container": "#93000a",
+                        "surface-bright": "#f9f9fe",
+                        "tertiary": "#3c3d3d",
+                        "on-tertiary-container": "#cac8c8",
+                        "on-background": "#1a1c1f",
+                        "surface-container-highest": "#e2e2e7",
+                        "primary": "#7f0900",
+                        "background": "#f9f9fe"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-page": "32px",
+                        "stack-lg": "24px",
+                        "gutter": "16px",
+                        "sidebar-width": "72px",
+                        "stack-sm": "4px",
+                        "base-unit": "8px",
+                        "stack-md": "12px"
+                    },
+                    "fontFamily": {
+                        "headline-xl": ["Outfit"],
+                        "body-md": ["DM Sans"],
+                        "body-md-bold": ["DM Sans"],
+                        "headline-lg": ["Outfit"],
+                        "headline-md": ["Outfit"],
+                        "caption": ["DM Sans"],
+                        "label-sm": ["DM Sans"],
+                        "body-lg": ["DM Sans"],
+                        "headline-sm": ["Outfit"]
+                    },
+                    "fontSize": {
+                        "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-md-bold": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "caption": ["11px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-sm": ["16px", { "lineHeight": "24px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-body-md antialiased min-h-screen flex">
+<!-- SideNavBar -->
+<nav class="bg-surface-container-lowest dark:bg-inverse-surface fixed left-0 top-0 h-full w-[72px] border-r border-surface-container-high dark:border-outline-variant flex flex-col items-center py-base-unit z-50">
+<div class="mb-stack-lg">
+<span class="font-headline-sm text-headline-sm text-primary dark:text-primary-fixed material-symbols-outlined" style="font-size: 32px;">support_agent</span>
+</div>
+<div class="flex flex-col gap-stack-md w-full">
+<!-- Active Tab: Dashboard -->
+<button aria-label="Dashboard" class="w-full flex justify-center py-stack-md transition-colors duration-200 ease-in-out hover:bg-surface-container dark:hover:bg-surface-variant text-primary dark:text-primary-fixed border-l-4 border-primary dark:border-primary-fixed">
+<span class="material-symbols-outlined" data-icon="dashboard" data-weight="fill" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+</button>
+<!-- Inactive Tabs -->
+<button aria-label="Inbox" class="w-full flex justify-center py-stack-md transition-colors duration-200 ease-in-out hover:bg-surface-container dark:hover:bg-surface-variant text-secondary dark:text-secondary-fixed-dim border-l-4 border-transparent">
+<span class="material-symbols-outlined" data-icon="inbox">inbox</span>
+</button>
+<button aria-label="Analytics" class="w-full flex justify-center py-stack-md transition-colors duration-200 ease-in-out hover:bg-surface-container dark:hover:bg-surface-variant text-secondary dark:text-secondary-fixed-dim border-l-4 border-transparent">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+</button>
+<button aria-label="Customers" class="w-full flex justify-center py-stack-md transition-colors duration-200 ease-in-out hover:bg-surface-container dark:hover:bg-surface-variant text-secondary dark:text-secondary-fixed-dim border-l-4 border-transparent">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+</button>
+<button aria-label="Settings" class="w-full flex justify-center py-stack-md transition-colors duration-200 ease-in-out hover:bg-surface-container dark:hover:bg-surface-variant text-secondary dark:text-secondary-fixed-dim border-l-4 border-transparent">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+<div class="mt-auto pt-stack-md">
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-surface-container-high overflow-hidden cursor-pointer" data-alt="Minimalist, professional corporate portrait of an agent, monochromatic studio lighting, clean background, sharp focus, high-end business photography style.">
+<img alt="User profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZAdountU3KBI2FztJR1zZGxfuSXs8umMKbvsy9plXwIe-P1gQ7HeMAnHkdjeSnN26_ydCKu4YvDe7JFUGIdzW04XrsB6-Wd-WsbATcqOcql98vLNfZBPNJpnVL0avg-5xzMFR0YKn8679ALWG9FktaEDyK7c8HRqB7hMkjIR8ZrNd0jrL3oRV1FVQEo_G_lOpWENEQYyxTtGfZIYn0VDBOLK6RyeTtYsBh92hKwKKNCYg5kbNf5SP5r9oZ7ldsqtP5Riy4xP0sVI"/>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 ml-[72px] flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface-container-lowest dark:bg-inverse-surface fixed top-0 right-0 w-[calc(100%-72px)] h-16 border-b border-surface-container-high dark:border-outline-variant flex justify-between items-center px-margin-page z-40 transition-all duration-150">
+<div class="flex items-center gap-gutter">
+<div class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed tracking-tight">SupportHub</div>
+<span class="text-secondary font-body-md">/ Editorial Statistics</span>
+</div>
+<div class="flex items-center gap-gutter">
+<div class="relative hidden md:block">
+<span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-secondary text-[20px]">search</span>
+<input class="pl-8 pr-4 py-1 bg-surface border border-surface-container-high rounded text-body-md focus:border-primary-container focus:outline-none transition-colors w-48" placeholder="Search..." type="text"/>
+</div>
+<button class="text-secondary dark:text-secondary-fixed-dim hover:text-primary dark:hover:text-primary-fixed transition-all duration-150">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-secondary dark:text-secondary-fixed-dim hover:text-primary dark:hover:text-primary-fixed transition-all duration-150">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+</div>
+</header>
+<!-- Page Content -->
+<main class="flex-1 mt-16 p-[24px]">
+<!-- Hero Stats -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-stack-lg mb-stack-lg border-b border-surface-container-high pb-stack-lg">
+<!-- Stat 1 -->
+<div class="flex flex-col gap-stack-sm">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-widest">Toplam Bilet</span>
+<div class="flex items-end justify-between">
+<span class="font-headline-xl text-headline-xl text-on-surface">1,247</span>
+<div class="w-24 h-8">
+<svg class="w-full h-full preserve-aspect-ratio-none" viewbox="0 0 100 30">
+<polyline class="text-surface-container-highest" fill="none" points="0,20 20,25 40,15 60,20 80,5 100,10" stroke="currentColor" stroke-width="2"></polyline>
+</svg>
+</div>
+</div>
+</div>
+<!-- Stat 2 -->
+<div class="flex flex-col gap-stack-sm">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-widest">SLA Uyumu</span>
+<div class="flex items-end justify-between">
+<span class="font-headline-xl text-headline-xl text-primary-container">94.2%</span>
+<div class="w-24 h-8">
+<svg class="w-full h-full preserve-aspect-ratio-none" viewbox="0 0 100 30">
+<polyline class="text-primary-container" fill="none" points="0,25 20,20 40,15 60,10 80,12 100,5" stroke="currentColor" stroke-width="2"></polyline>
+</svg>
+</div>
+</div>
+</div>
+<!-- Stat 3 -->
+<div class="flex flex-col gap-stack-sm">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-widest">Ort. Çözüm</span>
+<div class="flex items-end justify-between">
+<span class="font-headline-xl text-headline-xl text-on-surface">3.8s</span>
+<div class="w-24 h-8">
+<svg class="w-full h-full preserve-aspect-ratio-none" viewbox="0 0 100 30">
+<polyline class="text-surface-container-highest" fill="none" points="0,5 20,10 40,8 60,15 80,20 100,25" stroke="currentColor" stroke-width="2"></polyline>
+</svg>
+</div>
+</div>
+</div>
+</section>
+<!-- Trend Area -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-stack-lg mb-stack-lg">
+<!-- Area Chart -->
+<div class="lg:col-span-2 flex flex-col">
+<div class="flex justify-between items-center border-b border-surface-container-high pb-stack-sm mb-stack-md">
+<h2 class="font-headline-md text-headline-md text-on-surface">Son 30 Gün</h2>
+<span class="font-label-sm text-label-sm text-secondary">VOLUME TREND</span>
+</div>
+<div class="flex-1 min-h-[200px] w-full relative">
+<!-- Simulated SVG Area Chart -->
+<svg class="w-full h-full preserve-aspect-ratio-none" preserveaspectratio="none" viewbox="0 0 800 200">
+<path class="fill-surface-container-highest opacity-30" d="M0,180 L100,150 L200,160 L300,120 L400,130 L500,80 L600,100 L700,40 L800,60 L800,200 L0,200 Z"></path>
+<path class="stroke-on-surface" d="M0,180 L100,150 L200,160 L300,120 L400,130 L500,80 L600,100 L700,40 L800,60" fill="none" stroke-width="1.5"></path>
+</svg>
+</div>
+</div>
+<!-- Bar Chart -->
+<div class="flex flex-col">
+<div class="flex justify-between items-center border-b border-surface-container-high pb-stack-sm mb-stack-md">
+<h2 class="font-headline-md text-headline-md text-on-surface">Kategori Dağılımı</h2>
+<span class="font-label-sm text-label-sm text-secondary">DISTRIBUTION</span>
+</div>
+<div class="flex flex-col gap-stack-md justify-center flex-1">
+<div class="flex flex-col gap-stack-sm">
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface">
+<span>Teknik Destek</span>
+<span>45%</span>
+</div>
+<div class="w-full bg-surface-container-high h-base-unit rounded-sm overflow-hidden">
+<div class="bg-primary-container h-full" style="width: 45%;"></div>
+</div>
+</div>
+<div class="flex flex-col gap-stack-sm">
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface">
+<span>Fatura &amp; Ödeme</span>
+<span>30%</span>
+</div>
+<div class="w-full bg-surface-container-high h-base-unit rounded-sm overflow-hidden">
+<div class="bg-on-surface h-full" style="width: 30%;"></div>
+</div>
+</div>
+<div class="flex flex-col gap-stack-sm">
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface">
+<span>Hesap İşlemleri</span>
+<span>15%</span>
+</div>
+<div class="w-full bg-surface-container-high h-base-unit rounded-sm overflow-hidden">
+<div class="bg-on-surface h-full" style="width: 15%;"></div>
+</div>
+</div>
+<div class="flex flex-col gap-stack-sm">
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface">
+<span>Diğer</span>
+<span>10%</span>
+</div>
+<div class="w-full bg-surface-container-high h-base-unit rounded-sm overflow-hidden">
+<div class="bg-secondary-fixed-dim h-full" style="width: 10%;"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Team Performance Table -->
+<section class="flex flex-col">
+<div class="flex justify-between items-center border-b border-surface-container-high pb-stack-sm mb-stack-md">
+<h2 class="font-headline-md text-headline-md text-on-surface">Agent Performance</h2>
+<span class="font-label-sm text-label-sm text-secondary">THIS WEEK</span>
+</div>
+<div class="w-full overflow-x-auto">
+<table class="w-full text-left font-body-md border-collapse">
+<thead>
+<tr class="border-b border-surface-container-high">
+<th class="py-stack-sm font-label-sm text-label-sm text-secondary uppercase font-normal tracking-widest w-1/4">Agent</th>
+<th class="py-stack-sm font-label-sm text-label-sm text-secondary uppercase font-normal tracking-widest w-1/6">Çözülen</th>
+<th class="py-stack-sm font-label-sm text-label-sm text-secondary uppercase font-normal tracking-widest w-1/6">Ort. Süre</th>
+<th class="py-stack-sm font-label-sm text-label-sm text-secondary uppercase font-normal tracking-widest w-1/6">SLA</th>
+<th class="py-stack-sm font-label-sm text-label-sm text-secondary uppercase font-normal tracking-widest w-1/6">Memnuniyet</th>
+</tr>
+</thead>
+<tbody>
+<tr class="border-b border-surface-container-high group hover:bg-surface-container-low transition-colors duration-150">
+<td class="py-stack-md text-on-surface font-body-md-bold">Sarah Jenkins</td>
+<td class="py-stack-md text-on-surface">142</td>
+<td class="py-stack-md text-on-surface">2.4s</td>
+<td class="py-stack-md font-body-md-bold text-primary-container">99.1%</td>
+<td class="py-stack-md text-on-surface">4.9/5</td>
+</tr>
+<tr class="border-b border-surface-container-high group hover:bg-surface-container-low transition-colors duration-150">
+<td class="py-stack-md text-on-surface font-body-md-bold">Michael Chang</td>
+<td class="py-stack-md text-on-surface">128</td>
+<td class="py-stack-md text-on-surface">3.1s</td>
+<td class="py-stack-md text-on-surface">95.4%</td>
+<td class="py-stack-md text-on-surface">4.7/5</td>
+</tr>
+<tr class="border-b border-surface-container-high group hover:bg-surface-container-low transition-colors duration-150">
+<td class="py-stack-md text-on-surface font-body-md-bold">Elena Rostova</td>
+<td class="py-stack-md text-on-surface">156</td>
+<td class="py-stack-md text-on-surface">2.8s</td>
+<td class="py-stack-md text-on-surface">96.2%</td>
+<td class="py-stack-md text-on-surface">4.8/5</td>
+</tr>
+<tr class="border-b border-surface-container-high group hover:bg-surface-container-low transition-colors duration-150">
+<td class="py-stack-md text-on-surface font-body-md-bold">David Miller</td>
+<td class="py-stack-md text-on-surface">94</td>
+<td class="py-stack-md text-on-surface">4.5s</td>
+<td class="py-stack-md text-on-surface">88.5%</td>
+<td class="py-stack-md text-on-surface">4.2/5</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</main>
+</div>
+</body></html>

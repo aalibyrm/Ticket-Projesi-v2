@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Support Agent Desktop - Ticket View with Drawer</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&amp;family=Outfit:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#f3f3f8",
+                        "on-secondary-container": "#656464",
+                        "inverse-on-surface": "#f0f0f5",
+                        "error": "#ba1a1a",
+                        "on-surface-variant": "#5b403b",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#ffb4a7",
+                        "secondary-fixed": "#e5e2e1",
+                        "primary-container": "#aa1101",
+                        "tertiary-container": "#545454",
+                        "on-primary-fixed": "#400200",
+                        "surface-tint": "#b91e0b",
+                        "tertiary-fixed-dim": "#c7c6c6",
+                        "surface": "#f9f9fe",
+                        "background": "#f9f9fe",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#464747",
+                        "tertiary-fixed": "#e3e2e2",
+                        "secondary": "#5f5e5e",
+                        "on-tertiary-fixed": "#1b1c1c",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#e2e2e7",
+                        "on-secondary-fixed-variant": "#474646",
+                        "inverse-surface": "#2f3034",
+                        "inverse-primary": "#ffb4a7",
+                        "on-primary-fixed-variant": "#910b00",
+                        "on-primary-container": "#ffb8ab",
+                        "surface-container-highest": "#e2e2e7",
+                        "outline": "#90706a",
+                        "primary-fixed": "#ffdad4",
+                        "on-tertiary": "#ffffff",
+                        "secondary-container": "#e5e2e1",
+                        "on-tertiary-container": "#cac8c8",
+                        "surface-bright": "#f9f9fe",
+                        "tertiary": "#3c3d3d",
+                        "surface-dim": "#d9dade",
+                        "on-primary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "surface-container-high": "#e8e8ed",
+                        "secondary-fixed-dim": "#c8c6c5",
+                        "on-secondary": "#ffffff",
+                        "outline-variant": "#e4beb7",
+                        "on-background": "#1a1c1f",
+                        "surface-container": "#ededf2",
+                        "on-secondary-fixed": "#1c1b1b",
+                        "primary": "#7f0900",
+                        "on-surface": "#1a1c1f"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "24px",
+                        "margin-page": "32px",
+                        "gutter": "16px",
+                        "stack-md": "12px",
+                        "base-unit": "8px",
+                        "stack-sm": "4px",
+                        "sidebar-width": "72px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["DM Sans"],
+                        "headline-sm": ["Outfit"],
+                        "caption": ["DM Sans"],
+                        "headline-lg": ["Outfit"],
+                        "body-md": ["DM Sans"],
+                        "headline-xl": ["Outfit"],
+                        "body-lg": ["DM Sans"],
+                        "headline-md": ["Outfit"],
+                        "body-md-bold": ["DM Sans"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-sm": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "caption": ["11px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md-bold": ["14px", { "lineHeight": "20px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .material-symbols-outlined.filled { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        /* Custom scrollbar for minimalist look */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #e5e2e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #c8c6c5; }
+    </style>
+</head>
+<body class="bg-surface-container-low text-on-surface font-body-md h-full w-full overflow-hidden flex selection:bg-primary-container selection:text-on-primary-container">
+<!-- Column 1: SideNavBar -->
+<nav class="bg-surface-container-lowest dark:bg-inverse-surface border-r border-surface-container-high dark:border-outline-variant flex flex-col items-center py-base-unit z-50 fixed left-0 top-0 h-full w-[72px]">
+<!-- Brand/Avatar area (simplified for support agent) -->
+<div class="h-16 w-full flex items-center justify-center mb-4 border-b border-surface-container-high">
+<span class="font-headline-sm text-headline-sm text-primary dark:text-primary-fixed">SH</span>
+</div>
+<!-- Navigation Links -->
+<div class="flex flex-col gap-4 w-full px-2">
+<!-- Queue / Inbox -->
+<a class="group flex flex-col items-center justify-center h-14 w-full rounded-DEFAULT text-secondary hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[24px]">inbox</span>
+</a>
+<!-- Assigned (Active) -->
+<a aria-current="page" class="group relative flex flex-col items-center justify-center h-14 w-full rounded-DEFAULT text-primary border-l-4 border-primary bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined filled text-[24px]">assignment_ind</span>
+</a>
+<!-- Stats -->
+<a class="group flex flex-col items-center justify-center h-14 w-full rounded-DEFAULT text-secondary hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[24px]">analytics</span>
+</a>
+<!-- Settings -->
+<a class="group flex flex-col items-center justify-center h-14 w-full rounded-DEFAULT text-secondary hover:bg-surface-container transition-colors duration-200 mt-auto" href="#">
+<span class="material-symbols-outlined text-[24px]">settings</span>
+</a>
+</div>
+</nav>
+<!-- Main Workspace Container (offset by sidebar width) -->
+<div class="ml-sidebar-width flex w-[calc(100%-72px)] h-full">
+<!-- Column 2: Ticket Queue Panel -->
+<aside class="w-[300px] h-full bg-surface-container-lowest border-r border-surface-container-high flex flex-col shrink-0">
+<!-- Header -->
+<div class="p-5">
+<h2 class="font-headline-md text-headline-md text-on-surface">Atanan Biletler</h2>
+<!-- Search Input (Underline Style) -->
+<div class="mt-4 relative group">
+<span class="material-symbols-outlined absolute left-0 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+<input class="w-full pl-7 pr-0 py-2 bg-transparent border-0 border-b border-surface-container-high focus:ring-0 focus:border-b-2 focus:border-primary-container text-body-md text-on-surface placeholder:text-on-surface-variant transition-colors" placeholder="Bilet ara..." type="text"/>
+</div>
+<!-- Filter Chips -->
+<div class="mt-4 flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
+<button class="px-3 py-1 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm border border-surface-container-high whitespace-nowrap">Tümü</button>
+<button class="px-3 py-1 rounded-full bg-primary-container/10 text-primary-container font-label-sm text-label-sm border border-primary-container/20 whitespace-nowrap">Yüksek</button>
+<button class="px-3 py-1 rounded-full bg-surface-container-lowest text-on-surface font-label-sm text-label-sm border border-surface-container-high whitespace-nowrap hover:bg-surface-container transition-colors">Normal</button>
+<button class="px-3 py-1 rounded-full bg-surface-container-lowest text-on-surface font-label-sm text-label-sm border border-surface-container-high whitespace-nowrap hover:bg-surface-container transition-colors">Düşük</button>
+</div>
+</div>
+<!-- Ticket List -->
+<div class="flex-1 overflow-y-auto border-t border-surface-container-high">
+<!-- Ticket Item 1 (Selected/High Priority) -->
+<div class="p-3 border-b border-surface-container-high bg-surface-container border-l-4 border-l-primary-container cursor-pointer relative">
+<div class="flex justify-between items-start mb-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">#TKT-4821</span>
+<span class="font-caption text-caption text-on-surface-variant">10 dk önce</span>
+</div>
+<h3 class="font-body-md-bold text-body-md-bold text-on-surface mb-1 truncate">Ödeme sayfası yüklenmiyor</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2">Kredi kartı bilgilerimi girdikten sonra ödeme onayı butonuna basıyorum ama...</p>
+</div>
+<!-- Ticket Item 2 (Normal) -->
+<div class="p-3 border-b border-surface-container-high bg-surface-container-lowest hover:bg-surface-container/50 cursor-pointer border-l-4 border-l-transparent transition-colors">
+<div class="flex justify-between items-start mb-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">#TKT-4819</span>
+<span class="font-caption text-caption text-on-surface-variant">45 dk önce</span>
+</div>
+<h3 class="font-body-md-bold text-body-md-bold text-on-surface mb-1 truncate">Fatura adresi değişikliği</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2">Son siparişim için fatura adresimi değiştirmek istiyorum. Yardımcı olabilir misiniz?</p>
+</div>
+<!-- Ticket Item 3 (Low) -->
+<div class="p-3 border-b border-surface-container-high bg-surface-container-lowest hover:bg-surface-container/50 cursor-pointer border-l-4 border-l-transparent transition-colors">
+<div class="flex justify-between items-start mb-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">#TKT-4810</span>
+<span class="font-caption text-caption text-on-surface-variant">2 saat önce</span>
+</div>
+<h3 class="font-body-md-bold text-body-md-bold text-on-surface mb-1 truncate">Ürün stok durumu hk.</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2">Sitenizdeki XY-200 model kulaklık ne zaman tekrar stoklara girer?</p>
+</div>
+<!-- Ticket Item 4 (Normal) -->
+<div class="p-3 border-b border-surface-container-high bg-surface-container-lowest hover:bg-surface-container/50 cursor-pointer border-l-4 border-l-transparent transition-colors">
+<div class="flex justify-between items-start mb-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">#TKT-4795</span>
+<span class="font-caption text-caption text-on-surface-variant">Dün, 16:30</span>
+</div>
+<h3 class="font-body-md-bold text-body-md-bold text-on-surface mb-1 truncate">İade süreci başlatma</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2">Geçen hafta aldığım ürünü iade etmek istiyorum, kargo kodunu alamadım.</p>
+</div>
+</div>
+</aside>
+<!-- Column 3: Chat Area -->
+<main class="flex-1 flex flex-col min-w-0 bg-surface-container-low">
+<!-- Top Bar -->
+<header class="h-16 border-b border-surface-container-high bg-surface-container-lowest flex items-center justify-between px-6 shrink-0">
+<div class="flex items-center gap-3">
+<span class="font-label-sm text-label-sm text-on-surface-variant">#TKT-4821</span>
+<div class="w-1 h-4 bg-surface-container-high"></div>
+<h1 class="font-headline-md text-headline-md text-on-surface truncate">Ödeme sayfası yüklenmiyor</h1>
+<span class="px-2 py-0.5 rounded-full bg-primary-container/10 text-primary-container font-label-sm text-label-sm whitespace-nowrap">Yüksek</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-on-surface hover:bg-surface-container rounded-DEFAULT transition-colors">
+<span class="material-symbols-outlined">person</span>
+</button>
+<button class="p-2 text-on-surface hover:bg-surface-container rounded-DEFAULT transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</header>
+<!-- Messages Area -->
+<div class="flex-1 overflow-y-auto p-6 space-y-6">
+<!-- Customer Message -->
+<div class="flex flex-col items-start max-w-[80%]">
+<div class="flex items-center gap-2 mb-1 px-1">
+<span class="font-label-sm text-label-sm text-on-surface">Elif Demir</span>
+<span class="font-caption text-caption text-on-surface-variant">10:42 AM</span>
+</div>
+<div class="bg-surface-container-lowest border border-surface-container-high p-4 rounded-DEFAULT rounded-tl-none">
+<p class="font-body-md text-body-md text-on-surface whitespace-pre-wrap">Merhaba,
+
+Sepetimdeki ürünleri satın almak için ödeme adımına geçiyorum. Kredi kartı bilgilerimi girip "Siparişi Tamamla" butonuna bastığımda sayfa sürekli yükleniyor durumunda kalıyor ve işlem tamamlanmıyor.
+
+Farklı bir tarayıcıdan ve bilgisayardan da denedim ama sonuç aynı. İndirim süresi bitmeden yardımcı olabilir misiniz? Ekran görüntüsü ektedir.</p>
+<!-- Attachment -->
+<div class="mt-3 flex items-center gap-2 p-2 border border-surface-container-high rounded-DEFAULT bg-surface-container-low max-w-sm">
+<span class="material-symbols-outlined text-on-surface-variant">image</span>
+<span class="font-caption text-caption text-on-surface truncate flex-1">hata_ekrani.png</span>
+<span class="font-caption text-caption text-on-surface-variant">1.2 MB</span>
+<button class="text-on-surface-variant hover:text-on-surface">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</button>
+</div>
+</div>
+</div>
+<!-- System Message / Timeline -->
+<div class="flex items-center justify-center gap-4 my-6">
+<div class="h-px bg-surface-container-high flex-1"></div>
+<span class="font-caption text-caption text-on-surface-variant px-2 bg-surface-container-low rounded-full">Bilet size atandı - 10:45 AM</span>
+<div class="h-px bg-surface-container-high flex-1"></div>
+</div>
+<!-- Agent Message -->
+<div class="flex flex-col items-end max-w-[80%] self-end ml-auto">
+<div class="flex items-center gap-2 mb-1 px-1">
+<span class="font-caption text-caption text-on-surface-variant">10:48 AM</span>
+<span class="font-label-sm text-label-sm text-on-surface">Sen (Destek Ekibi)</span>
+</div>
+<div class="bg-surface-container-lowest border border-surface-container-high p-4 rounded-DEFAULT rounded-tr-none">
+<p class="font-body-md text-body-md text-on-surface whitespace-pre-wrap">Merhaba Elif Hanım,
+
+Yaşadığınız sorun için özür dileriz. Teknik ekibimiz şu anda ödeme altyapısıyla ilgili anlık bir yavaşlama olduğunu tespit etti ve çözüm üzerinde çalışıyor.
+
+İndirim hakkınızı kaybetmemeniz için sepetinizi sistemimizde askıya aldım. Sorun çözüldüğünde size bu bilet üzerinden bilgi vereceğim ve işleminizi tamamlayabileceksiniz.
+
+Anlayışınız için teşekkür ederiz.</p>
+</div>
+</div>
+</div>
+<!-- Bottom Response Bar -->
+<div class="p-4 border-t border-surface-container-high bg-surface-container-lowest shrink-0">
+<div class="relative">
+<textarea class="w-full min-h-[80px] p-3 border-0 border-b border-surface-container-high bg-transparent focus:ring-0 focus:border-b-2 focus:border-primary-container text-body-md text-on-surface placeholder:text-on-surface-variant resize-none" placeholder="Yanıtınızı buraya yazın..."></textarea>
+<div class="flex justify-between items-center mt-2 px-1">
+<div class="flex gap-1 text-on-surface-variant">
+<button class="p-1.5 hover:bg-surface-container rounded-DEFAULT transition-colors" title="Dosya Ekle">
+<span class="material-symbols-outlined text-[20px]">attach_file</span>
+</button>
+<button class="p-1.5 hover:bg-surface-container rounded-DEFAULT transition-colors" title="Hazır Yanıtlar">
+<span class="material-symbols-outlined text-[20px]">library_books</span>
+</button>
+<div class="w-px h-5 bg-surface-container-high mx-1 self-center"></div>
+<button class="p-1.5 hover:bg-surface-container rounded-DEFAULT transition-colors font-body-md-bold text-[16px] leading-none">B</button>
+<button class="p-1.5 hover:bg-surface-container rounded-DEFAULT transition-colors italic font-body-md text-[16px] leading-none">I</button>
+</div>
+<div class="flex items-center gap-3">
+<button class="text-on-surface-variant font-label-sm text-label-sm hover:text-on-surface transition-colors">İptal</button>
+<button class="bg-primary-container text-on-primary rounded-DEFAULT px-4 py-2 font-label-sm text-label-sm flex items-center gap-2 hover:bg-primary transition-colors">
+                                Yanıtla
+                                <span class="material-symbols-outlined text-[16px]">send</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Column 4: Customer Context Drawer -->
+<aside class="w-[340px] h-full bg-surface-container-lowest border-l border-surface-container-high flex flex-col shrink-0 overflow-y-auto">
+<!-- Top Section: Profile -->
+<div class="p-6 text-center border-b border-surface-container-high">
+<div class="w-14 h-14 rounded-full bg-surface-container mx-auto mb-3 flex items-center justify-center">
+<span class="font-headline-md text-headline-md text-on-surface">ED</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Elif Demir</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-1">elif.demir@firma.com</p>
+<p class="font-body-md text-body-md text-on-surface-variant">Müşteri No: #C-2847</p>
+<div class="mt-4 flex gap-2 justify-center">
+<span class="px-2 py-1 rounded-DEFAULT bg-surface-container font-caption text-caption text-on-surface border border-surface-container-high">Premium</span>
+<span class="px-2 py-1 rounded-DEFAULT bg-surface-container font-caption text-caption text-on-surface border border-surface-container-high">Kurumsal</span>
+</div>
+</div>
+<!-- Section: Statistics -->
+<div class="p-6 border-b border-surface-container-high">
+<h4 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-4">İstatistikler</h4>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<p class="font-caption text-caption text-on-surface-variant mb-1">Toplam Bilet</p>
+<p class="font-headline-lg text-headline-lg text-on-surface">12</p>
+</div>
+<div>
+<p class="font-caption text-caption text-on-surface-variant mb-1">Ort. Çözüm</p>
+<p class="font-headline-lg text-headline-lg text-on-surface">4.2 saat</p>
+</div>
+</div>
+<!-- Sparkline Placeholder (CSS based) -->
+<div class="mt-4 h-8 w-full flex items-end gap-[2px]">
+<div class="w-full bg-surface-container h-[20%] rounded-t-[1px]"></div>
+<div class="w-full bg-surface-container h-[40%] rounded-t-[1px]"></div>
+<div class="w-full bg-surface-container h-[30%] rounded-t-[1px]"></div>
+<div class="w-full bg-surface-container h-[70%] rounded-t-[1px]"></div>
+<div class="w-full bg-surface-container h-[50%] rounded-t-[1px]"></div>
+<div class="w-full bg-surface-container h-[90%] rounded-t-[1px]"></div>
+<div class="w-full bg-primary-container h-[100%] rounded-t-[1px]"></div>
+</div>
+<p class="font-caption text-caption text-on-surface-variant mt-1 text-right">Son 30 gün aktivitesi</p>
+</div>
+<!-- Section: Ticket History -->
+<div class="p-6 border-b border-surface-container-high flex-1">
+<div class="flex justify-between items-center mb-4">
+<h4 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Bilet Geçmişi</h4>
+<button class="font-caption text-caption text-on-surface hover:text-primary-container transition-colors">Tümünü Gör</button>
+</div>
+<div class="space-y-4">
+<!-- History Item 1 -->
+<div class="group cursor-pointer">
+<div class="flex justify-between items-start mb-1">
+<h5 class="font-body-md-bold text-body-md-bold text-on-surface group-hover:text-primary-container transition-colors truncate pr-2">İade kargo kodu gelmedi</h5>
+<span class="font-caption text-caption text-on-surface-variant whitespace-nowrap">12 Eki</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-surface-container-highest"></span>
+<span class="font-caption text-caption text-on-surface-variant">Kapalı</span>
+</div>
+</div>
+<!-- History Item 2 -->
+<div class="group cursor-pointer">
+<div class="flex justify-between items-start mb-1">
+<h5 class="font-body-md-bold text-body-md-bold text-on-surface group-hover:text-primary-container transition-colors truncate pr-2">Fatura bilgisi güncelleme</h5>
+<span class="font-caption text-caption text-on-surface-variant whitespace-nowrap">05 Eyl</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-surface-container-highest"></span>
+<span class="font-caption text-caption text-on-surface-variant">Kapalı</span>
+</div>
+</div>
+<!-- History Item 3 -->
+<div class="group cursor-pointer">
+<div class="flex justify-between items-start mb-1">
+<h5 class="font-body-md-bold text-body-md-bold text-on-surface group-hover:text-primary-container transition-colors truncate pr-2">Eksik ürün teslimatı hk.</h5>
+<span class="font-caption text-caption text-on-surface-variant whitespace-nowrap">22 Ağu</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-surface-container-highest"></span>
+<span class="font-caption text-caption text-on-surface-variant">Kapalı</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Actions -->
+<div class="p-6 mt-auto">
+<div class="flex flex-col gap-2">
+<button class="w-full bg-surface-container-lowest text-on-surface border border-surface-container-high rounded-DEFAULT py-2 font-label-sm text-label-sm hover:bg-surface-container transition-colors">
+                        Bileti Kapat
+                    </button>
+<button class="w-full bg-surface-container-lowest text-primary-container border border-surface-container-high rounded-DEFAULT py-2 font-label-sm text-label-sm hover:bg-surface-container transition-colors">
+                        Üst Kademeye Aktar
+                    </button>
+</div>
+</div>
+</aside>
+</div>
+</body></html>

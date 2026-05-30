@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Customer Portal: Ticket History</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&amp;family=DM+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#f3f3f8",
+                        "inverse-on-surface": "#f0f0f5",
+                        "on-tertiary-fixed-variant": "#464747",
+                        "tertiary-fixed": "#e3e2e2",
+                        "on-secondary-fixed-variant": "#474646",
+                        "surface-tint": "#b91e0b",
+                        "secondary": "#5f5e5e",
+                        "inverse-surface": "#2f3034",
+                        "tertiary-container": "#545454",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed-dim": "#c7c6c6",
+                        "on-tertiary-fixed": "#1b1c1c",
+                        "secondary-fixed-dim": "#c8c6c5",
+                        "primary-fixed-dim": "#ffb4a7",
+                        "surface-container-lowest": "#ffffff",
+                        "surface": "#f9f9fe",
+                        "primary-fixed": "#ffdad4",
+                        "on-secondary-fixed": "#1c1b1b",
+                        "primary-container": "#aa1101",
+                        "surface-container": "#ededf2",
+                        "secondary-fixed": "#e5e2e1",
+                        "surface-container-high": "#e8e8ed",
+                        "outline-variant": "#e4beb7",
+                        "surface-dim": "#d9dade",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#e2e2e7",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#400200",
+                        "inverse-primary": "#ffb4a7",
+                        "on-surface": "#1a1c1f",
+                        "secondary-container": "#e5e2e1",
+                        "on-primary": "#ffffff",
+                        "outline": "#90706a",
+                        "on-error": "#ffffff",
+                        "on-primary-container": "#ffb8ab",
+                        "on-primary-fixed-variant": "#910b00",
+                        "on-secondary-container": "#656464",
+                        "on-surface-variant": "#5b403b",
+                        "on-error-container": "#93000a",
+                        "surface-bright": "#f9f9fe",
+                        "tertiary": "#3c3d3d",
+                        "on-tertiary-container": "#cac8c8",
+                        "on-background": "#1a1c1f",
+                        "surface-container-highest": "#e2e2e7",
+                        "primary": "#7f0900",
+                        "background": "#f9f9fe"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-page": "32px",
+                        "stack-lg": "24px",
+                        "gutter": "16px",
+                        "sidebar-width": "72px",
+                        "stack-sm": "4px",
+                        "base-unit": "8px",
+                        "stack-md": "12px"
+                    },
+                    "fontFamily": {
+                        "headline-xl": ["Outfit"],
+                        "body-md": ["DM Sans"],
+                        "body-md-bold": ["DM Sans"],
+                        "headline-lg": ["Outfit"],
+                        "headline-md": ["Outfit"],
+                        "caption": ["DM Sans"],
+                        "label-sm": ["DM Sans"],
+                        "body-lg": ["DM Sans"],
+                        "headline-sm": ["Outfit"]
+                    },
+                    "fontSize": {
+                        "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-md-bold": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "caption": ["11px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-sm": ["16px", { "lineHeight": "24px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background min-h-screen text-on-background flex">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-0 h-full w-[72px] bg-surface-container-lowest dark:bg-inverse-surface border-r border-surface-container-high dark:border-outline-variant flex flex-col items-center py-base-unit z-50">
+<div class="mb-8 mt-4">
+<span class="font-headline-sm text-headline-sm text-primary dark:text-primary-fixed">SH</span>
+</div>
+<div class="flex flex-col gap-6 w-full">
+<a class="flex justify-center w-full relative text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container dark:hover:bg-surface-variant transition-colors duration-200 ease-in-out py-2" href="#" title="Dashboard">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+</a>
+<a class="flex justify-center w-full relative text-primary dark:text-primary-fixed border-l-4 border-primary dark:border-primary-fixed py-2" href="#" title="Inbox">
+<span class="material-symbols-outlined" data-icon="inbox">inbox</span>
+</a>
+<a class="flex justify-center w-full relative text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container dark:hover:bg-surface-variant transition-colors duration-200 ease-in-out py-2" href="#" title="Analytics">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+</a>
+<a class="flex justify-center w-full relative text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container dark:hover:bg-surface-variant transition-colors duration-200 ease-in-out py-2" href="#" title="Customers">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+</a>
+<a class="flex justify-center w-full relative text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container dark:hover:bg-surface-variant transition-colors duration-200 ease-in-out py-2 mt-auto mb-4" href="#" title="Settings">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</a>
+</div>
+</nav>
+<!-- TopAppBar -->
+<header class="fixed top-0 right-0 w-[calc(100%-72px)] h-16 bg-surface-container-lowest dark:bg-inverse-surface border-b border-surface-container-high dark:border-outline-variant flex justify-between items-center px-margin-page z-40">
+<div class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">
+            SupportHub
+        </div>
+<div class="flex items-center gap-4">
+<button class="text-secondary dark:text-secondary-fixed-dim hover:text-primary dark:hover:text-primary-fixed transition-all duration-150">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-secondary dark:text-secondary-fixed-dim hover:text-primary dark:hover:text-primary-fixed transition-all duration-150">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+<div class="w-8 h-8 bg-surface-container-high rounded-full overflow-hidden ml-4">
+<img alt="Agent avatar" class="w-full h-full object-cover" data-alt="A professional headshot of a customer support agent. The agent is smiling slightly, facing forward in bright, high-key lighting. The background is a clean, neutral white to match a minimalist light-mode aesthetic. The color palette focuses on sharp clarity and neutral tones, conveying trust and efficiency." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCo4faoTLpj-ns780KOjl-ELRvbocslQrzCJO2l9rfPlwGHDLFYbc-DOoEsIVvcJWi7rgrL9UeXzbTkbw2zDpOdLtgiX3aaUS6oBYpk5Md-Ty9fHXXVNH3CN7v7dPbuMKSzLmH6Vux8cAvo_MZp0ZK6EoF5l0LDIqNuEBggC5kJgVLn3QpYCs879T4pzD4uEjflhEIeY_V0WN2UF31h94DmdZbEdL5ulYrm_Rs_lQIRVEdsjXwU5AYBCxQEOa0IRiadEHxkom2C7tU"/>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-[72px] mt-16 p-margin-page w-full max-w-7xl mx-auto">
+<div class="mb-stack-lg flex flex-col gap-stack-md">
+<h1 class="font-headline-xl text-headline-xl">Taleplerim</h1>
+<!-- Filters -->
+<div class="flex gap-6 border-b border-surface-container-high">
+<button class="pb-2 px-1 font-body-md-bold text-body-md-bold text-on-surface border-b-2 border-primary-container">
+                    Tümü
+                </button>
+<button class="pb-2 px-1 font-body-md-bold text-body-md-bold text-secondary hover:text-on-surface transition-colors">
+                    Açık
+                </button>
+<button class="pb-2 px-1 font-body-md-bold text-body-md-bold text-secondary hover:text-on-surface transition-colors">
+                    Kapalı
+                </button>
+</div>
+</div>
+<!-- Ticket List -->
+<div class="bg-surface-container-lowest border border-surface-container-high rounded-lg mb-stack-lg">
+<!-- Header Row -->
+<div class="grid grid-cols-12 gap-4 px-6 py-3 border-b border-surface-container-high bg-surface-container-low font-label-sm text-label-sm text-secondary uppercase tracking-wider">
+<div class="col-span-2">ID</div>
+<div class="col-span-6">Konu</div>
+<div class="col-span-2">Tarih</div>
+<div class="col-span-2">Durum</div>
+</div>
+<!-- Row 1 -->
+<div class="grid grid-cols-12 gap-4 px-6 items-center h-[64px] border-b border-surface-container-high hover:bg-surface-variant transition-colors group cursor-pointer">
+<div class="col-span-2 font-body-md text-body-md text-secondary group-hover:text-on-surface transition-colors">#TKT-4821</div>
+<div class="col-span-6 font-headline-sm text-headline-sm text-on-surface truncate">Ödeme sayfası yüklenmiyor</div>
+<div class="col-span-2 font-body-md text-body-md text-secondary">23 May 2026</div>
+<div class="col-span-2">
+<span class="inline-flex items-center justify-center px-3 py-1 rounded bg-surface-container text-primary-container font-label-sm text-label-sm">
+                        Açık
+                    </span>
+</div>
+</div>
+<!-- Row 2 -->
+<div class="grid grid-cols-12 gap-4 px-6 items-center h-[64px] border-b border-surface-container-high hover:bg-surface-variant transition-colors group cursor-pointer">
+<div class="col-span-2 font-body-md text-body-md text-secondary group-hover:text-on-surface transition-colors">#TKT-4820</div>
+<div class="col-span-6 font-headline-sm text-headline-sm text-on-surface truncate">Hesap silme talebi</div>
+<div class="col-span-2 font-body-md text-body-md text-secondary">21 May 2026</div>
+<div class="col-span-2">
+<span class="inline-flex items-center justify-center px-3 py-1 rounded bg-surface-container text-on-surface font-label-sm text-label-sm">
+                        Çözüldü
+                    </span>
+</div>
+</div>
+<!-- Row 3 -->
+<div class="grid grid-cols-12 gap-4 px-6 items-center h-[64px] border-b border-surface-container-high hover:bg-surface-variant transition-colors group cursor-pointer">
+<div class="col-span-2 font-body-md text-body-md text-secondary group-hover:text-on-surface transition-colors">#TKT-4815</div>
+<div class="col-span-6 font-headline-sm text-headline-sm text-on-surface truncate">API anahtarı yenileme sorunu</div>
+<div class="col-span-2 font-body-md text-body-md text-secondary">18 May 2026</div>
+<div class="col-span-2">
+<span class="inline-flex items-center justify-center px-3 py-1 rounded bg-surface-container text-secondary font-label-sm text-label-sm">
+                        Beklemede
+                    </span>
+</div>
+</div>
+<!-- Row 4 -->
+<div class="grid grid-cols-12 gap-4 px-6 items-center h-[64px] hover:bg-surface-variant transition-colors group cursor-pointer">
+<div class="col-span-2 font-body-md text-body-md text-secondary group-hover:text-on-surface transition-colors">#TKT-4812</div>
+<div class="col-span-6 font-headline-sm text-headline-sm text-on-surface truncate">Fatura adresi güncelleme</div>
+<div class="col-span-2 font-body-md text-body-md text-secondary">15 May 2026</div>
+<div class="col-span-2">
+<span class="inline-flex items-center justify-center px-3 py-1 rounded bg-surface-container text-on-surface font-label-sm text-label-sm">
+                        Çözüldü
+                    </span>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="flex justify-between items-center">
+<button class="px-4 py-2 bg-surface-container-lowest border border-surface-container-high text-on-surface font-body-md-bold text-body-md-bold rounded hover:bg-surface-variant transition-colors opacity-50 cursor-not-allowed" disabled="">
+                ← Önceki
+            </button>
+<div class="font-body-md text-body-md text-secondary">
+                Sayfa 1 / 12
+            </div>
+<button class="px-4 py-2 bg-surface-container-lowest border border-surface-container-high text-on-surface font-body-md-bold text-body-md-bold rounded hover:bg-surface-variant transition-colors">
+                Sonraki →
+            </button>
+</div>
+</main>
+</body></html>

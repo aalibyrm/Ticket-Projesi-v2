@@ -18,6 +18,7 @@ OpenTelemetry, OpenSearch ve gercek e-posta gonderimi uzerine kurulacaktir.
 - [Architecture Decision Log](docs/architecture/decision-log.md)
 - [Sprint Plan](docs/architecture/sprint-plan.md)
 - [Commit Policy](docs/architecture/commit-policy.md)
+- [Web Design Documentation](docs/design/README.md)
 - [Local Setup](docs/development/local-setup.md)
 - [Observability](docs/development/observability.md)
 - [Environment](docs/development/environment.md)
@@ -55,6 +56,10 @@ infra/
 docs/
   architecture/
   api/
+  design/
   development/
+FrontendTasarim/
+  design_kararlari/  Web UI karar dokumani
+  */                 Referans ekran HTML ve goruntuleri
 scripts/
 ```
