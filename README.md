@@ -24,6 +24,7 @@ OpenTelemetry, OpenSearch ve gercek e-posta gonderimi uzerine kurulacaktir.
 - [Environment](docs/development/environment.md)
 - [Service Conventions](docs/development/service-conventions.md)
 - [Backend Build](docs/development/backend-build.md)
+- [Frontend Stack](docs/development/frontend-stack.md)
 - [CI](docs/development/ci.md)
 
 ## Lokal Altyapi
@@ -41,7 +42,7 @@ docker compose --env-file .env -f infra/docker/docker-compose.yml up -d
 ```text
 apps/
   mobile/          React Native mobil istemci
-  web/             React web istemci
+  web/             React 18 + MUI v7 web istemci
 services/
   api-gateway/
   ticket-service/

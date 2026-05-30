@@ -41,3 +41,4 @@ kayitlar `docs/architecture/adr` altindadir.
 | ADR-0034 | Docker Compose profilleri | Minimal gelistirme ile observability dahil stack farkli kaynak ihtiyacina sahip | `local`, `dev` ve `full` profilleri ayni compose dosyasinda tutulur; secret'lar `.env` disinda versiyonlanmaz |
 | ADR-0035 | GitHub Actions kalite kapilari | PR'larda backend, frontend, compose ve guvenlik kontrolleri tekrar edilebilir olmali | Maven testleri, compose config, conditional frontend checks, secret scan ve dependency review workflow'a alinir |
 | ADR-0036 | Web design source of truth | Frontend scaffold tasarim netlesmeden baslamamali | `FrontendTasarim` artefact'lari ve `docs/design` dokumanlari web UI kararlarinin resmi kaynagi olur |
+| ADR-0037 | Web frontend tech stack | Kullanici React 18, MUI v7, React Router Framework, Redux ve TanStack Query tabanli kurumsal stack secti | #50 `apps/web` scaffold'i bu stack ile baslar; server-state TanStack Query, client-state Redux ile ayrilir |
