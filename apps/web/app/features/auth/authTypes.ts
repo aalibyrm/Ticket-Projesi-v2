@@ -2,6 +2,7 @@ export type AppRole = "CUSTOMER" | "AGENT" | "MANAGER" | "ADMIN";
 
 export interface AuthUser {
   displayName: string;
+  id: string;
   roles: AppRole[];
   username: string;
 }

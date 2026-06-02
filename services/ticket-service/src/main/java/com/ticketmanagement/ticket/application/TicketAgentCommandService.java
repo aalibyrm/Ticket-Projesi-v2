@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ticketmanagement.ticket.api.dto.AddExternalCommentRequest;
+import com.ticketmanagement.ticket.api.dto.AddInternalNoteRequest;
 import com.ticketmanagement.ticket.api.dto.AddWorklogRequest;
 import com.ticketmanagement.ticket.api.dto.AssignTicketRequest;
 import com.ticketmanagement.ticket.api.dto.ChangeTicketStatusRequest;
@@ -30,11 +31,13 @@ public class TicketAgentCommandService {
     private final TicketMapper ticketMapper;
     private final TicketOutboxService ticketOutboxService;
     private final TicketWorkflowPort ticketWorkflowPort;
+    private final TicketSupportAccessService ticketSupportAccessService;
 
     // Agent tarafindan ticket status bilgisini degistirir ve event uretir.
     @Transactional
-    public TicketResponse changeStatus(UUID actorId, UUID ticketId, ChangeTicketStatusRequest request) {
+    public TicketResponse changeStatus(SupportActorContext context, UUID ticketId, ChangeTicketStatusRequest request) {
         TicketEntity ticket = findTicketForUpdate(ticketId);
+        ticketSupportAccessService.assertCanManageTicket(ticket, context);
         TicketStatusTransition transition = ticketWorkflowPort.authorizeStatusTransition(
                 ticketId,
                 ticket.getStatus(),
@@ -43,7 +46,7 @@ public class TicketAgentCommandService {
         ticket.changeStatus(transition.newStatus());
         ticketOutboxService.saveTicketStatusChanged(
                 ticket,
-                actorId,
+                context.actorId(),
                 transition.previousStatus(),
                 transition.newStatus());
         return ticketMapper.toResponse(ticket);
@@ -51,41 +54,64 @@ public class TicketAgentCommandService {
 
     // Agent veya ekip atamasini ticket uzerinde gunceller ve event uretir.
     @Transactional
-    public TicketResponse assignTicket(UUID actorId, UUID ticketId, AssignTicketRequest request) {
+    public TicketResponse assignTicket(SupportActorContext context, UUID ticketId, AssignTicketRequest request) {
         TicketEntity ticket = findTicketForUpdate(ticketId);
+        ticketSupportAccessService.assertCanManageTicket(ticket, context);
 
         ticket.assignTo(request.assigneeId(), request.assignedTeamId());
-        ticketOutboxService.saveTicketAssigned(ticket, actorId);
+        ticketOutboxService.saveTicketAssigned(ticket, context.actorId());
         return ticketMapper.toResponse(ticket);
     }
 
     // Musterinin de gorebilecegi external yorumu ticket'a ekler ve event uretir.
     @Transactional
-    public TicketCommentResponse addExternalComment(UUID actorId, UUID ticketId, AddExternalCommentRequest request) {
+    public TicketCommentResponse addExternalComment(
+            SupportActorContext context,
+            UUID ticketId,
+            AddExternalCommentRequest request) {
         TicketEntity ticket = findTicketForUpdate(ticketId);
+        ticketSupportAccessService.assertCanManageTicket(ticket, context);
         TicketCommentEntity comment = ticketCommentRepository.save(TicketCommentEntity.external(
                 UUID.randomUUID(),
                 ticket,
-                actorId,
+                context.actorId(),
                 request.body().trim()));
 
-        ticketOutboxService.saveExternalCommentAdded(comment, actorId);
+        ticketOutboxService.saveExternalCommentAdded(comment, context.actorId());
+        return ticketMapper.toResponse(comment);
+    }
+
+    // Sadece support ekibinin gorecegi internal notu ticket'a ekler.
+    @Transactional
+    public TicketCommentResponse addInternalNote(
+            SupportActorContext context,
+            UUID ticketId,
+            AddInternalNoteRequest request) {
+        TicketEntity ticket = findTicketForUpdate(ticketId);
+        ticketSupportAccessService.assertCanManageTicket(ticket, context);
+        TicketCommentEntity comment = ticketCommentRepository.save(TicketCommentEntity.internal(
+                UUID.randomUUID(),
+                ticket,
+                context.actorId(),
+                request.body().trim()));
+
         return ticketMapper.toResponse(comment);
     }
 
     // Agent'in harcadigi sureyi worklog olarak kaydeder ve event uretir.
     @Transactional
-    public TicketWorklogResponse addWorklog(UUID actorId, UUID ticketId, AddWorklogRequest request) {
+    public TicketWorklogResponse addWorklog(SupportActorContext context, UUID ticketId, AddWorklogRequest request) {
         TicketEntity ticket = findTicketForUpdate(ticketId);
+        ticketSupportAccessService.assertCanManageTicket(ticket, context);
         TicketWorklogEntity worklog = ticketWorklogRepository.save(TicketWorklogEntity.create(
                 UUID.randomUUID(),
                 ticket,
-                actorId,
+                context.actorId(),
                 request.workDate(),
                 request.durationMinutes(),
                 request.description().trim()));
 
-        ticketOutboxService.saveWorklogAdded(worklog, actorId);
+        ticketOutboxService.saveWorklogAdded(worklog, context.actorId());
         return ticketMapper.toResponse(worklog);
     }
 

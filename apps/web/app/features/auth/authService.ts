@@ -44,12 +44,14 @@ function toAuthUser(tokenParsed: unknown): AuthUser {
     name?: string;
     preferred_username?: string;
     realm_access?: { roles?: string[] };
+    sub?: string;
   };
   const roles = token.realm_access?.roles?.filter(isAppRole) ?? [];
   const username = token.preferred_username ?? "unknown";
 
   return {
     displayName: token.name ?? username,
+    id: token.sub ?? username,
     roles,
     username,
   };

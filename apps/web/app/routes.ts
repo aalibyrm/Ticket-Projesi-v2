@@ -8,6 +8,7 @@ export default [
     route("tickets/:ticketId", "routes/ticket-detail.tsx"),
     route("notifications", "routes/notifications.tsx"),
     route("agent/inbox", "routes/agent-inbox.tsx"),
+    route("agent/tickets/:ticketId", "routes/agent-ticket-detail.tsx"),
     route("reports", "routes/reports.tsx"),
   ]),
 ] satisfies RouteConfig;

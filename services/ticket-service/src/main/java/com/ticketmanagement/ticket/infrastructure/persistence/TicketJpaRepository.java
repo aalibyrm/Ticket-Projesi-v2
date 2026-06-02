@@ -12,6 +12,12 @@ import org.springframework.data.repository.query.Param;
 
 public interface TicketJpaRepository extends JpaRepository<TicketEntity, UUID> {
 
+    List<TicketEntity> findAllByOrderByUpdatedAtDesc();
+
+    List<TicketEntity> findByAssigneeIdOrderByUpdatedAtDesc(UUID assigneeId);
+
+    List<TicketEntity> findByAssignedTeamIdInOrderByUpdatedAtDesc(List<UUID> assignedTeamIds);
+
     List<TicketEntity> findByCustomerIdOrderByCreatedAtDesc(UUID customerId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

@@ -1,0 +1,119 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  addAgentExternalComment,
+  addAgentInternalNote,
+  addAgentWorklog,
+  assignAgentTicket,
+  changeAgentTicketStatus,
+  createAgentAttachmentDownloadUrl,
+  getAgentTicket,
+  listAgentTicketComments,
+  listAgentTickets,
+  listAgentWorklogs,
+} from "~/features/agent/agentApi";
+import type {
+  AddWorklogRequest,
+  AssignTicketRequest,
+  ChangeTicketStatusRequest,
+} from "~/features/agent/agentTypes";
+
+export const agentQueryKeys = {
+  comments: (ticketId: string) => ["agent", "ticket", ticketId, "comments"] as const,
+  ticket: (ticketId: string) => ["agent", "ticket", ticketId] as const,
+  tickets: ["agent", "tickets"] as const,
+  worklogs: (ticketId: string) => ["agent", "ticket", ticketId, "worklogs"] as const,
+};
+
+export function useAgentTickets() {
+  return useQuery({
+    queryFn: listAgentTickets,
+    queryKey: agentQueryKeys.tickets,
+  });
+}
+
+export function useAgentTicket(ticketId: string) {
+  return useQuery({
+    enabled: Boolean(ticketId),
+    queryFn: () => getAgentTicket(ticketId),
+    queryKey: agentQueryKeys.ticket(ticketId),
+  });
+}
+
+export function useAgentTicketComments(ticketId: string) {
+  return useQuery({
+    enabled: Boolean(ticketId),
+    queryFn: () => listAgentTicketComments(ticketId),
+    queryKey: agentQueryKeys.comments(ticketId),
+  });
+}
+
+export function useAgentWorklogs(ticketId: string) {
+  return useQuery({
+    enabled: Boolean(ticketId),
+    queryFn: () => listAgentWorklogs(ticketId),
+    queryKey: agentQueryKeys.worklogs(ticketId),
+  });
+}
+
+export function useAddAgentExternalComment(ticketId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: string) => addAgentExternalComment(ticketId, body),
+    onSuccess: () => invalidateTicketWorkspace(queryClient, ticketId),
+  });
+}
+
+export function useAddAgentInternalNote(ticketId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: string) => addAgentInternalNote(ticketId, body),
+    onSuccess: () => invalidateTicketWorkspace(queryClient, ticketId),
+  });
+}
+
+export function useAddAgentWorklog(ticketId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (request: AddWorklogRequest) => addAgentWorklog(ticketId, request),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: agentQueryKeys.worklogs(ticketId) });
+      void queryClient.invalidateQueries({ queryKey: agentQueryKeys.tickets });
+    },
+  });
+}
+
+export function useChangeAgentTicketStatus(ticketId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (request: ChangeTicketStatusRequest) => changeAgentTicketStatus(ticketId, request),
+    onSuccess: () => invalidateTicketWorkspace(queryClient, ticketId),
+  });
+}
+
+export function useAssignAgentTicket(ticketId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (request: AssignTicketRequest) => assignAgentTicket(ticketId, request),
+    onSuccess: () => invalidateTicketWorkspace(queryClient, ticketId),
+  });
+}
+
+export function useAgentAttachmentDownloadUrl() {
+  return useMutation({
+    mutationFn: (fileId: string) => createAgentAttachmentDownloadUrl(fileId),
+  });
+}
+
+function invalidateTicketWorkspace(
+  queryClient: ReturnType<typeof useQueryClient>,
+  ticketId: string,
+) {
+  void queryClient.invalidateQueries({ queryKey: agentQueryKeys.comments(ticketId) });
+  void queryClient.invalidateQueries({ queryKey: agentQueryKeys.ticket(ticketId) });
+  void queryClient.invalidateQueries({ queryKey: agentQueryKeys.tickets });
+}

@@ -56,6 +56,16 @@ public class TicketCommentEntity {
         return comment;
     }
 
+    public static TicketCommentEntity internal(UUID id, TicketEntity ticket, UUID authorId, String body) {
+        TicketCommentEntity comment = new TicketCommentEntity();
+        comment.id = id;
+        comment.ticket = ticket;
+        comment.authorId = authorId;
+        comment.visibility = TicketCommentVisibility.INTERNAL;
+        comment.body = body;
+        return comment;
+    }
+
     @PrePersist
     void prePersist() {
         createdAt = OffsetDateTime.now();

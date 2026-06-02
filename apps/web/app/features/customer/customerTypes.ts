@@ -43,7 +43,17 @@ export interface TicketCommentResponse {
   createdAt: string;
   id: string;
   ticketId: string;
-  visibility: "EXTERNAL";
+  visibility: "EXTERNAL" | "INTERNAL";
+}
+
+export interface TicketWorklogResponse {
+  agentId: string;
+  createdAt: string;
+  description: string;
+  durationMinutes: number;
+  id: string;
+  ticketId: string;
+  workDate: string;
 }
 
 export interface CreateTicketRequest {

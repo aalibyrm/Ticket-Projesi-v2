@@ -38,6 +38,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.ticketmanagement.ticket.api.dto.AddExternalCommentRequest;
+import com.ticketmanagement.ticket.api.dto.AddInternalNoteRequest;
 import com.ticketmanagement.ticket.api.dto.AddWorklogRequest;
 import com.ticketmanagement.ticket.api.dto.AssignTicketRequest;
 import com.ticketmanagement.ticket.api.dto.ChangeTicketStatusRequest;
@@ -241,9 +242,22 @@ class TicketApiIntegrationTests {
     @Test
     void agentActionsCreateVersionedOutboxEvents() {
         UUID customerId = UUID.randomUUID();
+        UUID adminId = UUID.randomUUID();
         UUID agentId = UUID.randomUUID();
         UUID teamId = UUID.randomUUID();
         TicketResponse created = createTicket(customerId);
+
+        ResponseEntity<TicketResponse> assignmentResponse = restTemplate.exchange(
+                "/api/agent/tickets/{id}/assignment",
+                HttpMethod.PATCH,
+                new HttpEntity<>(new AssignTicketRequest(agentId, teamId), supportHeaders(adminId, "ADMIN")),
+                TicketResponse.class,
+                created.id());
+
+        assertThat(assignmentResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(assignmentResponse.getBody()).isNotNull();
+        assertThat(assignmentResponse.getBody().assigneeId()).isEqualTo(agentId);
+        assertThat(assignmentResponse.getBody().assignedTeamId()).isEqualTo(teamId);
 
         ResponseEntity<TicketResponse> statusResponse = restTemplate.exchange(
                 "/api/agent/tickets/{id}/status",
@@ -255,18 +269,6 @@ class TicketApiIntegrationTests {
         assertThat(statusResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(statusResponse.getBody()).isNotNull();
         assertThat(statusResponse.getBody().status()).isEqualTo(TicketStatus.IN_PROGRESS);
-
-        ResponseEntity<TicketResponse> assignmentResponse = restTemplate.exchange(
-                "/api/agent/tickets/{id}/assignment",
-                HttpMethod.PATCH,
-                new HttpEntity<>(new AssignTicketRequest(agentId, teamId), actorHeaders(agentId)),
-                TicketResponse.class,
-                created.id());
-
-        assertThat(assignmentResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(assignmentResponse.getBody()).isNotNull();
-        assertThat(assignmentResponse.getBody().assigneeId()).isEqualTo(agentId);
-        assertThat(assignmentResponse.getBody().assignedTeamId()).isEqualTo(teamId);
 
         ResponseEntity<TicketCommentResponse> commentResponse = restTemplate.exchange(
                 "/api/agent/tickets/{id}/comments/external",
@@ -310,10 +312,118 @@ class TicketApiIntegrationTests {
     }
 
     @Test
+    void agentReadsAssignedQueueConversationWorklogsAndAttachments() {
+        UUID customerId = UUID.randomUUID();
+        UUID adminId = UUID.randomUUID();
+        UUID agentId = UUID.randomUUID();
+        UUID teamId = UUID.randomUUID();
+        UUID teamMemberId = UUID.randomUUID();
+        TicketResponse created = createTicket(customerId);
+        TicketAttachmentResponse attachment = attachmentFor(created.id());
+
+        ResponseEntity<TicketResponse> assignmentResponse = restTemplate.exchange(
+                "/api/agent/tickets/{id}/assignment",
+                HttpMethod.PATCH,
+                new HttpEntity<>(new AssignTicketRequest(agentId, teamId), supportHeaders(adminId, "ADMIN")),
+                TicketResponse.class,
+                created.id());
+        assertThat(assignmentResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        when(ticketAttachmentPort.listAttachments(eq(created.id()), any(AttachmentLookupContext.class)))
+                .thenReturn(List.of(attachment));
+
+        ResponseEntity<TicketCommentResponse> externalComment = restTemplate.exchange(
+                "/api/agent/tickets/{id}/comments/external",
+                HttpMethod.POST,
+                new HttpEntity<>(new AddExternalCommentRequest("Customer-visible response."), actorHeaders(agentId)),
+                TicketCommentResponse.class,
+                created.id());
+        ResponseEntity<TicketCommentResponse> internalNote = restTemplate.exchange(
+                "/api/agent/tickets/{id}/comments/internal",
+                HttpMethod.POST,
+                new HttpEntity<>(new AddInternalNoteRequest("Internal triage note."), actorHeaders(agentId)),
+                TicketCommentResponse.class,
+                created.id());
+        ResponseEntity<TicketWorklogResponse> worklog = restTemplate.exchange(
+                "/api/agent/tickets/{id}/worklogs",
+                HttpMethod.POST,
+                new HttpEntity<>(new AddWorklogRequest(
+                        LocalDate.parse("2026-05-27"),
+                        30,
+                        "Reviewed payment logs."),
+                        actorHeaders(agentId)),
+                TicketWorklogResponse.class,
+                created.id());
+
+        assertThat(externalComment.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(internalNote.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(worklog.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        ResponseEntity<java.util.List<TicketResponse>> queueResponse = restTemplate.exchange(
+                "/api/agent/tickets",
+                HttpMethod.GET,
+                new HttpEntity<>(actorHeaders(agentId)),
+                new ParameterizedTypeReference<>() {
+                });
+        assertThat(queueResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(queueResponse.getBody()).extracting(TicketResponse::id).contains(created.id());
+
+        ResponseEntity<java.util.List<TicketResponse>> teamQueueResponse = restTemplate.exchange(
+                "/api/agent/tickets",
+                HttpMethod.GET,
+                new HttpEntity<>(supportHeaders(teamMemberId, List.of(teamId), "AGENT")),
+                new ParameterizedTypeReference<>() {
+                });
+        assertThat(teamQueueResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(teamQueueResponse.getBody()).extracting(TicketResponse::id).contains(created.id());
+
+        ResponseEntity<TicketResponse> detailResponse = restTemplate.exchange(
+                "/api/agent/tickets/{id}",
+                HttpMethod.GET,
+                new HttpEntity<>(actorHeaders(agentId)),
+                TicketResponse.class,
+                created.id());
+        assertThat(detailResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(detailResponse.getBody()).isNotNull();
+        assertThat(detailResponse.getBody().attachments()).containsExactly(attachment);
+
+        ResponseEntity<java.util.List<TicketCommentResponse>> commentsResponse = restTemplate.exchange(
+                "/api/agent/tickets/{id}/comments",
+                HttpMethod.GET,
+                new HttpEntity<>(actorHeaders(agentId)),
+                new ParameterizedTypeReference<>() {
+                },
+                created.id());
+        assertThat(commentsResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(commentsResponse.getBody())
+                .extracting(comment -> comment.visibility().name())
+                .containsExactly("EXTERNAL", "INTERNAL");
+
+        ResponseEntity<java.util.List<TicketWorklogResponse>> worklogsResponse = restTemplate.exchange(
+                "/api/agent/tickets/{id}/worklogs",
+                HttpMethod.GET,
+                new HttpEntity<>(actorHeaders(agentId)),
+                new ParameterizedTypeReference<>() {
+                },
+                created.id());
+        assertThat(worklogsResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(worklogsResponse.getBody()).extracting(TicketWorklogResponse::durationMinutes).containsExactly(30);
+    }
+
+    @Test
     void invalidStatusTransitionIsRejectedWithoutStatusEvent() {
         UUID customerId = UUID.randomUUID();
+        UUID adminId = UUID.randomUUID();
         UUID agentId = UUID.randomUUID();
         TicketResponse created = createTicket(customerId);
+
+        ResponseEntity<TicketResponse> assignmentResponse = restTemplate.exchange(
+                "/api/agent/tickets/{id}/assignment",
+                HttpMethod.PATCH,
+                new HttpEntity<>(new AssignTicketRequest(agentId, null), supportHeaders(adminId, "ADMIN")),
+                TicketResponse.class,
+                created.id());
+        assertThat(assignmentResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         ResponseEntity<ApiErrorResponse> response = restTemplate.exchange(
                 "/api/agent/tickets/{id}/status",
@@ -327,7 +437,7 @@ class TicketApiIntegrationTests {
         assertThat(response.getBody().errorCode()).isEqualTo("INVALID_TICKET_OPERATION");
         assertThat(response.getBody().message()).contains("NEW -> CLOSED");
         assertThat(ticketStatusFor(created.id())).isEqualTo("NEW");
-        assertThat(outboxCountFor(created.id())).isEqualTo(1);
+        assertThat(outboxCountFor(created.id())).isEqualTo(2);
     }
 
     @Test
@@ -529,6 +639,21 @@ class TicketApiIntegrationTests {
     private static HttpHeaders actorHeaders(UUID actorId) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Actor-Id", actorId.toString());
+        return headers;
+    }
+
+    private static HttpHeaders supportHeaders(UUID actorId, String... roles) {
+        return supportHeaders(actorId, List.of(), roles);
+    }
+
+    private static HttpHeaders supportHeaders(UUID actorId, List<UUID> teamIds, String... roles) {
+        HttpHeaders headers = actorHeaders(actorId);
+        headers.set("X-Actor-Roles", String.join(",", roles));
+        if (!teamIds.isEmpty()) {
+            headers.set("X-Actor-Team-Ids", teamIds.stream()
+                    .map(UUID::toString)
+                    .collect(java.util.stream.Collectors.joining(",")));
+        }
         return headers;
     }
 }

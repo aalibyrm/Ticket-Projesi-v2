@@ -28,9 +28,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketmanagement.ticket.api.dto.AddExternalCommentRequest;
+import com.ticketmanagement.ticket.api.dto.AddInternalNoteRequest;
 import com.ticketmanagement.ticket.api.dto.AssignTicketRequest;
+import com.ticketmanagement.ticket.api.dto.ChangeTicketStatusRequest;
 import com.ticketmanagement.ticket.api.dto.CreateTicketRequest;
 import com.ticketmanagement.ticket.domain.TicketPriority;
+import com.ticketmanagement.ticket.domain.TicketStatus;
 import com.ticketmanagement.ticket.infrastructure.persistence.ProductJpaRepository;
 
 @SpringBootTest(properties = "app.security.jwt.enabled=true")
@@ -173,9 +176,10 @@ class TicketSecurityIntegrationTests {
     void assignedAgentCanAccessTicketAttachments() throws Exception {
         UUID ownerCustomerId = UUID.randomUUID();
         UUID agentId = UUID.randomUUID();
+        UUID adminId = UUID.randomUUID();
         UUID ticketId = createTicketFor(ownerCustomerId);
 
-        assignTicketTo(ticketId, agentId, null, agentId);
+        assignTicketTo(ticketId, agentId, null, adminId);
 
         mockMvc.perform(get("/internal/tickets/{id}/attachment-access", ticketId)
                         .with(jwtWithRoles(agentId, "AGENT")))
@@ -192,15 +196,54 @@ class TicketSecurityIntegrationTests {
         UUID assignedAgentId = UUID.randomUUID();
         UUID teamMemberId = UUID.randomUUID();
         UUID teamId = UUID.randomUUID();
+        UUID adminId = UUID.randomUUID();
         UUID ticketId = createTicketFor(ownerCustomerId);
 
-        assignTicketTo(ticketId, assignedAgentId, teamId, assignedAgentId);
+        assignTicketTo(ticketId, assignedAgentId, teamId, adminId);
 
         mockMvc.perform(get("/internal/tickets/{id}/attachment-access", ticketId)
                         .with(jwtWithRolesAndTeams(teamMemberId, List.of(teamId), "AGENT")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.ticketId").value(ticketId.toString()))
                 .andExpect(jsonPath("$.actorId").value(teamMemberId.toString()));
+    }
+
+    @Test
+    void rejectsCustomerRoleOnAgentTicketEndpoints() throws Exception {
+        mockMvc.perform(get("/api/agent/tickets")
+                        .with(jwtWithRoles(UUID.randomUUID(), "CUSTOMER")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+    }
+
+    @Test
+    void rejectsUnassignedAgentAccessToAssignedTicketWithJwt() throws Exception {
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID assignedAgentId = UUID.randomUUID();
+        UUID otherAgentId = UUID.randomUUID();
+        UUID adminId = UUID.randomUUID();
+        UUID ticketId = createTicketFor(ownerCustomerId);
+
+        assignTicketTo(ticketId, assignedAgentId, null, adminId);
+
+        mockMvc.perform(get("/api/agent/tickets/{id}", ticketId)
+                        .with(jwtWithRoles(otherAgentId, "AGENT")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+
+        mockMvc.perform(post("/api/agent/tickets/{id}/comments/internal", ticketId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new AddInternalNoteRequest("Cross access note.")))
+                        .with(jwtWithRoles(otherAgentId, "AGENT")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+
+        mockMvc.perform(patch("/api/agent/tickets/{id}/status", ticketId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new ChangeTicketStatusRequest(TicketStatus.IN_PROGRESS)))
+                        .with(jwtWithRoles(otherAgentId, "AGENT")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
     }
 
     private UUID createTicketFor(UUID customerId) throws Exception {
@@ -228,7 +271,7 @@ class TicketSecurityIntegrationTests {
         mockMvc.perform(patch("/api/agent/tickets/{id}/assignment", ticketId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
-                        .with(jwtWithRoles(actorId, "AGENT")))
+                        .with(jwtWithRoles(actorId, "ADMIN")))
                 .andExpect(status().isOk());
     }
 
