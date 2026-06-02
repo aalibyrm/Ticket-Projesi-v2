@@ -33,7 +33,21 @@ describe("ManagerReportsPage", () => {
             { count: 5, status: "NEW" },
             { count: 7, status: "IN_PROGRESS" },
           ],
+          departmentCounts: [
+            {
+              count: 9,
+              routedDepartmentCode: "APPLICATION_SUPPORT",
+              routedDepartmentId: "10000000-0000-0000-0000-000000000002",
+              routedDepartmentName: "Application Support",
+            },
+          ],
           generatedAt: "2026-06-02T08:00:00Z",
+          teamCounts: [
+            {
+              assignedTeamId: "20000000-0000-0000-0000-000000000003",
+              count: 9,
+            },
+          ],
           totalOpenTickets: 12,
         }),
       ),
@@ -95,6 +109,9 @@ describe("ManagerReportsPage", () => {
     await waitFor(() => expect(screen.getByText("Yonetici raporu")).toBeInTheDocument());
     expect(screen.getByText("Kapanis hacmi")).toBeInTheDocument();
     expect(screen.getByText("Status dagilimi")).toBeInTheDocument();
+    expect(screen.getByText("Department dagilimi")).toBeInTheDocument();
+    expect(screen.getByText("Application Support")).toBeInTheDocument();
+    expect(screen.getByText("Team dagilimi")).toBeInTheDocument();
     expect(screen.getByText("SLA dagilimi")).toBeInTheDocument();
     expect(screen.getByText("Agent performansi")).toBeInTheDocument();
     expect(screen.getAllByText("90.5%")).not.toHaveLength(0);

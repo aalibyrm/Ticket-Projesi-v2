@@ -34,7 +34,7 @@ class ReportController {
 
     private final ReportingQueryService reportingQueryService;
 
-    // Manager dashboard icin acik ticket status dagilimini dondurur.
+    // Manager dashboard icin acik ticket status ve organization dagilimini dondurur.
     @GetMapping("/tickets/status-distribution")
     TicketStatusDistributionResponse getOpenTicketStatusDistribution(@AuthenticationPrincipal Jwt jwt) {
         ensureReportViewerRole(jwt);

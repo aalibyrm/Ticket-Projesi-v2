@@ -36,7 +36,7 @@ public class ReportingQueryService {
     private final AgentPerformanceReportJdbcRepository agentPerformanceReportRepository;
     private final SlaComplianceReportJdbcRepository slaComplianceReportRepository;
 
-    // Acik ticket sayilarini status bazinda stabil sirayla raporlar.
+    // Acik ticket sayilarini status, department ve team kirilimlariyla raporlar.
     @Transactional(readOnly = true)
     public TicketStatusDistributionReport getOpenTicketStatusDistribution() {
         Map<ProjectionTicketStatus, Long> countsByStatus = new EnumMap<>(ProjectionTicketStatus.class);
@@ -51,7 +51,12 @@ public class ReportingQueryService {
                 .mapToLong(TicketStatusCount::count)
                 .sum();
 
-        return new TicketStatusDistributionReport(counts, totalOpenTickets, OffsetDateTime.now(ZoneOffset.UTC));
+        return new TicketStatusDistributionReport(
+                counts,
+                ticketReportProjectionRepository.countOpenTicketsByRoutedDepartment(ProjectionTicketStatus.CLOSED),
+                ticketReportProjectionRepository.countOpenTicketsByAssignedTeam(ProjectionTicketStatus.CLOSED),
+                totalOpenTickets,
+                OffsetDateTime.now(ZoneOffset.UTC));
     }
 
     // Kapali ticket raporunu tarih araligi, gunluk dagilim ve priority kirilimiyla dondurur.

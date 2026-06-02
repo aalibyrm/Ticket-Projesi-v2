@@ -338,9 +338,19 @@ function ClosedTicketsPanel({ report }: { report: ClosedTicketDateRangeResponse 
 }
 
 function StatusDistributionPanel({ report }: { report: TicketStatusDistributionResponse }) {
+  const departmentCounts = report.departmentCounts ?? [];
+  const teamCounts = report.teamCounts ?? [];
   const maxStatusCount = useMemo(
     () => maxValue(report.counts.map((item) => item.count)),
     [report.counts],
+  );
+  const maxDepartmentCount = useMemo(
+    () => maxValue(departmentCounts.map((item) => item.count)),
+    [departmentCounts],
+  );
+  const maxTeamCount = useMemo(
+    () => maxValue(teamCounts.map((item) => item.count)),
+    [teamCounts],
   );
 
   return (
@@ -360,6 +370,32 @@ function StatusDistributionPanel({ report }: { report: TicketStatusDistributionR
         ))}
         {report.counts.length === 0 && (
           <Typography color="text.secondary">Status verisi yok.</Typography>
+        )}
+        <Divider />
+        <Typography variant="h6">Department dagilimi</Typography>
+        {departmentCounts.map((item) => (
+          <MetricProgressRow
+            key={item.routedDepartmentId}
+            label={item.routedDepartmentName ?? item.routedDepartmentCode ?? shortId(item.routedDepartmentId)}
+            progress={progressValue(item.count, maxDepartmentCount)}
+            value={`${item.count} ticket`}
+          />
+        ))}
+        {departmentCounts.length === 0 && (
+          <Typography color="text.secondary">Department verisi yok.</Typography>
+        )}
+        <Divider />
+        <Typography variant="h6">Team dagilimi</Typography>
+        {teamCounts.map((item) => (
+          <MetricProgressRow
+            key={item.assignedTeamId}
+            label={shortId(item.assignedTeamId)}
+            progress={progressValue(item.count, maxTeamCount)}
+            value={`${item.count} ticket`}
+          />
+        ))}
+        {teamCounts.length === 0 && (
+          <Typography color="text.secondary">Team verisi yok.</Typography>
         )}
       </Stack>
     </Paper>

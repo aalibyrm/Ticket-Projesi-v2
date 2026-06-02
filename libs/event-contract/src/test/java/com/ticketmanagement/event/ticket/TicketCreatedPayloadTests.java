@@ -31,6 +31,33 @@ class TicketCreatedPayloadTests {
     }
 
     @Test
+    void createsOrganizationAwareTicketCreatedPayload() {
+        UUID ticketId = UUID.randomUUID();
+        UUID customerId = UUID.randomUUID();
+        UUID productId = UUID.randomUUID();
+        UUID departmentId = UUID.randomUUID();
+
+        TicketCreatedPayload payload = new TicketCreatedPayload(
+                ticketId,
+                "TCK-1001",
+                customerId,
+                productId,
+                " WEB_PORTAL_BUG ",
+                "Web Portal Bug",
+                departmentId,
+                "APPLICATION_SUPPORT",
+                "Application Support",
+                "MEDIUM",
+                "NEW");
+
+        assertEquals("WEB_PORTAL_BUG", payload.topicCode());
+        assertEquals("Web Portal Bug", payload.topicName());
+        assertEquals(departmentId, payload.routedDepartmentId());
+        assertEquals("APPLICATION_SUPPORT", payload.routedDepartmentCode());
+        assertEquals("Application Support", payload.routedDepartmentName());
+    }
+
+    @Test
     void rejectsBlankRequiredTextFields() {
         UUID id = UUID.randomUUID();
 

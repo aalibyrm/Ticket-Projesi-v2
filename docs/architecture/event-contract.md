@@ -90,8 +90,16 @@ minimum alani tasir:
 - `ticketNumber`
 - `customerId`
 - `productId`
+- `topicCode` (opsiyonel; #65 sonrasi yeni eventlerde doludur)
+- `topicName` (opsiyonel)
+- `routedDepartmentId` (opsiyonel; #65 sonrasi yeni eventlerde doludur)
+- `routedDepartmentCode` (opsiyonel)
+- `routedDepartmentName` (opsiyonel)
 - `priority`
 - `status`
+
+Organization alanlari backward-compatible olarak eklenmistir. Eski v1 eventleri
+bu alanlari tasimayabilir; consumer'lar null degeri desteklemelidir.
 
 Ticket `summary` ve `description` event payload'ina koyulmaz. Bu alanlar
 kullanici tarafindan yazildigi icin PII veya hassas veri icerebilir.

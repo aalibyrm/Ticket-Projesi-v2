@@ -39,6 +39,20 @@ public class TicketReportProjectionEntity {
     @Column(nullable = false)
     private UUID productId;
 
+    @Column(length = 80)
+    private String topicCode;
+
+    @Column(length = 160)
+    private String topicName;
+
+    private UUID routedDepartmentId;
+
+    @Column(length = 80)
+    private String routedDepartmentCode;
+
+    @Column(length = 160)
+    private String routedDepartmentName;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private ProjectionPriority priority;
@@ -84,6 +98,11 @@ public class TicketReportProjectionEntity {
         ticketNumber = command.ticketNumber().trim();
         customerId = command.customerId();
         productId = command.productId();
+        topicCode = command.topicCode();
+        topicName = command.topicName();
+        routedDepartmentId = command.routedDepartmentId();
+        routedDepartmentCode = command.routedDepartmentCode();
+        routedDepartmentName = command.routedDepartmentName();
         priority = command.priority();
         status = command.status();
         assigneeId = command.assigneeId();
@@ -97,7 +116,10 @@ public class TicketReportProjectionEntity {
     }
 
     public void updateAssignment(UUID assigneeId, UUID assignedTeamId, OffsetDateTime updatedAt) {
-        this.assigneeId = Objects.requireNonNull(assigneeId, "assigneeId must not be null");
+        if (assigneeId == null && assignedTeamId == null) {
+            throw new IllegalArgumentException("assigneeId or assignedTeamId must be provided");
+        }
+        this.assigneeId = assigneeId;
         this.assignedTeamId = assignedTeamId;
         this.updatedAt = utc(updatedAt);
         projectedAt = OffsetDateTime.now(ZoneOffset.UTC);

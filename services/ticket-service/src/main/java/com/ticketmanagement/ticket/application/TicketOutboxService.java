@@ -17,10 +17,12 @@ import com.ticketmanagement.event.ticket.TicketAssignedPayload;
 import com.ticketmanagement.event.ticket.TicketCreatedPayload;
 import com.ticketmanagement.event.ticket.TicketStatusChangedPayload;
 import com.ticketmanagement.event.ticket.WorklogAddedPayload;
+import com.ticketmanagement.ticket.infrastructure.persistence.DepartmentEntity;
 import com.ticketmanagement.ticket.infrastructure.outbox.OutboxEventEntity;
 import com.ticketmanagement.ticket.infrastructure.outbox.OutboxEventJpaRepository;
 import com.ticketmanagement.ticket.infrastructure.persistence.TicketCommentEntity;
 import com.ticketmanagement.ticket.infrastructure.persistence.TicketEntity;
+import com.ticketmanagement.ticket.infrastructure.persistence.TicketTopicEntity;
 import com.ticketmanagement.ticket.infrastructure.persistence.TicketWorklogEntity;
 import com.ticketmanagement.ticket.domain.TicketStatus;
 
@@ -34,11 +36,18 @@ public class TicketOutboxService {
     // Yeni ticket olusturma eventini mevcut transaction icinde outbox'a kaydeder.
     @Transactional(propagation = Propagation.MANDATORY)
     public void saveTicketCreated(TicketEntity ticket, UUID actorId) {
+        TicketTopicEntity topic = ticket.getTopic();
+        DepartmentEntity routedDepartment = ticket.getRoutedDepartment();
         TicketCreatedPayload payload = new TicketCreatedPayload(
                 ticket.getId(),
                 ticket.getTicketNumber(),
                 ticket.getCustomerId(),
                 ticket.getProduct().getId(),
+                topic == null ? null : topic.getCode(),
+                topic == null ? null : topic.getName(),
+                routedDepartment == null ? null : routedDepartment.getId(),
+                routedDepartment == null ? null : routedDepartment.getCode(),
+                routedDepartment == null ? null : routedDepartment.getName(),
                 ticket.getPriority().name(),
                 ticket.getStatus().name());
         EventEnvelope<TicketCreatedPayload> envelope = EventEnvelope.of(

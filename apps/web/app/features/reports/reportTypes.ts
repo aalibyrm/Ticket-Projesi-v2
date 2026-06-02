@@ -5,9 +5,23 @@ export interface TicketStatusCountResponse {
   status: string;
 }
 
+export interface DepartmentTicketCountResponse {
+  count: number;
+  routedDepartmentCode?: string | null;
+  routedDepartmentId: string;
+  routedDepartmentName?: string | null;
+}
+
+export interface TeamTicketCountResponse {
+  assignedTeamId: string;
+  count: number;
+}
+
 export interface TicketStatusDistributionResponse {
   counts: TicketStatusCountResponse[];
+  departmentCounts: DepartmentTicketCountResponse[];
   generatedAt: string;
+  teamCounts: TeamTicketCountResponse[];
   totalOpenTickets: number;
 }
 

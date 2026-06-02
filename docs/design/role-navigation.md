@@ -70,4 +70,7 @@ Frontend role checks are duplicated for UX only. Backend remains authoritative:
 - Attachment access is authorized by `ticket-service` before `file-service`
   creates upload/download URLs.
 - Manager report access is enforced by `reporting-service`.
+- Manager reports may show routed department and assigned team breakdowns, but
+  this is aggregate visibility only; ticket-level authorization remains owned by
+  `ticket-service`.
 - Admin-only settings remain backend-protected.

@@ -31,6 +31,11 @@ import com.ticketmanagement.reporting.domain.ProjectionTicketStatus;
 @Testcontainers(disabledWithoutDocker = true)
 class ReportingStatusDistributionApiTests {
 
+    private static final UUID APPLICATION_SUPPORT_DEPARTMENT_ID = UUID.fromString("10000000-0000-0000-0000-000000000002");
+    private static final UUID ACCESS_MANAGEMENT_DEPARTMENT_ID = UUID.fromString("10000000-0000-0000-0000-000000000001");
+    private static final UUID WEB_APP_SUPPORT_TEAM_ID = UUID.fromString("20000000-0000-0000-0000-000000000003");
+    private static final UUID IDENTITY_OPERATIONS_TEAM_ID = UUID.fromString("20000000-0000-0000-0000-000000000001");
+
     @Container
     @ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17-alpine")
@@ -60,10 +65,38 @@ class ReportingStatusDistributionApiTests {
 
     @Test
     void managerCanRetrieveCurrentOpenTicketCountsByStatus() {
-        createProjection("TCK-4001", ProjectionTicketStatus.NEW, null);
-        createProjection("TCK-4002", ProjectionTicketStatus.NEW, null);
-        createProjection("TCK-4003", ProjectionTicketStatus.IN_PROGRESS, null);
-        createProjection("TCK-4004", ProjectionTicketStatus.CLOSED, OffsetDateTime.now(ZoneOffset.UTC));
+        createProjection(
+                "TCK-4001",
+                ProjectionTicketStatus.NEW,
+                null,
+                APPLICATION_SUPPORT_DEPARTMENT_ID,
+                "APPLICATION_SUPPORT",
+                "Application Support",
+                WEB_APP_SUPPORT_TEAM_ID);
+        createProjection(
+                "TCK-4002",
+                ProjectionTicketStatus.NEW,
+                null,
+                APPLICATION_SUPPORT_DEPARTMENT_ID,
+                "APPLICATION_SUPPORT",
+                "Application Support",
+                WEB_APP_SUPPORT_TEAM_ID);
+        createProjection(
+                "TCK-4003",
+                ProjectionTicketStatus.IN_PROGRESS,
+                null,
+                ACCESS_MANAGEMENT_DEPARTMENT_ID,
+                "ACCESS_MANAGEMENT",
+                "Access Management",
+                IDENTITY_OPERATIONS_TEAM_ID);
+        createProjection(
+                "TCK-4004",
+                ProjectionTicketStatus.CLOSED,
+                OffsetDateTime.now(ZoneOffset.UTC),
+                APPLICATION_SUPPORT_DEPARTMENT_ID,
+                "APPLICATION_SUPPORT",
+                "Application Support",
+                WEB_APP_SUPPORT_TEAM_ID);
 
         ResponseEntity<TicketStatusDistributionResponse> response = restTemplate.getForEntity(
                 "/api/reports/tickets/status-distribution",
@@ -79,10 +112,27 @@ class ReportingStatusDistributionApiTests {
                         "IN_PROGRESS=1",
                         "WAITING_FOR_CUSTOMER=0",
                         "RESOLVED=0");
+        assertThat(response.getBody().departmentCounts())
+                .extracting(count -> count.routedDepartmentCode() + "=" + count.count())
+                .containsExactly(
+                        "APPLICATION_SUPPORT=2",
+                        "ACCESS_MANAGEMENT=1");
+        assertThat(response.getBody().teamCounts())
+                .extracting(count -> count.assignedTeamId() + "=" + count.count())
+                .containsExactly(
+                        WEB_APP_SUPPORT_TEAM_ID + "=2",
+                        IDENTITY_OPERATIONS_TEAM_ID + "=1");
         assertThat(response.getBody().generatedAt()).isNotNull();
     }
 
-    private void createProjection(String ticketNumber, ProjectionTicketStatus status, OffsetDateTime closedAt) {
+    private void createProjection(
+            String ticketNumber,
+            ProjectionTicketStatus status,
+            OffsetDateTime closedAt,
+            UUID routedDepartmentId,
+            String routedDepartmentCode,
+            String routedDepartmentName,
+            UUID assignedTeamId) {
         OffsetDateTime openedAt = OffsetDateTime.now(ZoneOffset.UTC).minusHours(3);
         OffsetDateTime updatedAt = closedAt == null ? openedAt.plusMinutes(10) : closedAt;
         reportingProjectionService.upsertTicketProjection(new TicketProjectionUpsertCommand(
@@ -90,10 +140,15 @@ class ReportingStatusDistributionApiTests {
                 ticketNumber,
                 UUID.randomUUID(),
                 UUID.randomUUID(),
+                "WEB_PORTAL_BUG",
+                "Web Portal Bug",
+                routedDepartmentId,
+                routedDepartmentCode,
+                routedDepartmentName,
                 ProjectionPriority.MEDIUM,
                 status,
                 null,
-                null,
+                assignedTeamId,
                 openedAt,
                 updatedAt,
                 closedAt,

@@ -21,6 +21,11 @@ Guncel status distribution raporu `ticket_report_projection` snapshot
 tablosundan hesaplanir ve `CLOSED` haricindeki status'leri sabit sirayla,
 zero-count dahil olacak sekilde dondurur.
 
+#65 sonrasi ayni rapor routed department ve assigned team kirilimlarini da
+`ticket_report_projection` uzerinden dondurur. Bu alanlar ticket-service
+eventlerinden projection'a kopyalanir; reporting-service operasyonel
+ticket-service DB'sine sorgu atmaz.
+
 Kapali ticket tarih araligi raporu `closed_at` alanini UTC gun sinirlariyla
 filtreler. Aralik en fazla 366 gun olabilir; bu limit manager dashboard
 sorgularinin operasyonel read model uzerinde pahali full scan'e donmesini

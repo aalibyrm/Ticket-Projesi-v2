@@ -30,6 +30,13 @@ Kullanici event contract icin B secenegini secti: `ticket.assigned` eventinde
 atamasi uretebilir; bu nedenle team-only assignment gecerli lifecycle olayi
 olarak kabul edilir.
 
+Not: #65 ve ADR-0045 ile reporting ihtiyaci icin `ticket.created` payload'i
+opsiyonel topic ve routed department alanlariyla genisletildi. Bu, bu ADR'deki
+"routing alanlarini create eventine koymama" tercihinin sinirli ve
+backward-compatible reporting dimension ihtiyaci icin kismen guncellenmis
+halidir. Summary/description gibi hassas veya buyuk alanlar hala event
+payload'ina eklenmez.
+
 ## Degerlendirilen Secenekler
 
 ### Topic katalogu
