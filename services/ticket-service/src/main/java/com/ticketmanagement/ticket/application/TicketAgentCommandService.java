@@ -56,7 +56,11 @@ public class TicketAgentCommandService {
     @Transactional
     public TicketResponse assignTicket(SupportActorContext context, UUID ticketId, AssignTicketRequest request) {
         TicketEntity ticket = findTicketForUpdate(ticketId);
-        ticketSupportAccessService.assertCanManageTicket(ticket, context);
+        ticketSupportAccessService.assertCanAssignTicket(
+                ticket,
+                context,
+                request.assigneeId(),
+                request.assignedTeamId());
 
         ticket.assignTo(request.assigneeId(), request.assignedTeamId());
         ticketOutboxService.saveTicketAssigned(ticket, context.actorId());

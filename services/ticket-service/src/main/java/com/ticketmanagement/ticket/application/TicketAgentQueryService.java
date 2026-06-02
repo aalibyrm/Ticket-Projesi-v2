@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -25,6 +26,7 @@ import com.ticketmanagement.ticket.infrastructure.persistence.TicketWorklogJpaRe
 public class TicketAgentQueryService {
 
     private static final String ROLE_ADMIN = "ADMIN";
+    private static final String ROLE_MANAGER = "MANAGER";
 
     private final TicketJpaRepository ticketRepository;
     private final TicketCommentJpaRepository ticketCommentRepository;
@@ -36,7 +38,7 @@ public class TicketAgentQueryService {
     // Agent queue icin actor'a veya ekiplerine atanmis ticket listesini getirir.
     @Transactional(readOnly = true)
     public List<TicketResponse> listTicketsForSupportActor(SupportActorContext context) {
-        List<TicketEntity> tickets = context.hasRole(ROLE_ADMIN)
+        List<TicketEntity> tickets = canReadAllTickets(context)
                 ? ticketRepository.findAllByOrderByUpdatedAtDesc()
                 : listAssignedTickets(context);
 
@@ -52,7 +54,7 @@ public class TicketAgentQueryService {
             UUID ticketId,
             AttachmentLookupContext attachmentLookupContext) {
         TicketEntity ticket = findTicket(ticketId);
-        ticketSupportAccessService.assertCanManageTicket(ticket, context);
+        ticketSupportAccessService.assertCanReadTicket(ticket, context);
         return ticketMapper.toResponse(ticket, ticketAttachmentPort.listAttachments(ticketId, attachmentLookupContext));
     }
 
@@ -60,7 +62,7 @@ public class TicketAgentQueryService {
     @Transactional(readOnly = true)
     public List<TicketCommentResponse> listCommentsForSupportActor(SupportActorContext context, UUID ticketId) {
         TicketEntity ticket = findTicket(ticketId);
-        ticketSupportAccessService.assertCanManageTicket(ticket, context);
+        ticketSupportAccessService.assertCanReadTicket(ticket, context);
         return ticketCommentRepository.findByTicketIdOrderByCreatedAtAsc(ticketId)
                 .stream()
                 .map(ticketMapper::toResponse)
@@ -71,7 +73,7 @@ public class TicketAgentQueryService {
     @Transactional(readOnly = true)
     public List<TicketWorklogResponse> listWorklogsForSupportActor(SupportActorContext context, UUID ticketId) {
         TicketEntity ticket = findTicket(ticketId);
-        ticketSupportAccessService.assertCanManageTicket(ticket, context);
+        ticketSupportAccessService.assertCanReadTicket(ticket, context);
         return ticketWorklogRepository.findByTicketIdOrderByCreatedAtDesc(ticketId)
                 .stream()
                 .map(ticketMapper::toResponse)
@@ -82,9 +84,10 @@ public class TicketAgentQueryService {
     private List<TicketEntity> listAssignedTickets(SupportActorContext context) {
         List<TicketEntity> tickets = new ArrayList<>(
                 ticketRepository.findByAssigneeIdOrderByUpdatedAtDesc(context.actorId()));
-        if (!context.teamIds().isEmpty()) {
+        Set<UUID> readableTeamIds = context.readableTeamIds();
+        if (!readableTeamIds.isEmpty()) {
             tickets.addAll(ticketRepository.findByAssignedTeamIdInOrderByUpdatedAtDesc(
-                    new ArrayList<>(context.teamIds())));
+                    new ArrayList<>(readableTeamIds)));
         }
 
         return tickets.stream()
@@ -97,6 +100,11 @@ public class TicketAgentQueryService {
                 .stream()
                 .sorted(Comparator.comparing(TicketEntity::getUpdatedAt).reversed())
                 .toList();
+    }
+
+    // Admin ve manager rollerinin tum ticket listesini okuyabilmesini saglar.
+    private boolean canReadAllTickets(SupportActorContext context) {
+        return context.hasRole(ROLE_ADMIN) || context.hasRole(ROLE_MANAGER);
     }
 
     // Ticket kaydini getirir veya standart not found hatasi uretir.

@@ -54,8 +54,14 @@ rules inside ticket-service:
 
 - `CUSTOMER` can access only their own ticket attachments.
 - `ADMIN` can access any ticket attachment.
-- `AGENT` can access when they are the assigned agent or their team context
-  includes the assigned team.
+- `MANAGER` can download ticket attachments read-only, but cannot upload.
+- `AGENT` and `TEAM_LEAD` can access when they are the assigned agent or their
+  active DB team membership includes the assigned team.
+
+Support team membership is DB authoritative as of #63. `team_ids` JWT claims or
+local `X-Actor-Team-Ids` headers are ignored for authorization. Active
+`team_members` rows decide team read scope, and active `team_lead` rows decide
+team lead management scope.
 
 ## Attachment Metadata Composition
 

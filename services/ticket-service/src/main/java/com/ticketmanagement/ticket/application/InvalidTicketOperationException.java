@@ -22,4 +22,10 @@ public class InvalidTicketOperationException extends RuntimeException {
                 "Invalid ticket status transition for ticket %s: %s -> %s"
                         .formatted(ticketId, currentStatus, requestedStatus));
     }
+
+    public static InvalidTicketOperationException invalidAssignmentTarget(UUID assigneeId, UUID teamId) {
+        return new InvalidTicketOperationException(
+                "Invalid assignment target: assignee %s is not an active member of team %s"
+                        .formatted(assigneeId, teamId));
+    }
 }

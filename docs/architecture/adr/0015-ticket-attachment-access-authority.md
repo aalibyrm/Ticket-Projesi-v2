@@ -11,7 +11,11 @@ Ilk uygulamada su kurallar gecerlidir:
 - `CUSTOMER` sadece kendi ticket'ina dosya ekleyebilir ve dosya indirebilir.
 - `ADMIN` tum ticket eklerine erisebilir.
 - `AGENT` erisimi assignment modeliyle birlikte sadece assigned agent veya
-  actor'un `team_ids` claim'i icindeki assigned team icin acilir.
+  ticket-service DB'sindeki aktif assigned team membership icin acilir.
+
+#63 ve ADR-0043 ile `team_ids` claim/header degerleri authorization kaynagi
+olmaktan cikarildi. Support ekip kapsami aktif `team_members` kayitlarindan
+cozulur.
 
 ## Neden
 

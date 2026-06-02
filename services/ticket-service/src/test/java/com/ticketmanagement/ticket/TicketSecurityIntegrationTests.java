@@ -42,6 +42,10 @@ import com.ticketmanagement.ticket.infrastructure.persistence.ProductJpaReposito
 class TicketSecurityIntegrationTests {
 
     private static final String DEFAULT_TOPIC_CODE = "WEB_PORTAL_BUG";
+    private static final String CORE_TOPIC_CODE = "CORE_SYSTEM_ERROR";
+    private static final UUID WEB_APP_SUPPORT_TEAM_ID = UUID.fromString("20000000-0000-0000-0000-000000000003");
+    private static final UUID WEB_APP_SUPPORT_LEAD_ID = UUID.fromString("30000000-0000-0000-0000-000000000003");
+    private static final UUID WEB_APP_SUPPORT_MEMBER_ID = UUID.fromString("40000000-0000-0000-0000-000000000003");
 
     @Container
     @ServiceConnection
@@ -196,19 +200,99 @@ class TicketSecurityIntegrationTests {
     @Test
     void assignedTeamMemberCanAccessTicketAttachments() throws Exception {
         UUID ownerCustomerId = UUID.randomUUID();
-        UUID assignedAgentId = UUID.randomUUID();
-        UUID teamMemberId = UUID.randomUUID();
-        UUID teamId = UUID.randomUUID();
-        UUID adminId = UUID.randomUUID();
         UUID ticketId = createTicketFor(ownerCustomerId);
 
-        assignTicketTo(ticketId, assignedAgentId, teamId, adminId);
-
         mockMvc.perform(get("/internal/tickets/{id}/attachment-access", ticketId)
-                        .with(jwtWithRolesAndTeams(teamMemberId, List.of(teamId), "AGENT")))
+                        .with(jwtWithRoles(WEB_APP_SUPPORT_MEMBER_ID, "AGENT")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.ticketId").value(ticketId.toString()))
-                .andExpect(jsonPath("$.actorId").value(teamMemberId.toString()));
+                .andExpect(jsonPath("$.actorId").value(WEB_APP_SUPPORT_MEMBER_ID.toString()));
+    }
+
+    @Test
+    void jwtTeamClaimDoesNotGrantTicketAccessWithoutDbMembership() throws Exception {
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID spoofingAgentId = UUID.randomUUID();
+        UUID ticketId = createTicketFor(ownerCustomerId);
+
+        mockMvc.perform(get("/api/agent/tickets/{id}", ticketId)
+                        .with(jwtWithRolesAndTeams(spoofingAgentId, List.of(WEB_APP_SUPPORT_TEAM_ID), "AGENT")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+
+        mockMvc.perform(get("/internal/tickets/{id}/attachment-access", ticketId)
+                        .with(jwtWithRolesAndTeams(spoofingAgentId, List.of(WEB_APP_SUPPORT_TEAM_ID), "AGENT")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+    }
+
+    @Test
+    void activeTeamMemberCanReadTeamTicketWithoutTeamClaim() throws Exception {
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID ticketId = createTicketFor(ownerCustomerId);
+
+        mockMvc.perform(get("/api/agent/tickets")
+                        .with(jwtWithRoles(WEB_APP_SUPPORT_MEMBER_ID, "AGENT")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.id == '%s')]".formatted(ticketId)).isNotEmpty());
+    }
+
+    @Test
+    void teamMemberCannotManageTeamTicketWhenNotAssignedOrLead() throws Exception {
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID ticketId = createTicketFor(ownerCustomerId);
+
+        mockMvc.perform(patch("/api/agent/tickets/{id}/status", ticketId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new ChangeTicketStatusRequest(TicketStatus.IN_PROGRESS)))
+                        .with(jwtWithRoles(WEB_APP_SUPPORT_MEMBER_ID, "AGENT")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+    }
+
+    @Test
+    void teamLeadCanManageOwnTeamTicket() throws Exception {
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID ticketId = createTicketFor(ownerCustomerId);
+
+        mockMvc.perform(patch("/api/agent/tickets/{id}/status", ticketId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new ChangeTicketStatusRequest(TicketStatus.IN_PROGRESS)))
+                        .with(jwtWithRoles(WEB_APP_SUPPORT_LEAD_ID, "TEAM_LEAD")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(TicketStatus.IN_PROGRESS.name()));
+    }
+
+    @Test
+    void teamLeadCannotManageOtherTeamTicket() throws Exception {
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID ticketId = createTicketFor(ownerCustomerId, CORE_TOPIC_CODE);
+
+        mockMvc.perform(patch("/api/agent/tickets/{id}/status", ticketId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new ChangeTicketStatusRequest(TicketStatus.IN_PROGRESS)))
+                        .with(jwtWithRoles(WEB_APP_SUPPORT_LEAD_ID, "TEAM_LEAD")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+    }
+
+    @Test
+    void managerCanReadAllTicketsButCannotManage() throws Exception {
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID managerId = UUID.randomUUID();
+        UUID ticketId = createTicketFor(ownerCustomerId);
+
+        mockMvc.perform(get("/api/agent/tickets")
+                        .with(jwtWithRoles(managerId, "MANAGER")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.id == '%s')]".formatted(ticketId)).isNotEmpty());
+
+        mockMvc.perform(patch("/api/agent/tickets/{id}/status", ticketId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new ChangeTicketStatusRequest(TicketStatus.IN_PROGRESS)))
+                        .with(jwtWithRoles(managerId, "MANAGER")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
     }
 
     @Test
@@ -250,10 +334,14 @@ class TicketSecurityIntegrationTests {
     }
 
     private UUID createTicketFor(UUID customerId) throws Exception {
+        return createTicketFor(customerId, DEFAULT_TOPIC_CODE);
+    }
+
+    private UUID createTicketFor(UUID customerId, String topicCode) throws Exception {
         UUID productId = productRepository.findByActiveTrueOrderByNameAsc().getFirst().getId();
         CreateTicketRequest request = new CreateTicketRequest(
                 productId,
-                DEFAULT_TOPIC_CODE,
+                topicCode,
                 "Cannot download receipt",
                 "Receipt download fails after payment confirmation.",
                 TicketPriority.MEDIUM);

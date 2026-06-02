@@ -48,6 +48,6 @@ Event payload'lari minimum veri tasir. Yorum govdesi, worklog aciklamasi,
 ticket summary ve ticket description Kafka event payload'ina koyulmaz.
 
 Assignment modeli geldigi icin file attachment authorization karari da
-genisletildi: customer kendi ticket'ina, assigned agent veya actor'un
-`team_ids` claim'i icindeki assigned team ise ilgili ticket dosyalarina
-erisebilir.
+genisletildi: customer kendi ticket'ina, assigned agent veya ticket-service
+DB'sindeki aktif assigned team member ise ilgili ticket dosyalarina erisebilir.
+#63 ve ADR-0043 sonrasinda `team_ids` claim/header yetki kaynagi degildir.

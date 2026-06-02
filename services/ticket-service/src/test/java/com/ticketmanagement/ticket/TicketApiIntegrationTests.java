@@ -62,6 +62,8 @@ class TicketApiIntegrationTests {
 
     private static final String DEFAULT_TOPIC_CODE = "WEB_PORTAL_BUG";
     private static final UUID WEB_APP_SUPPORT_TEAM_ID = UUID.fromString("20000000-0000-0000-0000-000000000003");
+    private static final UUID WEB_APP_SUPPORT_LEAD_ID = UUID.fromString("30000000-0000-0000-0000-000000000003");
+    private static final UUID WEB_APP_SUPPORT_MEMBER_ID = UUID.fromString("40000000-0000-0000-0000-000000000003");
     private static final UUID APPLICATION_SUPPORT_DEPARTMENT_ID =
             UUID.fromString("10000000-0000-0000-0000-000000000002");
 
@@ -328,8 +330,8 @@ class TicketApiIntegrationTests {
     void agentActionsCreateVersionedOutboxEvents() {
         UUID customerId = UUID.randomUUID();
         UUID adminId = UUID.randomUUID();
-        UUID agentId = UUID.randomUUID();
-        UUID teamId = UUID.randomUUID();
+        UUID agentId = WEB_APP_SUPPORT_MEMBER_ID;
+        UUID teamId = WEB_APP_SUPPORT_TEAM_ID;
         TicketResponse created = createTicket(customerId);
 
         ResponseEntity<TicketResponse> assignmentResponse = restTemplate.exchange(
@@ -400,9 +402,9 @@ class TicketApiIntegrationTests {
     void agentReadsAssignedQueueConversationWorklogsAndAttachments() {
         UUID customerId = UUID.randomUUID();
         UUID adminId = UUID.randomUUID();
-        UUID agentId = UUID.randomUUID();
-        UUID teamId = UUID.randomUUID();
-        UUID teamMemberId = UUID.randomUUID();
+        UUID agentId = WEB_APP_SUPPORT_LEAD_ID;
+        UUID teamId = WEB_APP_SUPPORT_TEAM_ID;
+        UUID teamMemberId = WEB_APP_SUPPORT_MEMBER_ID;
         TicketResponse created = createTicket(customerId);
         TicketAttachmentResponse attachment = attachmentFor(created.id());
 
@@ -456,7 +458,7 @@ class TicketApiIntegrationTests {
         ResponseEntity<java.util.List<TicketResponse>> teamQueueResponse = restTemplate.exchange(
                 "/api/agent/tickets",
                 HttpMethod.GET,
-                new HttpEntity<>(supportHeaders(teamMemberId, List.of(teamId), "AGENT")),
+                new HttpEntity<>(supportHeaders(teamMemberId, "AGENT")),
                 new ParameterizedTypeReference<>() {
                 });
         assertThat(teamQueueResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -771,17 +773,8 @@ class TicketApiIntegrationTests {
     }
 
     private static HttpHeaders supportHeaders(UUID actorId, String... roles) {
-        return supportHeaders(actorId, List.of(), roles);
-    }
-
-    private static HttpHeaders supportHeaders(UUID actorId, List<UUID> teamIds, String... roles) {
         HttpHeaders headers = actorHeaders(actorId);
         headers.set("X-Actor-Roles", String.join(",", roles));
-        if (!teamIds.isEmpty()) {
-            headers.set("X-Actor-Team-Ids", teamIds.stream()
-                    .map(UUID::toString)
-                    .collect(java.util.stream.Collectors.joining(",")));
-        }
         return headers;
     }
 }

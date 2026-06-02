@@ -1,9 +1,7 @@
 package com.ticketmanagement.ticket.api;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -29,7 +27,6 @@ class TicketAttachmentAccessController {
 
     private static final String REALM_ACCESS_CLAIM = "realm_access";
     private static final String ROLES_CLAIM = "roles";
-    private static final String TEAM_IDS_CLAIM = "team_ids";
     private static final String LOCAL_DEFAULT_ROLE = "CUSTOMER";
 
     private final TicketAttachmentAccessService ticketAttachmentAccessService;
@@ -40,12 +37,10 @@ class TicketAttachmentAccessController {
             @AuthenticationPrincipal Jwt jwt,
             @RequestHeader(value = "X-Actor-Id", required = false) UUID localActorId,
             @RequestHeader(value = "X-Actor-Roles", required = false) String localRoles,
-            @RequestHeader(value = "X-Actor-Team-Ids", required = false) String localTeamIds,
             @PathVariable UUID id) {
         UUID actorId = resolveActorId(jwt, localActorId);
         Set<String> roles = resolveRoles(jwt, localRoles);
-        Set<UUID> teamIds = resolveTeamIds(jwt, localTeamIds);
-        return ticketAttachmentAccessService.assertAttachmentAccess(id, actorId, roles, teamIds);
+        return ticketAttachmentAccessService.assertAttachmentAccess(id, actorId, roles);
     }
 
     // JWT subject degerinden veya local test header'indan actor kimligini cozer.
@@ -75,21 +70,6 @@ class TicketAttachmentAccessController {
         return normalizeRoles(Arrays.asList(localRoles.split(",")));
     }
 
-    // JWT team id claim'lerini veya local test team header'ini UUID setine cevirir.
-    private Set<UUID> resolveTeamIds(Jwt jwt, String localTeamIds) {
-        if (jwt != null) {
-            Object teamIds = jwt.getClaims().get(TEAM_IDS_CLAIM);
-            if (teamIds instanceof Collection<?> collection) {
-                return parseTeamIds(collection);
-            }
-            return Set.of();
-        }
-        if (localTeamIds == null || localTeamIds.isBlank()) {
-            return Set.of();
-        }
-        return parseTeamIds(Arrays.asList(localTeamIds.split(",")));
-    }
-
     // JWT subject degerini UUID actor kimligine cevirir.
     private UUID parseActorSubject(Jwt jwt) {
         try {
@@ -108,26 +88,5 @@ class TicketAttachmentAccessController {
                 .filter(role -> !role.isBlank())
                 .map(role -> role.toUpperCase(Locale.ROOT))
                 .collect(Collectors.toUnmodifiableSet());
-    }
-
-    // Team id degerlerini UUID olarak parse eder ve gecersiz degerleri yok sayar.
-    private Set<UUID> parseTeamIds(Collection<?> teamIds) {
-        return teamIds.stream()
-                .filter(Objects::nonNull)
-                .map(Object::toString)
-                .map(String::trim)
-                .filter(teamId -> !teamId.isBlank())
-                .map(this::parseOptionalTeamId)
-                .flatMap(java.util.Optional::stream)
-                .collect(Collectors.toUnmodifiableSet());
-    }
-
-    // Tek bir team id degerini UUID olarak parse eder.
-    private java.util.Optional<UUID> parseOptionalTeamId(String teamId) {
-        try {
-            return java.util.Optional.of(UUID.fromString(teamId));
-        } catch (IllegalArgumentException exception) {
-            return java.util.Optional.empty();
-        }
     }
 }

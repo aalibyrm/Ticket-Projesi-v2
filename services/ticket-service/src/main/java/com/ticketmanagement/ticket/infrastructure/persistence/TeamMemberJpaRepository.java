@@ -33,4 +33,17 @@ public interface TeamMemberJpaRepository extends JpaRepository<TeamMemberEntity,
             order by team.name asc
             """)
     List<TeamMemberEntity> findActiveMembershipsForActor(UUID actorId);
+
+    @Query("""
+            select count(member) > 0
+            from TeamMemberEntity member
+            join member.team team
+            join team.department department
+            where member.active = true
+              and member.actorId = :actorId
+              and team.id = :teamId
+              and team.active = true
+              and department.active = true
+            """)
+    boolean existsActiveMembership(UUID actorId, UUID teamId);
 }

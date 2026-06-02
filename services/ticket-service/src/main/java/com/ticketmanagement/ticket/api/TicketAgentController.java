@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -37,6 +36,7 @@ import com.ticketmanagement.ticket.api.dto.TicketWorklogResponse;
 import com.ticketmanagement.ticket.application.AttachmentLookupContext;
 import com.ticketmanagement.ticket.application.ForbiddenOperationException;
 import com.ticketmanagement.ticket.application.SupportActorContext;
+import com.ticketmanagement.ticket.application.SupportActorContextService;
 import com.ticketmanagement.ticket.application.TicketAgentCommandService;
 import com.ticketmanagement.ticket.application.TicketAgentQueryService;
 
@@ -47,35 +47,35 @@ class TicketAgentController {
 
     private static final String REALM_ACCESS_CLAIM = "realm_access";
     private static final String ROLES_CLAIM = "roles";
-    private static final String TEAM_IDS_CLAIM = "team_ids";
     private static final String AGENT_ROLE = "AGENT";
+    private static final String TEAM_LEAD_ROLE = "TEAM_LEAD";
+    private static final String MANAGER_ROLE = "MANAGER";
     private static final String ADMIN_ROLE = "ADMIN";
     private static final String LOCAL_DEFAULT_ROLE = AGENT_ROLE;
 
     private final TicketAgentCommandService ticketAgentCommandService;
     private final TicketAgentQueryService ticketAgentQueryService;
+    private final SupportActorContextService supportActorContextService;
 
-    // Agent'in yonetebilecegi ticket kuyrugunu dondurur.
+    // Support actor'un gorebilecegi ticket kuyrugunu dondurur.
     @GetMapping
     java.util.List<TicketResponse> listTickets(
             @AuthenticationPrincipal Jwt jwt,
             @RequestHeader(value = "X-Actor-Id", required = false) UUID localActorId,
-            @RequestHeader(value = "X-Actor-Roles", required = false) String localRoles,
-            @RequestHeader(value = "X-Actor-Team-Ids", required = false) String localTeamIds) {
-        SupportActorContext context = resolveSupportActorContext(jwt, localActorId, localRoles, localTeamIds);
+            @RequestHeader(value = "X-Actor-Roles", required = false) String localRoles) {
+        SupportActorContext context = resolveSupportActorContext(jwt, localActorId, localRoles);
         return ticketAgentQueryService.listTicketsForSupportActor(context);
     }
 
-    // Agent'in yonetebilecegi tek bir ticket detayini dondurur.
+    // Support actor'un gorebilecegi tek bir ticket detayini dondurur.
     @GetMapping("/{id}")
     TicketResponse getTicket(
             @AuthenticationPrincipal Jwt jwt,
             @RequestHeader(value = "X-Actor-Id", required = false) UUID localActorId,
             @RequestHeader(value = "X-Actor-Roles", required = false) String localRoles,
-            @RequestHeader(value = "X-Actor-Team-Ids", required = false) String localTeamIds,
             @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorizationHeader,
             @PathVariable UUID id) {
-        SupportActorContext context = resolveSupportActorContext(jwt, localActorId, localRoles, localTeamIds);
+        SupportActorContext context = resolveSupportActorContext(jwt, localActorId, localRoles);
         return ticketAgentQueryService.getTicketForSupportActor(
                 context,
                 id,
@@ -88,9 +88,8 @@ class TicketAgentController {
             @AuthenticationPrincipal Jwt jwt,
             @RequestHeader(value = "X-Actor-Id", required = false) UUID localActorId,
             @RequestHeader(value = "X-Actor-Roles", required = false) String localRoles,
-            @RequestHeader(value = "X-Actor-Team-Ids", required = false) String localTeamIds,
             @PathVariable UUID id) {
-        SupportActorContext context = resolveSupportActorContext(jwt, localActorId, localRoles, localTeamIds);
+        SupportActorContext context = resolveSupportActorContext(jwt, localActorId, localRoles);
         return ticketAgentQueryService.listCommentsForSupportActor(context, id);
     }
 
@@ -100,9 +99,8 @@ class TicketAgentController {
             @AuthenticationPrincipal Jwt jwt,
             @RequestHeader(value = "X-Actor-Id", required = false) UUID localActorId,
             @RequestHeader(value = "X-Actor-Roles", required = false) String localRoles,
-            @RequestHeader(value = "X-Actor-Team-Ids", required = false) String localTeamIds,
             @PathVariable UUID id) {
-        SupportActorContext context = resolveSupportActorContext(jwt, localActorId, localRoles, localTeamIds);
+        SupportActorContext context = resolveSupportActorContext(jwt, localActorId, localRoles);
         return ticketAgentQueryService.listWorklogsForSupportActor(context, id);
     }
 
@@ -112,10 +110,9 @@ class TicketAgentController {
             @AuthenticationPrincipal Jwt jwt,
             @RequestHeader(value = "X-Actor-Id", required = false) UUID localActorId,
             @RequestHeader(value = "X-Actor-Roles", required = false) String localRoles,
-            @RequestHeader(value = "X-Actor-Team-Ids", required = false) String localTeamIds,
             @PathVariable UUID id,
             @Valid @RequestBody ChangeTicketStatusRequest request) {
-        SupportActorContext context = resolveSupportActorContext(jwt, localActorId, localRoles, localTeamIds);
+        SupportActorContext context = resolveSupportActorContext(jwt, localActorId, localRoles);
         return ticketAgentCommandService.changeStatus(context, id, request);
     }
 
@@ -125,10 +122,9 @@ class TicketAgentController {
             @AuthenticationPrincipal Jwt jwt,
             @RequestHeader(value = "X-Actor-Id", required = false) UUID localActorId,
             @RequestHeader(value = "X-Actor-Roles", required = false) String localRoles,
-            @RequestHeader(value = "X-Actor-Team-Ids", required = false) String localTeamIds,
             @PathVariable UUID id,
             @Valid @RequestBody AssignTicketRequest request) {
-        SupportActorContext context = resolveSupportActorContext(jwt, localActorId, localRoles, localTeamIds);
+        SupportActorContext context = resolveSupportActorContext(jwt, localActorId, localRoles);
         return ticketAgentCommandService.assignTicket(context, id, request);
     }
 
@@ -138,10 +134,9 @@ class TicketAgentController {
             @AuthenticationPrincipal Jwt jwt,
             @RequestHeader(value = "X-Actor-Id", required = false) UUID localActorId,
             @RequestHeader(value = "X-Actor-Roles", required = false) String localRoles,
-            @RequestHeader(value = "X-Actor-Team-Ids", required = false) String localTeamIds,
             @PathVariable UUID id,
             @Valid @RequestBody AddExternalCommentRequest request) {
-        SupportActorContext context = resolveSupportActorContext(jwt, localActorId, localRoles, localTeamIds);
+        SupportActorContext context = resolveSupportActorContext(jwt, localActorId, localRoles);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ticketAgentCommandService.addExternalComment(context, id, request));
     }
@@ -152,10 +147,9 @@ class TicketAgentController {
             @AuthenticationPrincipal Jwt jwt,
             @RequestHeader(value = "X-Actor-Id", required = false) UUID localActorId,
             @RequestHeader(value = "X-Actor-Roles", required = false) String localRoles,
-            @RequestHeader(value = "X-Actor-Team-Ids", required = false) String localTeamIds,
             @PathVariable UUID id,
             @Valid @RequestBody AddInternalNoteRequest request) {
-        SupportActorContext context = resolveSupportActorContext(jwt, localActorId, localRoles, localTeamIds);
+        SupportActorContext context = resolveSupportActorContext(jwt, localActorId, localRoles);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ticketAgentCommandService.addInternalNote(context, id, request));
     }
@@ -166,24 +160,21 @@ class TicketAgentController {
             @AuthenticationPrincipal Jwt jwt,
             @RequestHeader(value = "X-Actor-Id", required = false) UUID localActorId,
             @RequestHeader(value = "X-Actor-Roles", required = false) String localRoles,
-            @RequestHeader(value = "X-Actor-Team-Ids", required = false) String localTeamIds,
             @PathVariable UUID id,
             @Valid @RequestBody AddWorklogRequest request) {
-        SupportActorContext context = resolveSupportActorContext(jwt, localActorId, localRoles, localTeamIds);
+        SupportActorContext context = resolveSupportActorContext(jwt, localActorId, localRoles);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ticketAgentCommandService.addWorklog(context, id, request));
     }
 
-    // Actor kimligi, rolleri ve ekiplerini support context icinde toplar.
+    // Actor kimligi ve rollerinden DB kaynakli support context olusturur.
     private SupportActorContext resolveSupportActorContext(
             Jwt jwt,
             UUID localActorId,
-            String localRoles,
-            String localTeamIds) {
-        SupportActorContext context = new SupportActorContext(
+            String localRoles) {
+        SupportActorContext context = supportActorContextService.resolve(
                 resolveSupportActorId(jwt, localActorId),
-                resolveRoles(jwt, localRoles),
-                resolveTeamIds(jwt, localTeamIds));
+                resolveRoles(jwt, localRoles));
         ensureSupportRole(context);
         return context;
     }
@@ -215,24 +206,12 @@ class TicketAgentController {
         return normalizeRoles(Arrays.asList(localRoles.split(",")));
     }
 
-    // JWT team id claim'lerini veya local test team header'ini UUID setine cevirir.
-    private Set<UUID> resolveTeamIds(Jwt jwt, String localTeamIds) {
-        if (jwt != null) {
-            Object teamIds = jwt.getClaims().get(TEAM_IDS_CLAIM);
-            if (teamIds instanceof Collection<?> collection) {
-                return parseTeamIds(collection);
-            }
-            return Set.of();
-        }
-        if (localTeamIds == null || localTeamIds.isBlank()) {
-            return Set.of();
-        }
-        return parseTeamIds(Arrays.asList(localTeamIds.split(",")));
-    }
-
-    // Agent endpointlerini sadece AGENT veya ADMIN rolune sahip actor'lere acar.
+    // Agent endpointlerini sadece support rollerine sahip actor'lere acar.
     private void ensureSupportRole(SupportActorContext context) {
-        if (context.hasRole(AGENT_ROLE) || context.hasRole(ADMIN_ROLE)) {
+        if (context.hasRole(AGENT_ROLE)
+                || context.hasRole(TEAM_LEAD_ROLE)
+                || context.hasRole(MANAGER_ROLE)
+                || context.hasRole(ADMIN_ROLE)) {
             return;
         }
         throw ForbiddenOperationException.accessDenied();
@@ -268,26 +247,5 @@ class TicketAgentController {
                 .filter(role -> !role.isBlank())
                 .map(role -> role.toUpperCase(Locale.ROOT))
                 .collect(Collectors.toUnmodifiableSet());
-    }
-
-    // Team id degerlerini UUID olarak parse eder ve gecersiz degerleri yok sayar.
-    private Set<UUID> parseTeamIds(Collection<?> teamIds) {
-        return teamIds.stream()
-                .filter(Objects::nonNull)
-                .map(Object::toString)
-                .map(String::trim)
-                .filter(teamId -> !teamId.isBlank())
-                .map(this::parseOptionalTeamId)
-                .flatMap(java.util.Optional::stream)
-                .collect(Collectors.toUnmodifiableSet());
-    }
-
-    // Tek bir team id degerini UUID olarak parse eder.
-    private java.util.Optional<UUID> parseOptionalTeamId(String teamId) {
-        try {
-            return java.util.Optional.of(UUID.fromString(teamId));
-        } catch (IllegalArgumentException exception) {
-            return java.util.Optional.empty();
-        }
     }
 }

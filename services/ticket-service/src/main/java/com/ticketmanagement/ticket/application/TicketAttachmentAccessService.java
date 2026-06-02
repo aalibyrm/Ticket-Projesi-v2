@@ -16,45 +16,41 @@ import com.ticketmanagement.ticket.infrastructure.persistence.TicketJpaRepositor
 public class TicketAttachmentAccessService {
 
     private static final String ROLE_ADMIN = "ADMIN";
-    private static final String ROLE_AGENT = "AGENT";
     private static final String ROLE_CUSTOMER = "CUSTOMER";
+    private static final String ROLE_MANAGER = "MANAGER";
 
     private final TicketJpaRepository ticketRepository;
+    private final SupportActorContextService supportActorContextService;
+    private final TicketSupportAccessService ticketSupportAccessService;
 
     // Dosya ekleme/indirme icin ticket sahipligi ve rol yetkisini dogrular.
     @Transactional(readOnly = true)
     public AttachmentAccessResponse assertAttachmentAccess(
             UUID ticketId,
             UUID actorId,
-            Set<String> roles,
-            Set<UUID> teamIds) {
+            Set<String> roles) {
         TicketEntity ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> NotFoundException.ticket(ticketId));
 
-        if (roles.contains(ROLE_ADMIN)
-                || canCustomerAccess(ticket, actorId, roles)
-                || canAssignedAgentAccess(ticket, actorId, roles)
-                || canAssignedTeamAccess(ticket, teamIds, roles)) {
+        if (canCustomerAccess(ticket, actorId, roles)) {
             return new AttachmentAccessResponse(ticketId, actorId, true, true);
         }
+        SupportActorContext context = supportActorContextService.resolve(actorId, roles);
 
+        if (context.hasRole(ROLE_ADMIN)) {
+            return new AttachmentAccessResponse(ticketId, actorId, true, true);
+        }
+        if (context.hasRole(ROLE_MANAGER)) {
+            return new AttachmentAccessResponse(ticketId, actorId, false, true);
+        }
+        if (ticketSupportAccessService.canReadTicket(ticket, context)) {
+            return new AttachmentAccessResponse(ticketId, actorId, true, true);
+        }
         throw ForbiddenOperationException.accessDenied();
     }
 
     // Customer rolundeki actor'un sadece kendi ticket'ina erismesini saglar.
     private boolean canCustomerAccess(TicketEntity ticket, UUID actorId, Set<String> roles) {
         return roles.contains(ROLE_CUSTOMER) && ticket.getCustomerId().equals(actorId);
-    }
-
-    // Agent rolundeki actor'un sadece kendisine atanmis ticket'a erismesini saglar.
-    private boolean canAssignedAgentAccess(TicketEntity ticket, UUID actorId, Set<String> roles) {
-        return roles.contains(ROLE_AGENT) && actorId.equals(ticket.getAssigneeId());
-    }
-
-    // Agent rolundeki actor'un sadece ekiplerinden birine atanmis ticket'a erismesini saglar.
-    private boolean canAssignedTeamAccess(TicketEntity ticket, Set<UUID> teamIds, Set<String> roles) {
-        return roles.contains(ROLE_AGENT)
-                && ticket.getAssignedTeamId() != null
-                && teamIds.contains(ticket.getAssignedTeamId());
     }
 }
