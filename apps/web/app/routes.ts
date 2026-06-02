@@ -5,6 +5,8 @@ export default [
   layout("routes/protected-layout.tsx", [
     route("tickets", "routes/tickets.tsx"),
     route("tickets/new", "routes/new-ticket.tsx"),
+    route("tickets/:ticketId", "routes/ticket-detail.tsx"),
+    route("notifications", "routes/notifications.tsx"),
     route("agent/inbox", "routes/agent-inbox.tsx"),
     route("reports", "routes/reports.tsx"),
   ]),

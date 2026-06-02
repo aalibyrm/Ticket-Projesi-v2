@@ -3,6 +3,7 @@ import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 import ConfirmationNumberOutlinedIcon from "@mui/icons-material/ConfirmationNumberOutlined";
 import DashboardCustomizeOutlinedIcon from "@mui/icons-material/DashboardCustomizeOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
+import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import {
   Box,
   Button,
@@ -53,6 +54,12 @@ const navigationItems: NavigationItem[] = [
     label: "Raporlar",
     path: "/reports",
     roles: ["MANAGER", "ADMIN"],
+  },
+  {
+    icon: <NotificationsNoneOutlinedIcon />,
+    label: "Bildirimler",
+    path: "/notifications",
+    roles: ["CUSTOMER", "AGENT", "MANAGER", "ADMIN"],
   },
 ];
 

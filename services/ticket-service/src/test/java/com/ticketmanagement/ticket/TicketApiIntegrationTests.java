@@ -167,6 +167,54 @@ class TicketApiIntegrationTests {
     }
 
     @Test
+    void customerAddsAndListsOwnExternalCommentsOnly() {
+        UUID customerId = UUID.randomUUID();
+        UUID otherCustomerId = UUID.randomUUID();
+        TicketResponse created = createTicket(customerId);
+
+        ResponseEntity<TicketCommentResponse> commentResponse = restTemplate.exchange(
+                "/api/tickets/{id}/comments/external",
+                HttpMethod.POST,
+                new HttpEntity<>(new AddExternalCommentRequest("I reproduced the problem after clearing cache."),
+                        actorHeaders(customerId)),
+                TicketCommentResponse.class,
+                created.id());
+
+        assertThat(commentResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(commentResponse.getBody()).isNotNull();
+        assertThat(commentResponse.getBody().ticketId()).isEqualTo(created.id());
+        assertThat(commentResponse.getBody().authorId()).isEqualTo(customerId);
+        assertThat(commentResponse.getBody().visibility().name()).isEqualTo("EXTERNAL");
+
+        ResponseEntity<java.util.List<TicketCommentResponse>> commentsResponse = restTemplate.exchange(
+                "/api/tickets/{id}/comments",
+                HttpMethod.GET,
+                new HttpEntity<>(actorHeaders(customerId)),
+                new ParameterizedTypeReference<>() {
+                },
+                created.id());
+
+        assertThat(commentsResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(commentsResponse.getBody())
+                .extracting(TicketCommentResponse::id)
+                .containsExactly(commentResponse.getBody().id());
+        assertThat(outboxPayloadFor(created.id(), "ticket.external-comment-added"))
+                .doesNotContain("I reproduced the problem after clearing cache.");
+
+        ResponseEntity<ApiErrorResponse> otherCustomerComment = restTemplate.exchange(
+                "/api/tickets/{id}/comments/external",
+                HttpMethod.POST,
+                new HttpEntity<>(new AddExternalCommentRequest("Trying another customer's ticket."),
+                        actorHeaders(otherCustomerId)),
+                ApiErrorResponse.class,
+                created.id());
+
+        assertThat(otherCustomerComment.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(otherCustomerComment.getBody()).isNotNull();
+        assertThat(otherCustomerComment.getBody().errorCode()).isEqualTo("ACCESS_DENIED");
+    }
+
+    @Test
     void invalidCreateRequestReturnsStandardValidationError() {
         UUID customerId = UUID.randomUUID();
         String correlationId = "validation-test-correlation";

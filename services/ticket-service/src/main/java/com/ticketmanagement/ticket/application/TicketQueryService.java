@@ -7,7 +7,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ticketmanagement.ticket.api.dto.TicketCommentResponse;
 import com.ticketmanagement.ticket.api.dto.TicketResponse;
+import com.ticketmanagement.ticket.domain.TicketCommentVisibility;
+import com.ticketmanagement.ticket.infrastructure.persistence.TicketCommentJpaRepository;
 import com.ticketmanagement.ticket.infrastructure.persistence.TicketEntity;
 import com.ticketmanagement.ticket.infrastructure.persistence.TicketJpaRepository;
 
@@ -15,6 +18,7 @@ import com.ticketmanagement.ticket.infrastructure.persistence.TicketJpaRepositor
 @RequiredArgsConstructor
 public class TicketQueryService {
 
+    private final TicketCommentJpaRepository ticketCommentRepository;
     private final TicketJpaRepository ticketRepository;
     private final TicketMapper ticketMapper;
     private final TicketAttachmentPort ticketAttachmentPort;
@@ -39,5 +43,23 @@ public class TicketQueryService {
         }
 
         return ticketMapper.toResponse(ticket, ticketAttachmentPort.listAttachments(ticketId, context));
+    }
+
+    // Musteriye sadece kendi ticket'ina ait external yorumlari dondurur.
+    @Transactional(readOnly = true)
+    public List<TicketCommentResponse> listExternalCommentsForCustomer(UUID customerId, UUID ticketId) {
+        TicketEntity ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> NotFoundException.ticket(ticketId));
+
+        if (!ticket.getCustomerId().equals(customerId)) {
+            throw ForbiddenOperationException.accessDenied();
+        }
+
+        return ticketCommentRepository.findByTicketIdAndVisibilityOrderByCreatedAtAsc(
+                        ticketId,
+                        TicketCommentVisibility.EXTERNAL)
+                .stream()
+                .map(ticketMapper::toResponse)
+                .toList();
     }
 }

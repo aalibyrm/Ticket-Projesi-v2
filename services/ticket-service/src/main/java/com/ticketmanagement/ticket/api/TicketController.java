@@ -21,7 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.ticketmanagement.ticket.api.dto.AddExternalCommentRequest;
 import com.ticketmanagement.ticket.api.dto.CreateTicketRequest;
+import com.ticketmanagement.ticket.api.dto.TicketCommentResponse;
 import com.ticketmanagement.ticket.api.dto.TicketResponse;
 import com.ticketmanagement.ticket.application.AttachmentLookupContext;
 import com.ticketmanagement.ticket.application.ForbiddenOperationException;
@@ -74,6 +76,28 @@ class TicketController {
         UUID customerId = resolveCustomerId(jwt, localActorId);
         return ticketQueryService.getTicketForCustomer(customerId, id, new AttachmentLookupContext(
                 resolveBearerToken(authorizationHeader)));
+    }
+
+    // Musterinin kendi ticket'indaki external yorumlari okumasini saglar.
+    @GetMapping("/{id}/comments")
+    List<TicketCommentResponse> listOwnTicketComments(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestHeader(value = "X-Actor-Id", required = false) UUID localActorId,
+            @PathVariable UUID id) {
+        UUID customerId = resolveCustomerId(jwt, localActorId);
+        return ticketQueryService.listExternalCommentsForCustomer(customerId, id);
+    }
+
+    // Musterinin kendi ticket'ina external yorum eklemesini saglar.
+    @PostMapping("/{id}/comments/external")
+    ResponseEntity<TicketCommentResponse> addOwnTicketComment(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestHeader(value = "X-Actor-Id", required = false) UUID localActorId,
+            @PathVariable UUID id,
+            @Valid @RequestBody AddExternalCommentRequest request) {
+        UUID customerId = resolveCustomerId(jwt, localActorId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ticketCommandService.addCustomerExternalComment(customerId, id, request));
     }
 
     // JWT subject degerinden veya local test header'indan musteri kimligini cozer.

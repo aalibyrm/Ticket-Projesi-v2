@@ -27,6 +27,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ticketmanagement.ticket.api.dto.AddExternalCommentRequest;
 import com.ticketmanagement.ticket.api.dto.AssignTicketRequest;
 import com.ticketmanagement.ticket.api.dto.CreateTicketRequest;
 import com.ticketmanagement.ticket.domain.TicketPriority;
@@ -105,6 +106,25 @@ class TicketSecurityIntegrationTests {
         UUID ticketId = createTicketFor(ownerCustomerId);
 
         mockMvc.perform(get("/api/tickets/{id}", ticketId)
+                        .with(jwtWithRoles(otherCustomerId, "CUSTOMER")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+    }
+
+    @Test
+    void rejectsCrossCustomerCommentAccessWithJwt() throws Exception {
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID otherCustomerId = UUID.randomUUID();
+        UUID ticketId = createTicketFor(ownerCustomerId);
+
+        mockMvc.perform(get("/api/tickets/{id}/comments", ticketId)
+                        .with(jwtWithRoles(otherCustomerId, "CUSTOMER")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+
+        mockMvc.perform(post("/api/tickets/{id}/comments/external", ticketId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new AddExternalCommentRequest("Cross access attempt.")))
                         .with(jwtWithRoles(otherCustomerId, "CUSTOMER")))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));

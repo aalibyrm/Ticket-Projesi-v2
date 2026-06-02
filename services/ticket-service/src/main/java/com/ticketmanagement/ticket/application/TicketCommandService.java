@@ -6,11 +6,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ticketmanagement.ticket.api.dto.AddExternalCommentRequest;
 import com.ticketmanagement.ticket.api.dto.CreateTicketRequest;
+import com.ticketmanagement.ticket.api.dto.TicketCommentResponse;
 import com.ticketmanagement.ticket.api.dto.TicketResponse;
 import com.ticketmanagement.ticket.domain.TicketPriority;
 import com.ticketmanagement.ticket.infrastructure.persistence.ProductEntity;
 import com.ticketmanagement.ticket.infrastructure.persistence.ProductJpaRepository;
+import com.ticketmanagement.ticket.infrastructure.persistence.TicketCommentEntity;
+import com.ticketmanagement.ticket.infrastructure.persistence.TicketCommentJpaRepository;
 import com.ticketmanagement.ticket.infrastructure.persistence.TicketEntity;
 import com.ticketmanagement.ticket.infrastructure.persistence.TicketJpaRepository;
 
@@ -19,6 +23,7 @@ import com.ticketmanagement.ticket.infrastructure.persistence.TicketJpaRepositor
 public class TicketCommandService {
 
     private final ProductJpaRepository productRepository;
+    private final TicketCommentJpaRepository ticketCommentRepository;
     private final TicketJpaRepository ticketRepository;
     private final TicketMapper ticketMapper;
     private final TicketNumberGenerator ticketNumberGenerator;
@@ -43,5 +48,28 @@ public class TicketCommandService {
         ticketOutboxService.saveTicketCreated(savedTicket, customerId);
 
         return ticketMapper.toResponse(savedTicket);
+    }
+
+    // Musterinin sadece kendi ticket'ina external yorum eklemesini saglar.
+    @Transactional
+    public TicketCommentResponse addCustomerExternalComment(
+            UUID customerId,
+            UUID ticketId,
+            AddExternalCommentRequest request) {
+        TicketEntity ticket = ticketRepository.findByIdForUpdate(ticketId)
+                .orElseThrow(() -> NotFoundException.ticket(ticketId));
+
+        if (!ticket.getCustomerId().equals(customerId)) {
+            throw ForbiddenOperationException.accessDenied();
+        }
+
+        TicketCommentEntity comment = ticketCommentRepository.save(TicketCommentEntity.external(
+                UUID.randomUUID(),
+                ticket,
+                customerId,
+                request.body().trim()));
+
+        ticketOutboxService.saveExternalCommentAdded(comment, customerId);
+        return ticketMapper.toResponse(comment);
     }
 }
