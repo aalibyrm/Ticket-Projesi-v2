@@ -7,6 +7,13 @@ export interface ProductResponse {
   name: string;
 }
 
+export interface TicketTopicResponse {
+  code: string;
+  description: string;
+  id: string;
+  name: string;
+}
+
 export interface TicketAttachmentResponse {
   completedAt?: string;
   contentType: string;
@@ -61,6 +68,7 @@ export interface CreateTicketRequest {
   priority: TicketPriority;
   productId: string;
   summary: string;
+  topicCode: string;
 }
 
 export interface CreateTicketFormValues extends CreateTicketRequest {

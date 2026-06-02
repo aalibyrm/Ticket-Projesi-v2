@@ -10,6 +10,8 @@ import {
   listAgentTicketComments,
   listAgentTickets,
   listAgentWorklogs,
+  listSupportTeamMembers,
+  listSupportTeams,
 } from "~/features/agent/agentApi";
 import type {
   AddWorklogRequest,
@@ -19,6 +21,8 @@ import type {
 
 export const agentQueryKeys = {
   comments: (ticketId: string) => ["agent", "ticket", ticketId, "comments"] as const,
+  teamMembers: (teamId: string) => ["agent", "organization", "teams", teamId, "members"] as const,
+  teams: ["agent", "organization", "teams"] as const,
   ticket: (ticketId: string) => ["agent", "ticket", ticketId] as const,
   tickets: ["agent", "tickets"] as const,
   worklogs: (ticketId: string) => ["agent", "ticket", ticketId, "worklogs"] as const,
@@ -36,6 +40,23 @@ export function useAgentTicket(ticketId: string) {
     enabled: Boolean(ticketId),
     queryFn: () => getAgentTicket(ticketId),
     queryKey: agentQueryKeys.ticket(ticketId),
+  });
+}
+
+export function useSupportTeams() {
+  return useQuery({
+    queryFn: listSupportTeams,
+    queryKey: agentQueryKeys.teams,
+    staleTime: 300_000,
+  });
+}
+
+export function useSupportTeamMembers(teamId: string) {
+  return useQuery({
+    enabled: Boolean(teamId),
+    queryFn: () => listSupportTeamMembers(teamId),
+    queryKey: agentQueryKeys.teamMembers(teamId),
+    staleTime: 300_000,
   });
 }
 

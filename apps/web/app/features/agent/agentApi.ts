@@ -6,6 +6,8 @@ import type {
   AssignTicketRequest,
   ChangeTicketStatusRequest,
   DownloadUrlResponse,
+  SupportTeamResponse,
+  TeamMemberResponse,
   TicketCommentResponse,
   TicketResponse,
   TicketWorklogResponse,
@@ -14,6 +16,16 @@ import { apiClient } from "~/shared/api/httpClient";
 
 export async function listAgentTickets() {
   const response = await apiClient.get<TicketResponse[]>("/api/agent/tickets");
+  return response.data;
+}
+
+export async function listSupportTeams() {
+  const response = await apiClient.get<SupportTeamResponse[]>("/api/organization/teams");
+  return response.data;
+}
+
+export async function listSupportTeamMembers(teamId: string) {
+  const response = await apiClient.get<TeamMemberResponse[]>(`/api/organization/teams/${teamId}/members`);
   return response.data;
 }
 

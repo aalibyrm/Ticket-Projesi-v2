@@ -9,7 +9,6 @@ import {
   FormControlLabel,
   FormHelperText,
   FormLabel,
-  MenuItem,
   Paper,
   Radio,
   RadioGroup,
@@ -24,9 +23,11 @@ import { CustomerErrorState, CustomerLoadingState } from "~/features/customer/co
 import {
   useCreateCustomerTicket,
   useProducts,
+  useTicketTopics,
   useUploadTicketAttachment,
 } from "~/features/customer/customerQueries";
 import type { CreateTicketFormValues } from "~/features/customer/customerTypes";
+import { backendUuidSchema } from "~/shared/validation/uuid";
 
 const maxAttachmentBytes = 10 * 1024 * 1024;
 
@@ -41,13 +42,15 @@ const createTicketSchema = z.object({
     }, "Dosya 10 MB'tan kucuk olmali."),
   description: z.string().trim().min(20, "Aciklama en az 20 karakter olmali.").max(5000),
   priority: z.enum(["LOW", "MEDIUM", "HIGH"]),
-  productId: z.string().uuid("Kategori secmelisin."),
+  productId: backendUuidSchema("Kategori secmelisin."),
   summary: z.string().trim().min(5, "Konu en az 5 karakter olmali.").max(180),
+  topicCode: z.string().trim().min(1, "Talep tipi secmelisin."),
 });
 
 export function CustomerCreateTicketPage() {
   const navigate = useNavigate();
   const productsQuery = useProducts();
+  const topicsQuery = useTicketTopics();
   const createTicket = useCreateCustomerTicket();
   const uploadAttachment = useUploadTicketAttachment();
 
@@ -63,11 +66,13 @@ export function CustomerCreateTicketPage() {
       priority: "MEDIUM",
       productId: "",
       summary: "",
+      topicCode: "",
     },
     resolver: zodResolver(createTicketSchema),
   });
 
   const selectedFile = watch("attachment")?.item(0);
+  const selectedTopic = (topicsQuery.data ?? []).find((topic) => topic.code === watch("topicCode"));
 
   async function submitForm(values: CreateTicketFormValues) {
     const ticket = await createTicket.mutateAsync({
@@ -75,6 +80,7 @@ export function CustomerCreateTicketPage() {
       priority: values.priority,
       productId: values.productId,
       summary: values.summary.trim(),
+      topicCode: values.topicCode,
     });
 
     const file = values.attachment?.item(0);
@@ -85,12 +91,20 @@ export function CustomerCreateTicketPage() {
     navigate(`/tickets/${ticket.id}`);
   }
 
-  if (productsQuery.isLoading) {
+  if (productsQuery.isLoading || topicsQuery.isLoading) {
     return <CustomerLoadingState label="Form verileri yukleniyor" />;
   }
 
-  if (productsQuery.isError) {
-    return <CustomerErrorState message="Kategori listesi alinamadi." onRetry={() => void productsQuery.refetch()} />;
+  if (productsQuery.isError || topicsQuery.isError) {
+    return (
+      <CustomerErrorState
+        message="Form kataloglari alinamadi."
+        onRetry={() => {
+          void productsQuery.refetch();
+          void topicsQuery.refetch();
+        }}
+      />
+    );
   }
 
   const isBusy = isSubmitting || createTicket.isPending || uploadAttachment.isPending;
@@ -147,13 +161,37 @@ export function CustomerCreateTicketPage() {
                   error={Boolean(errors.productId)}
                   helperText={errors.productId?.message}
                   label="Kategori"
+                  SelectProps={{ native: true }}
                   select
                   variant="standard"
                 >
+                  <option value="">Kategori sec</option>
                   {(productsQuery.data ?? []).map((product) => (
-                    <MenuItem key={product.id} value={product.id}>
+                    <option key={product.id} value={product.id}>
                       {product.name}
-                    </MenuItem>
+                    </option>
+                  ))}
+                </TextField>
+              )}
+            />
+            <Controller
+              control={control}
+              name="topicCode"
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  error={Boolean(errors.topicCode)}
+                  helperText={errors.topicCode?.message ?? selectedTopic?.description}
+                  label="Talep tipi"
+                  SelectProps={{ native: true }}
+                  select
+                  variant="standard"
+                >
+                  <option value="">Talep tipi sec</option>
+                  {(topicsQuery.data ?? []).map((topic) => (
+                    <option key={topic.code} value={topic.code}>
+                      {topic.name}
+                    </option>
                   ))}
                 </TextField>
               )}

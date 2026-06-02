@@ -4,6 +4,7 @@ import type {
   NotificationResponse,
   ProductResponse,
   TicketCommentResponse,
+  TicketTopicResponse,
   TicketResponse,
   UploadUrlResponse,
 } from "~/features/customer/customerTypes";
@@ -26,6 +27,11 @@ export async function createCustomerTicket(request: CreateTicketRequest) {
 
 export async function listProducts() {
   const response = await apiClient.get<ProductResponse[]>("/api/products");
+  return response.data;
+}
+
+export async function listTicketTopics() {
+  const response = await apiClient.get<TicketTopicResponse[]>("/api/ticket-topics");
   return response.data;
 }
 

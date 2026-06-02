@@ -27,6 +27,8 @@ import {
   useAgentWorklogs,
   useAssignAgentTicket,
   useChangeAgentTicketStatus,
+  useSupportTeamMembers,
+  useSupportTeams,
 } from "~/features/agent/agentQueries";
 import type {
   TicketAttachmentResponse,
@@ -36,6 +38,7 @@ import type {
 import { selectAuthUser } from "~/features/auth/authSlice";
 import { formatDate, formatDateTime, formatFileSize } from "~/features/customer/formatters";
 import { useAppSelector } from "~/shared/store/hooks";
+import { backendUuidSchema } from "~/shared/validation/uuid";
 
 const statusLabels: Record<TicketStatus, string> = {
   CLOSED: "Kapali",
@@ -53,9 +56,9 @@ const allowedStatusTransitions: Record<TicketStatus, TicketStatus[]> = {
   WAITING_FOR_CUSTOMER: ["IN_PROGRESS"],
 };
 
-const uuidSchema = z.string().uuid();
+const uuidSchema = backendUuidSchema();
 const assignmentSchema = z.object({
-  assignedTeamId: z.string().trim().refine((value) => value === "" || uuidSchema.safeParse(value).success),
+  assignedTeamId: uuidSchema,
   assigneeId: uuidSchema,
 });
 const worklogSchema = z.object({
@@ -74,10 +77,12 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
   const addWorklog = useAddAgentWorklog(ticket.id);
   const downloadUrl = useAgentAttachmentDownloadUrl();
   const statusOptions = allowedStatusTransitions[ticket.status];
+  const teamsQuery = useSupportTeams();
   const [targetStatus, setTargetStatus] = useState<TicketStatus | "">(statusOptions[0] ?? "");
-  const [assigneeId, setAssigneeId] = useState(ticket.assigneeId ?? user?.id ?? "");
+  const [assigneeId, setAssigneeId] = useState(ticket.assigneeId ?? "");
   const [assignedTeamId, setAssignedTeamId] = useState(ticket.assignedTeamId ?? "");
   const [assignmentError, setAssignmentError] = useState<string>();
+  const teamMembersQuery = useSupportTeamMembers(assignedTeamId);
 
   const {
     formState: { errors },
@@ -95,9 +100,18 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
 
   useEffect(() => {
     setTargetStatus(allowedStatusTransitions[ticket.status][0] ?? "");
-    setAssigneeId(ticket.assigneeId ?? user?.id ?? "");
+    setAssigneeId(ticket.assigneeId ?? "");
     setAssignedTeamId(ticket.assignedTeamId ?? "");
-  }, [ticket.assignedTeamId, ticket.assigneeId, ticket.id, ticket.status, user?.id]);
+  }, [ticket.assignedTeamId, ticket.assigneeId, ticket.id, ticket.status]);
+
+  useEffect(() => {
+    if (!teamMembersQuery.data || !assigneeId) {
+      return;
+    }
+    if (!teamMembersQuery.data.some((member) => member.actorId === assigneeId)) {
+      setAssigneeId("");
+    }
+  }, [assigneeId, teamMembersQuery.data]);
 
   async function changeStatus() {
     if (!targetStatus) {
@@ -110,7 +124,7 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
     setAssignmentError(undefined);
     const parsed = assignmentSchema.safeParse({ assignedTeamId, assigneeId });
     if (!parsed.success) {
-      setAssignmentError("Agent ve ekip kimlikleri UUID formatinda olmali.");
+      setAssignmentError("Ekip ve agent secmelisin.");
       return;
     }
 
@@ -126,11 +140,18 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
       setAssignmentError("Oturum kimligi assignment icin UUID formatinda degil.");
       return;
     }
+    const teamId = assignedTeamId || ticket.assignedTeamId;
+    if (!teamId) {
+      setAssignmentError("Bana atamak icin once ekip secmelisin.");
+      return;
+    }
 
     await assignMutation.mutateAsync({
-      assignedTeamId: ticket.assignedTeamId ?? null,
+      assignedTeamId: teamId,
       assigneeId: user.id,
     });
+    setAssignedTeamId(teamId);
+    setAssigneeId(user.id);
   }
 
   async function submitWorklog(values: WorklogFormValues) {
@@ -149,6 +170,10 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
   }
 
   const worklogs = worklogsQuery.data ?? [];
+  const teams = teamsQuery.data ?? [];
+  const teamMembers = teamMembersQuery.data ?? [];
+  const selectedTeamInTeams = teams.some((team) => team.id === assignedTeamId);
+  const selectedAssigneeInMembers = teamMembers.some((member) => member.actorId === assigneeId);
 
   return (
     <Stack
@@ -169,6 +194,11 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
           {(statusMutation.isError || assignMutation.isError || assignmentError) && (
             <Alert severity="error" variant="outlined">
               {assignmentError ?? "Aksiyon kaydedilemedi."}
+            </Alert>
+          )}
+          {(teamsQuery.isError || teamMembersQuery.isError) && (
+            <Alert severity="error" variant="outlined">
+              Ekip katalogu alinamadi.
             </Alert>
           )}
           <TextField
@@ -206,19 +236,55 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
             Bana ata
           </Button>
           <TextField
-            label="Assignee UUID"
-            onChange={(event) => setAssigneeId(event.target.value)}
-            size="small"
-            value={assigneeId}
-            variant="standard"
-          />
-          <TextField
-            label="Team UUID"
-            onChange={(event) => setAssignedTeamId(event.target.value)}
+            disabled={teamsQuery.isLoading}
+            label="Ekip"
+            onChange={(event) => {
+              setAssignedTeamId(event.target.value);
+              setAssigneeId("");
+            }}
+            SelectProps={{ native: true }}
+            select
             size="small"
             value={assignedTeamId}
             variant="standard"
-          />
+          >
+            <option value="">{teamsQuery.isLoading ? "Ekipler yukleniyor" : "Ekip sec"}</option>
+            {assignedTeamId && !selectedTeamInTeams && (
+              <option value={assignedTeamId}>{assignedTeamId}</option>
+            )}
+            {teams.map((team) => (
+              <option key={team.id} value={team.id}>
+                {team.name} / {team.departmentCode} / {team.code}
+              </option>
+            ))}
+          </TextField>
+          <TextField
+            disabled={!assignedTeamId || teamMembersQuery.isLoading}
+            label="Agent"
+            onChange={(event) => setAssigneeId(event.target.value)}
+            SelectProps={{ native: true }}
+            select
+            size="small"
+            value={assigneeId}
+            variant="standard"
+          >
+            <option value="">
+              {!assignedTeamId
+                ? "Once ekip sec"
+                : teamMembersQuery.isLoading
+                  ? "Agentlar yukleniyor"
+                  : "Agent sec"}
+            </option>
+            {assigneeId && !selectedAssigneeInMembers && (
+              <option value={assigneeId}>{assigneeId}</option>
+            )}
+            {teamMembers.map((member) => (
+              <option key={member.actorId} value={member.actorId}>
+                {member.actorId}
+                {member.teamLead ? " / Lead" : ""}
+              </option>
+            ))}
+          </TextField>
           <Button disabled={assignMutation.isPending} onClick={() => void submitAssignment()} variant="outlined">
             Atamayi kaydet
           </Button>

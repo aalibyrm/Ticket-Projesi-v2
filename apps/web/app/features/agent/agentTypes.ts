@@ -23,6 +23,22 @@ export interface AssignTicketRequest {
   assignedTeamId?: string | null;
 }
 
+export interface SupportTeamResponse {
+  code: string;
+  departmentCode: string;
+  departmentId: string;
+  id: string;
+  leadActorId: string;
+  name: string;
+}
+
+export interface TeamMemberResponse {
+  actorId: string;
+  teamCode: string;
+  teamId: string;
+  teamLead: boolean;
+}
+
 export interface ChangeTicketStatusRequest {
   status: TicketStatus;
 }

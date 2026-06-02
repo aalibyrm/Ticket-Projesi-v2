@@ -8,6 +8,7 @@ import {
   listCustomerTickets,
   listNotifications,
   listProducts,
+  listTicketTopics,
   markNotificationRead,
   uploadTicketAttachment,
 } from "~/features/customer/customerApi";
@@ -19,6 +20,7 @@ export const customerQueryKeys = {
   products: ["customer", "products"] as const,
   ticket: (ticketId: string) => ["customer", "ticket", ticketId] as const,
   tickets: ["customer", "tickets"] as const,
+  topics: ["customer", "ticket-topics"] as const,
 };
 
 export function useCustomerTickets() {
@@ -40,6 +42,14 @@ export function useProducts() {
   return useQuery({
     queryFn: listProducts,
     queryKey: customerQueryKeys.products,
+    staleTime: 300_000,
+  });
+}
+
+export function useTicketTopics() {
+  return useQuery({
+    queryFn: listTicketTopics,
+    queryKey: customerQueryKeys.topics,
     staleTime: 300_000,
   });
 }
