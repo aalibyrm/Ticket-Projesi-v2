@@ -1,5 +1,5 @@
-import { ManagerReportPreview } from "~/features/reports/ManagerReportPreview";
+import { ManagerReportsPage } from "~/features/reports/ManagerReportsPage";
 
 export default function ReportsRoute() {
-  return <ManagerReportPreview />;
+  return <ManagerReportsPage />;
 }
