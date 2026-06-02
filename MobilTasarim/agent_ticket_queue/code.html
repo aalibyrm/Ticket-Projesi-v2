@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+
+<html class="light" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Bilet Kuyruğu</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&amp;family=Outfit:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-container": "#e3e2e2",
+                    "on-primary-fixed-variant": "#910b00",
+                    "on-secondary-container": "#646464",
+                    "inverse-primary": "#ffb4a7",
+                    "secondary-fixed-dim": "#c7c6c6",
+                    "tertiary-container": "#555454",
+                    "primary-fixed": "#ffdad4",
+                    "on-primary-fixed": "#400200",
+                    "surface-dim": "#d9dade",
+                    "primary": "#7f0900",
+                    "on-tertiary-container": "#cbc8c8",
+                    "on-error": "#ffffff",
+                    "outline-variant": "#e4beb7",
+                    "inverse-surface": "#2f3034",
+                    "on-primary": "#ffffff",
+                    "surface-tint": "#b91e0b",
+                    "surface-container-highest": "#e2e2e7",
+                    "primary-container": "#aa1101",
+                    "surface-container-high": "#e8e8ed",
+                    "on-primary-container": "#ffb8ab",
+                    "tertiary-fixed": "#e5e2e1",
+                    "on-error-container": "#93000a",
+                    "background": "#f9f9fe",
+                    "secondary-fixed": "#e3e2e2",
+                    "on-secondary": "#ffffff",
+                    "on-surface": "#1a1c1f",
+                    "inverse-on-surface": "#f0f0f5",
+                    "secondary": "#5e5e5e",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container": "#ededf2",
+                    "surface-variant": "#e2e2e7",
+                    "on-tertiary-fixed-variant": "#474646",
+                    "on-secondary-fixed": "#1b1c1c",
+                    "surface": "#f9f9fe",
+                    "error": "#ba1a1a",
+                    "on-secondary-fixed-variant": "#464747",
+                    "on-tertiary-fixed": "#1c1b1b",
+                    "on-surface-variant": "#5b403b",
+                    "outline": "#90706a",
+                    "surface-bright": "#f9f9fe",
+                    "on-background": "#1a1c1f",
+                    "tertiary-fixed-dim": "#c8c6c5",
+                    "surface-container-low": "#f3f3f8",
+                    "tertiary": "#3e3d3d",
+                    "primary-fixed-dim": "#ffb4a7",
+                    "on-tertiary": "#ffffff",
+                    "error-container": "#ffdad6"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-md": "16px",
+                    "stack-lg": "32px",
+                    "gutter": "16px",
+                    "stack-sm": "8px",
+                    "unit": "4px",
+                    "container-margin": "24px"
+            },
+            "fontFamily": {
+                    "display": [
+                            "Outfit"
+                    ],
+                    "body-md": [
+                            "DM Sans"
+                    ],
+                    "body-lg": [
+                            "DM Sans"
+                    ],
+                    "headline-md": [
+                            "Outfit"
+                    ],
+                    "headline-lg": [
+                            "Outfit"
+                    ],
+                    "stats-lg": [
+                            "Outfit"
+                    ],
+                    "headline-lg-mobile": [
+                            "Outfit"
+                    ],
+                    "label-sm": [
+                            "DM Sans"
+                    ]
+            },
+            "fontSize": {
+                    "display": [
+                            "48px",
+                            {
+                                    "lineHeight": "1.1",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "body-md": [
+                            "15px",
+                            {
+                                    "lineHeight": "1.5",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "body-lg": [
+                            "18px",
+                            {
+                                    "lineHeight": "1.6",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-md": [
+                            "20px",
+                            {
+                                    "lineHeight": "1.4",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "1.2",
+                                    "letterSpacing": "-0.01em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "stats-lg": [
+                            "36px",
+                            {
+                                    "lineHeight": "1",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-lg-mobile": [
+                            "24px",
+                            {
+                                    "lineHeight": "1.2",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "label-sm": [
+                            "13px",
+                            {
+                                    "lineHeight": "1.2",
+                                    "letterSpacing": "0.02em",
+                                    "fontWeight": "500"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+<style>
+        /* Custom styles to enforce strict rules where Tailwind might be tricky */
+        .hairline-b { border-bottom: 1px solid #E5E5EA; }
+        .hairline-t { border-top: 1px solid #E5E5EA; }
+        .hairline-l { border-left: 1px solid #E5E5EA; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .input-underline {
+            border: none;
+            border-bottom: 1px solid #E5E5EA;
+            border-radius: 0;
+            padding-left: 40px;
+        }
+        .input-underline:focus {
+            outline: none;
+            box-shadow: none;
+            border-bottom-color: #111111;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface h-screen flex flex-col font-body-md antialiased overflow-hidden w-full max-w-[390px] mx-auto relative border-x border-surface-container-highest">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between px-gutter h-14 w-full bg-surface hairline-b shrink-0 z-10 sticky top-0">
+<div class="w-8">
+<span class="material-symbols-outlined text-on-surface" data-icon="menu">menu</span>
+</div>
+<h1 class="font-headline-md text-headline-md text-on-surface text-center flex-1">Bilet Kuyruğu</h1>
+<div class="w-8 flex justify-end">
+<span class="material-symbols-outlined text-secondary" data-icon="sort">sort</span>
+</div>
+</header>
+<!-- Search Bar -->
+<div class="px-gutter pt-stack-sm pb-stack-sm bg-surface shrink-0 z-10 relative">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-0 top-1/2 -translate-y-1/2 text-secondary px-2" data-icon="search">search</span>
+<input class="w-full h-10 bg-transparent input-underline text-body-md font-body-md placeholder:text-secondary focus:ring-0" placeholder="Bilet ara..." type="text"/>
+</div>
+</div>
+<!-- Ticket List -->
+<main class="flex-1 overflow-y-auto hide-scrollbar pb-24 bg-surface">
+<ul class="flex flex-col">
+<!-- Row 1: High Priority, Unassigned -->
+<li class="relative px-gutter py-3 hairline-b flex items-start gap-3 active:bg-surface-container-lowest transition-colors">
+<div class="w-1 absolute left-0 top-0 bottom-0 bg-surface-container-highest"></div>
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary text-[20px]" data-icon="report">report</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<span class="font-body-md text-body-md text-on-surface font-medium truncate pr-2">Sistem Hatası - Giriş Yapılamıyor</span>
+<span class="font-label-sm text-label-sm text-secondary shrink-0">12:45</span>
+</div>
+<div class="font-body-md text-[13px] text-secondary truncate mb-1">Şifre sıfırlama e-postaları kullanıcılara ulaşmıyor. Acil incelenmesi gerekiyor.</div>
+<div class="flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-secondary">Atanmamış</span>
+<button class="font-label-sm text-label-sm font-medium text-primary-container">Üstlen</button>
+</div>
+</div>
+</li>
+<!-- Row 2: High Priority, Assigned to self -->
+<li class="relative px-gutter py-3 hairline-b flex items-start gap-3 active:bg-surface-container-lowest transition-colors">
+<div class="w-1 absolute left-0 top-0 bottom-0 bg-primary-container"></div>
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary text-[20px]" data-icon="credit_card">credit_card</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<span class="font-body-md text-body-md text-on-surface font-medium truncate pr-2">Ödeme Başarısız</span>
+<span class="font-label-sm text-label-sm text-secondary shrink-0">11:30</span>
+</div>
+<div class="font-body-md text-[13px] text-secondary truncate mb-1">Kredi kartı ile ödeme yaparken 500 hatası alıyorum.</div>
+<div class="flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-secondary">Bana atandı</span>
+<span class="material-symbols-outlined text-secondary text-[16px]" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</li>
+<!-- Row 3: Normal Priority, Unassigned -->
+<li class="relative px-gutter py-3 hairline-b flex items-start gap-3 active:bg-surface-container-lowest transition-colors">
+<div class="w-1 absolute left-0 top-0 bottom-0 bg-surface-container-highest"></div>
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary text-[20px]" data-icon="settings">settings</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<span class="font-body-md text-body-md text-on-surface font-medium truncate pr-2">Profil Fotoğrafı Güncellenemiyor</span>
+<span class="font-label-sm text-label-sm text-secondary shrink-0">09:15</span>
+</div>
+<div class="font-body-md text-[13px] text-secondary truncate mb-1">JPG dosyası yüklemeye çalışıyorum ama hata veriyor.</div>
+<div class="flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-secondary">Atanmamış</span>
+<button class="font-label-sm text-label-sm font-medium text-primary-container">Üstlen</button>
+</div>
+</div>
+</li>
+<!-- Row 4: Normal Priority, Unassigned -->
+<li class="relative px-gutter py-3 hairline-b flex items-start gap-3 active:bg-surface-container-lowest transition-colors">
+<div class="w-1 absolute left-0 top-0 bottom-0 bg-surface-container-highest"></div>
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary text-[20px]" data-icon="person_add">person_add</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<span class="font-body-md text-body-md text-on-surface font-medium truncate pr-2">Yeni Kullanıcı Kaydı</span>
+<span class="font-label-sm text-label-sm text-secondary shrink-0">Dün</span>
+</div>
+<div class="font-body-md text-[13px] text-secondary truncate mb-1">Kayıt işlemi sırasında onay SMS'i gelmedi.</div>
+<div class="flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-secondary">Atanmamış</span>
+<button class="font-label-sm text-label-sm font-medium text-primary-container">Üstlen</button>
+</div>
+</div>
+</li>
+<!-- Row 5: Normal Priority, Assigned to self -->
+<li class="relative px-gutter py-3 hairline-b flex items-start gap-3 active:bg-surface-container-lowest transition-colors">
+<div class="w-1 absolute left-0 top-0 bottom-0 bg-secondary-container"></div>
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary text-[20px]" data-icon="receipt_long">receipt_long</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<span class="font-body-md text-body-md text-on-surface font-medium truncate pr-2">Fatura İsteği</span>
+<span class="font-label-sm text-label-sm text-secondary shrink-0">Dün</span>
+</div>
+<div class="font-body-md text-[13px] text-secondary truncate mb-1">Geçen ayki aboneliğimin faturasını talep ediyorum.</div>
+<div class="flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-secondary">Bana atandı</span>
+<span class="material-symbols-outlined text-secondary text-[16px]" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</li>
+<!-- Row 6: Normal Priority, Unassigned -->
+<li class="relative px-gutter py-3 hairline-b flex items-start gap-3 active:bg-surface-container-lowest transition-colors">
+<div class="w-1 absolute left-0 top-0 bottom-0 bg-surface-container-highest"></div>
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary text-[20px]" data-icon="info">info</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<span class="font-body-md text-body-md text-on-surface font-medium truncate pr-2">Üyelik İptali Hakkında Bilgi</span>
+<span class="font-label-sm text-label-sm text-secondary shrink-0">Salı</span>
+</div>
+<div class="font-body-md text-[13px] text-secondary truncate mb-1">Üyeliğimi iptal edersem verilerim silinir mi?</div>
+<div class="flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-secondary">Atanmamış</span>
+<button class="font-label-sm text-label-sm font-medium text-primary-container">Üstlen</button>
+</div>
+</div>
+</li>
+<!-- Row 7: Normal Priority, Unassigned -->
+<li class="relative px-gutter py-3 hairline-b flex items-start gap-3 active:bg-surface-container-lowest transition-colors">
+<div class="w-1 absolute left-0 top-0 bottom-0 bg-surface-container-highest"></div>
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary text-[20px]" data-icon="sync_problem">sync_problem</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<span class="font-body-md text-body-md text-on-surface font-medium truncate pr-2">Mobil Uygulama Senkronizasyon</span>
+<span class="font-label-sm text-label-sm text-secondary shrink-0">Pzt</span>
+</div>
+<div class="font-body-md text-[13px] text-secondary truncate mb-1">Web'de yaptığım değişiklikler mobilde görünmüyor.</div>
+<div class="flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-secondary">Atanmamış</span>
+<button class="font-label-sm text-label-sm font-medium text-primary-container">Üstlen</button>
+</div>
+</div>
+</li>
+<!-- Row 8: Normal Priority, Unassigned -->
+<li class="relative px-gutter py-3 hairline-b flex items-start gap-3 active:bg-surface-container-lowest transition-colors">
+<div class="w-1 absolute left-0 top-0 bottom-0 bg-surface-container-highest"></div>
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary text-[20px]" data-icon="bug_report">bug_report</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<span class="font-body-md text-body-md text-on-surface font-medium truncate pr-2">Raporlama Ekranı Görüntü Hatası</span>
+<span class="font-label-sm text-label-sm text-secondary shrink-0">Pzr</span>
+</div>
+<div class="font-body-md text-[13px] text-secondary truncate mb-1">Grafikler birbirine girmiş durumda, okunamıyor.</div>
+<div class="flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-secondary">Atanmamış</span>
+<button class="font-label-sm text-label-sm font-medium text-primary-container">Üstlen</button>
+</div>
+</div>
+</li>
+</ul>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center h-16 bg-surface px-4 pb-safe hairline-t z-50">
+<div class="flex flex-col items-center justify-center text-primary-container relative before:content-[''] before:absolute before:-top-1 before:w-[3px] before:h-[3px] before:bg-primary-container before:rounded-full cursor-pointer hover:bg-surface-container-lowest transition-transform scale-95 duration-150">
+<span class="material-symbols-outlined mb-1" data-icon="queue" style="font-variation-settings: 'FILL' 1;">queue</span>
+<span class="font-label-sm text-[11px] font-medium leading-none">Kuyruk</span>
+</div>
+<div class="flex flex-col items-center justify-center text-secondary cursor-pointer hover:bg-surface-container-lowest transition-transform scale-95 duration-150">
+<span class="material-symbols-outlined mb-1" data-icon="assignment">assignment</span>
+<span class="font-label-sm text-[11px] font-medium leading-none">Atanan</span>
+</div>
+<div class="flex flex-col items-center justify-center text-secondary cursor-pointer hover:bg-surface-container-lowest transition-transform scale-95 duration-150">
+<span class="material-symbols-outlined mb-1" data-icon="bar_chart">bar_chart</span>
+<span class="font-label-sm text-[11px] font-medium leading-none">İstatistik</span>
+</div>
+<div class="flex flex-col items-center justify-center text-secondary cursor-pointer hover:bg-surface-container-lowest transition-transform scale-95 duration-150">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-label-sm text-[11px] font-medium leading-none">Profil</span>
+</div>
+</nav>
+<!-- SafeArea Padding for iOS -->
+<style>
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+    </style>
+</body></html>

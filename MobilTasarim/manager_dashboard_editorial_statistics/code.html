@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+
+<html class="light" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Özet</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&amp;family=Outfit:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#646464",
+                        "surface-bright": "#f9f9fe",
+                        "on-secondary-fixed-variant": "#464747",
+                        "on-background": "#1a1c1f",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "surface-container": "#ededf2",
+                        "secondary-container": "#e3e2e2",
+                        "primary-container": "#aa1101",
+                        "error": "#ba1a1a",
+                        "on-tertiary-container": "#cbc8c8",
+                        "surface-tint": "#b91e0b",
+                        "surface-dim": "#d9dade",
+                        "surface-container-highest": "#e2e2e7",
+                        "secondary-fixed-dim": "#c7c6c6",
+                        "secondary": "#5e5e5e",
+                        "on-primary-fixed-variant": "#910b00",
+                        "tertiary-fixed-dim": "#c8c6c5",
+                        "surface-container-high": "#e8e8ed",
+                        "primary-fixed-dim": "#ffb4a7",
+                        "on-error": "#ffffff",
+                        "inverse-on-surface": "#f0f0f5",
+                        "primary-fixed": "#ffdad4",
+                        "on-tertiary-fixed-variant": "#474646",
+                        "on-error-container": "#93000a",
+                        "tertiary-container": "#555454",
+                        "surface-container-low": "#f3f3f8",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-surface": "#2f3034",
+                        "tertiary-fixed": "#e5e2e1",
+                        "secondary-fixed": "#e3e2e2",
+                        "surface": "#f9f9fe",
+                        "surface-variant": "#e2e2e7",
+                        "outline-variant": "#e4beb7",
+                        "on-tertiary-fixed": "#1c1b1b",
+                        "on-primary-fixed": "#400200",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#3e3d3d",
+                        "outline": "#90706a",
+                        "on-secondary": "#ffffff",
+                        "primary": "#7f0900",
+                        "on-surface-variant": "#5b403b",
+                        "on-primary": "#ffffff",
+                        "background": "#f9f9fe",
+                        "on-surface": "#1a1c1f",
+                        "inverse-primary": "#ffb4a7",
+                        "on-primary-container": "#ffb8ab"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "32px",
+                        "container-margin": "24px",
+                        "stack-sm": "8px",
+                        "unit": "4px",
+                        "stack-md": "16px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "stats-lg": ["Outfit"],
+                        "label-sm": ["DM Sans"],
+                        "headline-lg-mobile": ["Outfit"],
+                        "body-md": ["DM Sans"],
+                        "body-lg": ["DM Sans"],
+                        "headline-md": ["Outfit"],
+                        "headline-lg": ["Outfit"],
+                        "display": ["Outfit"]
+                    },
+                    "fontSize": {
+                        "stats-lg": ["36px", { "lineHeight": "1", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "label-sm": ["13px", { "lineHeight": "1.2", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "body-md": ["15px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-md": ["20px", { "lineHeight": "1.4", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .sparkline {
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .line-chart {
+            fill: none;
+            stroke: #1a1c1f;
+            stroke-width: 1;
+            stroke-linejoin: round;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface antialiased">
+<nav class="fixed top-0 w-full h-[56px] border-b border-surface-variant dark:border-on-surface-variant transition-colors duration-200 flex items-center justify-between px-gutter z-50 bg-surface dark:bg-surface-dim">
+<div class="w-10"></div>
+<div class="font-headline-md text-headline-md font-bold text-on-surface dark:text-inverse-on-surface flex-grow text-center">Özet</div>
+<div class="w-10 flex justify-end">
+<span class="material-symbols-outlined text-secondary" data-icon="calendar_today">calendar_today</span>
+</div>
+</nav>
+<main class="pt-[56px] pb-[80px] px-4 md:px-container-margin max-w-3xl mx-auto space-y-8">
+<section class="flex flex-col space-y-6 pt-6">
+<div class="flex flex-col">
+<span class="font-stats-lg text-stats-lg text-on-surface">1,247</span>
+<div class="w-full h-12 my-2 relative">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 100 30">
+<path class="sparkline" d="M0 25 L10 20 L20 28 L30 15 L40 22 L50 10 L60 18 L70 5 L80 15 L90 2 L100 8" stroke="#737373"></path>
+</svg>
+</div>
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-widest">TOPLAM BİLET</span>
+</div>
+<div class="flex flex-col">
+<span class="font-stats-lg text-stats-lg text-primary">94.2%</span>
+<div class="w-full h-12 my-2 relative">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 100 30">
+<path class="sparkline" d="M0 20 L15 15 L30 25 L45 10 L60 18 L75 5 L90 12 L100 2" stroke="#aa1101"></path>
+</svg>
+</div>
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-widest">SLA UYUMU</span>
+</div>
+<div class="flex flex-col">
+<span class="font-stats-lg text-stats-lg text-on-surface">3.8s</span>
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-widest mt-2">ORT. ÇÖZÜM SÜRESİ</span>
+</div>
+</section>
+<div class="h-px w-full bg-surface-variant"></div>
+<section class="space-y-4">
+<h2 class="font-headline-md text-headline-md text-on-surface">Son 30 Gün</h2>
+<div class="w-full h-[180px] relative mt-4">
+<svg class="w-full h-[150px]" preserveaspectratio="none" viewbox="0 0 300 150">
+<path class="line-chart" d="M0 120 C 50 120, 50 80, 100 90 C 150 100, 150 40, 200 50 C 250 60, 250 10, 300 20"></path>
+<circle cx="300" cy="20" fill="#aa1101" r="4"></circle>
+</svg>
+<div class="flex justify-between items-center px-1 font-label-sm text-[11px] text-secondary mt-2">
+<span>Eyl</span>
+<span>Eki</span>
+<span>Kas</span>
+<span>Ara</span>
+</div>
+</div>
+</section>
+<div class="h-px w-full bg-surface-variant"></div>
+<section class="space-y-6">
+<h2 class="font-headline-md text-headline-md text-on-surface">Kategori Dağılımı</h2>
+<div class="space-y-4">
+<div class="flex items-center">
+<span class="font-body-md text-body-md text-on-surface w-24">Donanım</span>
+<div class="flex-grow mx-4">
+<div class="h-1.5 w-full bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-on-surface w-[85%]"></div>
+</div>
+</div>
+<span class="font-body-md text-body-md text-secondary w-8 text-right">452</span>
+</div>
+<div class="flex items-center">
+<span class="font-body-md text-body-md text-on-surface w-24">Yazılım</span>
+<div class="flex-grow mx-4">
+<div class="h-1.5 w-full bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-on-surface w-[60%]"></div>
+</div>
+</div>
+<span class="font-body-md text-body-md text-secondary w-8 text-right">318</span>
+</div>
+<div class="flex items-center">
+<span class="font-body-md text-body-md text-on-surface w-24">Erişim</span>
+<div class="flex-grow mx-4">
+<div class="h-1.5 w-full bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-on-surface w-[45%]"></div>
+</div>
+</div>
+<span class="font-body-md text-body-md text-secondary w-8 text-right">241</span>
+</div>
+<div class="flex items-center">
+<span class="font-body-md text-body-md text-on-surface w-24">Ağ</span>
+<div class="flex-grow mx-4">
+<div class="h-1.5 w-full bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-on-surface w-[30%]"></div>
+</div>
+</div>
+<span class="font-body-md text-body-md text-secondary w-8 text-right">156</span>
+</div>
+</div>
+</section>
+<div class="h-px w-full bg-surface-variant"></div>
+<section class="space-y-2">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-4">Ekip Performansı</h2>
+<div class="flex items-center py-[14px] border-b border-surface-variant">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center mr-3 overflow-hidden">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="A detailed, professional studio portrait of a young woman with a calm expression, used as an avatar in a minimalist light-mode dashboard. Soft, high-key lighting illuminates her face, highlighting the clean, modern aesthetic of the UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7odY9sRNs0whlM51icUfTbGfetg4EhpRtU6JU-YE-KFGKhY6Koo7BGP1vMZABtbuWlQEaQKfo22IFafC8k6U5pWqifjvppbbmAjGOd3yz-zN5Snw5sgxoiFGcBCI5f9hcV3TI1lMZOdOhCA-ctY6lcOhdMbl4Bz20GDu4knrr8BSsIgl4leaPMWAHcSCYQpuciCuLLg8qKp1HlvPum_sNcQS0sKr1ATzrNSkMp2B9X35PJvdtYudp7PfFivUuaGnBF7pTH1mBV0w"/>
+</div>
+<div class="flex-grow">
+<div class="font-body-md text-body-md font-medium text-on-surface">Ayşe Yılmaz</div>
+<div class="font-label-sm text-label-sm text-secondary">245 Bilet • 2.1s Ort.</div>
+</div>
+<div class="font-stats-lg text-[18px] font-semibold text-primary">98%</div>
+</div>
+<div class="flex items-center py-[14px] border-b border-surface-variant">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center mr-3 overflow-hidden">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="A detailed, professional studio portrait of a young man looking directly at the camera, used as an avatar in a minimalist light-mode dashboard. The lighting is crisp and natural, emphasizing the professional, high-end magazine style of the application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEr-3fsuSoAby74GDP7mddIwosQj32LBG9CE7TlD8VlA8CESSfTewLqjxmoomhGAR_SnubSgnwfVrAbISCqQSvcC5TL1UrpsXSYyW346r44xJV8fBJKrQu6Ty5zTnf0tFyFDHjPGGucXjcRlyWU7OF2ZnWAqiT1EDvFJVYSfbzVnC0y5LHIvcGSu9O1Qs1nbysYkDzmjVZSsNOvOjjmlRZCLEVcoEFtpVkgMThCLmP4G4FifJYxcjBqs_Xrd0t34L5IoOnmzDI2Y4"/>
+</div>
+<div class="flex-grow">
+<div class="font-body-md text-body-md font-medium text-on-surface">Mehmet Demir</div>
+<div class="font-label-sm text-label-sm text-secondary">218 Bilet • 2.8s Ort.</div>
+</div>
+<div class="font-stats-lg text-[18px] font-semibold text-on-surface">94%</div>
+</div>
+<div class="flex items-center py-[14px] border-b border-surface-variant">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center mr-3 overflow-hidden">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="A detailed, professional studio portrait of a smiling young woman, used as an avatar in a sleek, minimalist light-mode dashboard. High-key white lighting creates a bright, modern feel that perfectly matches the clean, typographic layout of the UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuWspGjgUdM-Qy0dBTYZXTAX1mDsIM43b_Am3XF8x9jcJNlof6yrcty8BDrBrXVIBg2A1tvBIr5AdaIFFP0azOxEKAJrF5NjSECXPPQA3iiX_QS38CEi8PMQ7i7A7cd-A-GjfHu1IXE26zJzPlxJgQWjmMr22kz1l_f3jwDbCveNnaWD6o-AFVS55iLgQV-_4snFHWMZyNJWFkHsIlhUe7NncHiry9ChZLTQhSPL1Er2UxoUpEyWweBJwrqm-nnIHQcYPtZhr1pow"/>
+</div>
+<div class="flex-grow">
+<div class="font-body-md text-body-md font-medium text-on-surface">Elif Şahin</div>
+<div class="font-label-sm text-label-sm text-secondary">195 Bilet • 3.2s Ort.</div>
+</div>
+<div class="font-stats-lg text-[18px] font-semibold text-on-surface">91%</div>
+</div>
+<div class="flex items-center py-[14px]">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center mr-3 overflow-hidden">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="A detailed, professional studio portrait of a mature man with glasses, used as an avatar in a high-end, minimalist light-mode dashboard. The clean, crisp lighting reflects the sophisticated, editorial style of the application's design system." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBZ_A0sEbfX-T6ln0rUVIGQUqQekj8GkiCZqGPWeesYjsQ-Dg2ndxceTTa4AwfH3E8POQP15uikjYcWC129ObrgbrNsGjtGzowuZ60yIcgrGD3Qpetmbd6u434aNqkBfF5-LB6XvVhFAuZE2aSFamizrpiBPTGJQAzXEY1LX2aSBo102x1_OrKZ-0WBklxkGX440OS0HstPKDSWopmgSpDXOggr4ZsPc0pt_mMP4zMyc31x7fd0KXLLeYihSZ7tnpdXKOsHykRuBQ"/>
+</div>
+<div class="flex-grow">
+<div class="font-body-md text-body-md font-medium text-on-surface">Can Kaya</div>
+<div class="font-label-sm text-label-sm text-secondary">164 Bilet • 4.1s Ort.</div>
+</div>
+<div class="font-stats-lg text-[18px] font-semibold text-on-surface">88%</div>
+</div>
+</section>
+</main>
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center bg-surface dark:bg-surface-dim border-t border-surface-variant h-[56px] px-2 pb-safe">
+<button class="flex flex-col items-center justify-center text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:opacity-80 active:scale-95 transition-transform w-16 h-full">
+<span class="material-symbols-outlined text-[24px] mb-1" data-icon="add_circle">add_circle</span>
+<span class="font-label-sm text-[10px] leading-none">Yeni Talep</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:opacity-80 active:scale-95 transition-transform w-16 h-full">
+<span class="material-symbols-outlined text-[24px] mb-1" data-icon="history">history</span>
+<span class="font-label-sm text-[10px] leading-none">Taleplerim</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface dark:text-inverse-on-surface relative before:content-[''] before:absolute before:top-1 before:w-1 before:h-1 before:bg-primary before:rounded-full hover:opacity-80 active:scale-95 transition-transform w-16 h-full">
+<span class="material-symbols-outlined text-[24px] mb-1" data-icon="analytics">analytics</span>
+<span class="font-label-sm text-[10px] leading-none">Özet</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:opacity-80 active:scale-95 transition-transform w-16 h-full">
+<span class="material-symbols-outlined text-[24px] mb-1" data-icon="person">person</span>
+<span class="font-label-sm text-[10px] leading-none">Profil</span>
+</button>
+</nav>
+</body></html>

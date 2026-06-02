@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=390, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Active Conversation - Bottom Sheet Open</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&amp;family=DM+Sans:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "on-secondary-container": "#646464",
+                "primary-container": "#aa1101",
+                "error-container": "#ffdad6",
+                "on-surface": "#1a1c1f",
+                "surface-container-low": "#f3f3f8",
+                "on-surface-variant": "#5b403b",
+                "on-secondary-fixed-variant": "#464747",
+                "on-primary-fixed-variant": "#910b00",
+                "tertiary-fixed-dim": "#c8c6c5",
+                "on-secondary-fixed": "#1b1c1c",
+                "on-tertiary": "#ffffff",
+                "on-error": "#ffffff",
+                "tertiary-container": "#555454",
+                "secondary-fixed-dim": "#c7c6c6",
+                "surface-container-lowest": "#ffffff",
+                "secondary": "#5e5e5e",
+                "inverse-on-surface": "#f0f0f5",
+                "on-primary": "#ffffff",
+                "on-error-container": "#93000a",
+                "inverse-surface": "#2f3034",
+                "outline-variant": "#e4beb7",
+                "surface-container-highest": "#e2e2e7",
+                "tertiary": "#3e3d3d",
+                "surface-container": "#ededf2",
+                "primary": "#7f0900",
+                "surface-variant": "#e2e2e7",
+                "secondary-container": "#e3e2e2",
+                "error": "#ba1a1a",
+                "outline": "#90706a",
+                "on-primary-container": "#ffb8ab",
+                "tertiary-fixed": "#e5e2e1",
+                "surface-container-high": "#e8e8ed",
+                "surface": "#f9f9fe",
+                "primary-fixed": "#ffdad4",
+                "surface-tint": "#b91e0b",
+                "inverse-primary": "#ffb4a7",
+                "background": "#f9f9fe",
+                "on-tertiary-container": "#cbc8c8",
+                "secondary-fixed": "#e3e2e2",
+                "on-tertiary-fixed-variant": "#474646",
+                "on-tertiary-fixed": "#1c1b1b",
+                "on-secondary": "#ffffff",
+                "surface-dim": "#d9dade",
+                "primary-fixed-dim": "#ffb4a7",
+                "on-primary-fixed": "#400200",
+                "surface-bright": "#f9f9fe",
+                "on-background": "#1a1c1f"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "unit": "4px",
+                "gutter": "16px",
+                "container-margin": "24px",
+                "stack-md": "16px",
+                "stack-sm": "8px",
+                "stack-lg": "32px"
+        },
+        "fontFamily": {
+                "headline-md": [
+                        "Outfit"
+                ],
+                "headline-lg-mobile": [
+                        "Outfit"
+                ],
+                "stats-lg": [
+                        "Outfit"
+                ],
+                "headline-lg": [
+                        "Outfit"
+                ],
+                "display": [
+                        "Outfit"
+                ],
+                "label-sm": [
+                        "DM Sans"
+                ],
+                "body-md": [
+                        "DM Sans"
+                ],
+                "body-lg": [
+                        "DM Sans"
+                ]
+        },
+        "fontSize": {
+                "headline-md": [
+                        "20px",
+                        {
+                                "lineHeight": "1.4",
+                                "fontWeight": "500"
+                        }
+                ],
+                "headline-lg-mobile": [
+                        "24px",
+                        {
+                                "lineHeight": "1.2",
+                                "fontWeight": "600"
+                        }
+                ],
+                "stats-lg": [
+                        "36px",
+                        {
+                                "lineHeight": "1",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "headline-lg": [
+                        "32px",
+                        {
+                                "lineHeight": "1.2",
+                                "letterSpacing": "-0.01em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "display": [
+                        "48px",
+                        {
+                                "lineHeight": "1.1",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "label-sm": [
+                        "13px",
+                        {
+                                "lineHeight": "1.2",
+                                "letterSpacing": "0.02em",
+                                "fontWeight": "500"
+                        }
+                ],
+                "body-md": [
+                        "15px",
+                        {
+                                "lineHeight": "1.5",
+                                "fontWeight": "400"
+                        }
+                ],
+                "body-lg": [
+                        "18px",
+                        {
+                                "lineHeight": "1.6",
+                                "fontWeight": "400"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+<style>
+  body {
+    width: 390px;
+    height: 844px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+  }
+</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface antialiased">
+<!-- Main Chat View (Dimmed) -->
+<div class="h-full w-full flex flex-col relative z-0">
+<!-- Top Nav Bar -->
+<div class="h-14 w-full flex items-center justify-between px-gutter border-b border-surface-container-highest bg-surface">
+<button class="w-10 h-10 flex items-center justify-start text-on-surface">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="flex flex-col items-center justify-center">
+<h1 class="font-headline-md text-headline-md text-on-surface">Ödeme sorunu</h1>
+<span class="font-label-sm text-label-sm text-secondary">#TKT-4821</span>
+</div>
+<button class="w-10 h-10 flex items-center justify-end text-secondary">
+<span class="material-symbols-outlined">info</span>
+</button>
+</div>
+<!-- Chat Area Placeholder -->
+<div class="flex-1 bg-surface-container-lowest p-gutter flex flex-col gap-stack-md overflow-y-auto">
+<div class="flex items-start gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center flex-shrink-0">
+<span class="font-label-sm text-label-sm text-on-surface">AY</span>
+</div>
+<div class="bg-surface-container-low p-3 rounded-lg rounded-tl-none border border-surface-container-highest max-w-[80%]">
+<p class="font-body-md text-body-md text-on-surface">Merhaba, ödemeniz ile ilgili kontrol sağlıyorum. Lütfen kısa bir süre bekleyin.</p>
+</div>
+</div>
+<div class="flex items-start gap-3 flex-row-reverse">
+<div class="bg-primary text-on-primary p-3 rounded-lg rounded-tr-none max-w-[80%]">
+<p class="font-body-md text-body-md">Tamamdır, bekliyorum.</p>
+</div>
+</div>
+</div>
+<!-- Input Area Placeholder -->
+<div class="p-gutter border-t border-surface-container-highest bg-surface flex items-center gap-2">
+<button class="text-secondary p-2"><span class="material-symbols-outlined">attach_file</span></button>
+<div class="flex-1 bg-surface-container-low border border-surface-container-highest rounded-full h-10 px-4 flex items-center">
+<span class="font-body-md text-body-md text-secondary">Mesaj yaz...</span>
+</div>
+<button class="bg-primary text-on-primary w-10 h-10 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+</div>
+<!-- Overlay Scrim -->
+<div class="absolute inset-0 bg-[#111111] bg-opacity-30 z-40 transition-opacity"></div>
+<!-- Bottom Sheet -->
+<div class="absolute bottom-0 left-0 w-full bg-surface-container-lowest rounded-t-[16px] z-50 flex flex-col" style="height: 65%;">
+<!-- Handle -->
+<div class="w-full flex justify-center pt-2 pb-4">
+<div class="w-10 h-1 bg-surface-container-highest rounded-full"></div>
+</div>
+<div class="flex-1 overflow-y-auto px-gutter pb-8 flex flex-col gap-stack-lg">
+<!-- Section 1: Agent Profile -->
+<div class="flex flex-col gap-stack-sm pb-stack-md border-b border-surface-container-highest">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center flex-shrink-0">
+<span class="font-headline-md text-headline-md text-on-surface">AY</span>
+</div>
+<div class="flex flex-col">
+<h2 class="font-headline-md text-headline-md text-on-surface">Ahmet Yılmaz</h2>
+<span class="font-label-sm text-label-sm text-secondary">Kıdemli Destek Uzmanı</span>
+</div>
+</div>
+</div>
+<!-- Section 2: SLA Durumu -->
+<div class="flex flex-col gap-stack-md pb-stack-md border-b border-surface-container-highest">
+<h3 class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">SLA DURUMU</h3>
+<div class="flex flex-col gap-stack-sm">
+<div class="flex items-center justify-between">
+<span class="font-body-md text-body-md text-secondary">İlk Yanıt</span>
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-[18px] font-semibold text-on-surface">2s 14dk</span>
+<span class="bg-surface-container-low px-2 py-1 rounded-full font-label-sm text-label-sm text-on-surface">Uyumlu</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-body-md text-body-md text-secondary">Çözüm Süresi</span>
+<span class="font-headline-md text-[18px] font-semibold text-on-surface">18s 45dk</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full h-1 bg-surface-container-highest rounded-full mt-1 overflow-hidden">
+<div class="h-full bg-primary-container rounded-full" style="width: 75%;"></div>
+</div>
+</div>
+</div>
+<!-- Section 3: Bilet Bilgileri -->
+<div class="flex flex-col gap-stack-sm pb-stack-md border-b border-surface-container-highest">
+<div class="flex items-center justify-between py-1">
+<span class="font-body-md text-body-md text-secondary">Kategori</span>
+<span class="font-body-md text-body-md text-on-surface">Ödeme</span>
+</div>
+<div class="flex items-center justify-between py-1">
+<span class="font-body-md text-body-md text-secondary">Öncelik</span>
+<span class="bg-primary-container text-on-primary px-3 py-1 rounded-lg font-label-sm text-label-sm">Yüksek</span>
+</div>
+<div class="flex items-center justify-between py-1">
+<span class="font-body-md text-body-md text-secondary">Oluşturulma</span>
+<span class="font-body-md text-body-md text-on-surface">23 May 2026</span>
+</div>
+</div>
+<!-- Action Button -->
+<div class="mt-auto pt-4">
+<button class="w-full h-12 bg-surface-container-lowest border border-surface-container-highest rounded-lg font-label-sm text-label-sm text-on-surface flex items-center justify-center active:bg-surface-container-low transition-colors">
+          Bileti Kapat
+        </button>
+</div>
+</div>
+</div>
+</body></html>

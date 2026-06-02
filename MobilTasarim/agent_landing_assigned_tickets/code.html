@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Atanan Biletler - Assigned Tickets</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&amp;family=Outfit:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-surface": "#2f3034",
+                        "tertiary-fixed": "#e5e2e1",
+                        "surface-container-low": "#f3f3f8",
+                        "on-primary": "#ffffff",
+                        "on-surface": "#1a1c1f",
+                        "on-tertiary-fixed-variant": "#474646",
+                        "tertiary-container": "#555454",
+                        "on-primary-container": "#ffb8ab",
+                        "surface-container-high": "#e8e8ed",
+                        "tertiary": "#3e3d3d",
+                        "on-tertiary-fixed": "#1c1b1b",
+                        "on-secondary-fixed-variant": "#464747",
+                        "on-secondary-container": "#646464",
+                        "inverse-primary": "#ffb4a7",
+                        "outline-variant": "#e4beb7",
+                        "tertiary-fixed-dim": "#c8c6c5",
+                        "surface-bright": "#f9f9fe",
+                        "on-secondary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-container": "#cbc8c8",
+                        "on-primary-fixed-variant": "#910b00",
+                        "on-error-container": "#93000a",
+                        "surface-container": "#ededf2",
+                        "surface-tint": "#b91e0b",
+                        "primary-fixed-dim": "#ffb4a7",
+                        "primary": "#7f0900",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e2e2e7",
+                        "on-surface-variant": "#5b403b",
+                        "surface": "#f9f9fe",
+                        "secondary": "#5e5e5e",
+                        "primary-container": "#aa1101",
+                        "on-primary-fixed": "#400200",
+                        "background": "#f9f9fe",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-container": "#e3e2e2",
+                        "primary-fixed": "#ffdad4",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#e3e2e2",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "secondary-fixed-dim": "#c7c6c6",
+                        "surface-dim": "#d9dade",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#e2e2e7",
+                        "on-background": "#1a1c1f",
+                        "inverse-on-surface": "#f0f0f5",
+                        "outline": "#90706a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "stack-md": "16px",
+                        "stack-lg": "32px",
+                        "gutter": "16px",
+                        "container-margin": "24px",
+                        "stack-sm": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Outfit"],
+                        "stats-lg": ["Outfit"],
+                        "headline-lg-mobile": ["Outfit"],
+                        "headline-lg": ["Outfit"],
+                        "display": ["Outfit"],
+                        "body-md": ["DM Sans"],
+                        "body-lg": ["DM Sans"],
+                        "label-sm": ["DM Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["20px", { "lineHeight": "1.4", "fontWeight": "500" }],
+                        "stats-lg": ["36px", { "lineHeight": "1", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-md": ["15px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "label-sm": ["13px", { "lineHeight": "1.2", "letterSpacing": "0.02em", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .material-symbols-outlined.filled { font-variation-settings: 'FILL' 1; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface antialiased h-screen flex flex-col md:hidden selection:bg-primary-container selection:text-on-primary">
+<!-- Top App Bar -->
+<header class="flex items-center justify-between px-gutter h-14 w-full bg-surface border-b border-secondary-container sticky top-0 z-40 shrink-0">
+<button aria-label="Menu" class="text-on-surface p-1 -ml-1 active:opacity-70 transition-opacity">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h1 class="font-headline-md text-headline-md text-on-surface truncate px-4">Atanan Biletler</h1>
+<button aria-label="Filter" class="text-secondary p-1 -mr-1 active:opacity-70 transition-opacity">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+</header>
+<!-- Stats Strip -->
+<div class="h-12 bg-surface-container-lowest border-b border-secondary-container flex items-center px-gutter shrink-0">
+<div class="flex items-center w-full justify-between font-label-sm text-label-sm">
+<div class="flex items-center gap-2 flex-1 justify-center">
+<span class="text-on-surface font-semibold">12</span>
+<span class="text-on-surface">Açık</span>
+</div>
+<div class="w-px h-6 bg-secondary-container"></div>
+<div class="flex items-center gap-2 flex-1 justify-center">
+<span class="text-primary-container font-semibold">3</span>
+<span class="text-primary-container">Acil</span>
+</div>
+<div class="w-px h-6 bg-secondary-container"></div>
+<div class="flex items-center gap-2 flex-1 justify-center">
+<span class="text-secondary font-semibold">5</span>
+<span class="text-secondary">Bugün</span>
+</div>
+</div>
+</div>
+<!-- Filter Chips -->
+<div class="h-11 border-b border-secondary-container flex items-center shrink-0 overflow-hidden bg-surface">
+<div class="flex items-center gap-2 px-gutter overflow-x-auto no-scrollbar whitespace-nowrap w-full">
+<button class="h-7 px-3 rounded-full border border-on-surface bg-surface-container-low text-on-surface font-label-sm text-label-sm active:opacity-70 transition-opacity shrink-0">Tümü</button>
+<button class="h-7 px-3 rounded-full border border-secondary-container text-secondary font-label-sm text-label-sm active:opacity-70 transition-opacity shrink-0">Yüksek</button>
+<button class="h-7 px-3 rounded-full border border-secondary-container text-secondary font-label-sm text-label-sm active:opacity-70 transition-opacity shrink-0">Normal</button>
+<button class="h-7 px-3 rounded-full border border-secondary-container text-secondary font-label-sm text-label-sm active:opacity-70 transition-opacity shrink-0">Düşük</button>
+</div>
+</div>
+<!-- Ticket List -->
+<main class="flex-1 overflow-y-auto no-scrollbar bg-surface-container-lowest pb-20">
+<!-- Urgent Ticket 1 -->
+<article class="relative flex border-b border-secondary-container bg-surface-container-lowest active:bg-surface-container-low transition-colors touch-pan-y">
+<div class="w-[3px] bg-primary-container shrink-0"></div>
+<div class="flex-1 p-[14px] pl-3">
+<div class="flex justify-between items-start gap-2 mb-1">
+<h2 class="font-body-md text-body-md text-on-surface font-medium truncate">Ödeme alınamadı hatası alıyorum 5 defa denedim</h2>
+</div>
+<div class="font-label-sm text-label-sm text-secondary mb-2 truncate">
+                    Elif Demir · Ödeme Sistemi
+                </div>
+<div class="flex justify-between items-end mt-2">
+<span class="font-headline-md text-[13px] leading-tight font-semibold text-primary-container">1s 23dk kaldı</span>
+<span class="px-2 py-1 bg-error-container text-on-primary-fixed-variant font-label-sm text-[11px] rounded shrink-0 leading-none">Yanıt Bekliyor</span>
+</div>
+</div>
+</article>
+<!-- Urgent Ticket 2 -->
+<article class="relative flex border-b border-secondary-container bg-surface-container-lowest active:bg-surface-container-low transition-colors touch-pan-y">
+<div class="w-[3px] bg-primary-container shrink-0"></div>
+<div class="flex-1 p-[14px] pl-3">
+<div class="flex justify-between items-start gap-2 mb-1">
+<h2 class="font-body-md text-body-md text-on-surface font-medium truncate">Sistem giriş yapmama izin vermiyor şifremi sıfırladım</h2>
+</div>
+<div class="font-label-sm text-label-sm text-secondary mb-2 truncate">
+                    Ahmet Yılmaz · Kimlik Doğrulama
+                </div>
+<div class="flex justify-between items-end mt-2">
+<span class="font-headline-md text-[13px] leading-tight font-semibold text-primary-container">2s 45dk kaldı</span>
+<span class="px-2 py-1 bg-error-container text-on-primary-fixed-variant font-label-sm text-[11px] rounded shrink-0 leading-none">İnceleniyor</span>
+</div>
+</div>
+</article>
+<!-- Normal Ticket 1 -->
+<article class="relative flex border-b border-secondary-container bg-surface-container-lowest active:bg-surface-container-low transition-colors touch-pan-y">
+<div class="w-[3px] bg-secondary shrink-0"></div>
+<div class="flex-1 p-[14px] pl-3">
+<div class="flex justify-between items-start gap-2 mb-1">
+<h2 class="font-body-md text-body-md text-on-surface font-medium truncate">Fatura adresimi güncellemek istiyorum</h2>
+</div>
+<div class="font-label-sm text-label-sm text-secondary mb-2 truncate">
+                    Ayşe Kaya · Hesap İşlemleri
+                </div>
+<div class="flex justify-between items-end mt-2">
+<span class="font-label-sm text-[13px] text-secondary">Yarın 14:00</span>
+<span class="px-2 py-1 bg-surface-container-low text-on-surface font-label-sm text-[11px] rounded shrink-0 border border-secondary-container leading-none">Devam Ediyor</span>
+</div>
+</div>
+</article>
+<!-- Normal Ticket 2 -->
+<article class="relative flex border-b border-secondary-container bg-surface-container-lowest active:bg-surface-container-low transition-colors touch-pan-y">
+<div class="w-[3px] bg-secondary shrink-0"></div>
+<div class="flex-1 p-[14px] pl-3">
+<div class="flex justify-between items-start gap-2 mb-1">
+<h2 class="font-body-md text-body-md text-on-surface font-medium truncate">Yeni özellik hakkında geri bildirim</h2>
+</div>
+<div class="font-label-sm text-label-sm text-secondary mb-2 truncate">
+                    Mehmet Çelik · Geri Bildirim
+                </div>
+<div class="flex justify-between items-end mt-2">
+<span class="font-label-sm text-[13px] text-secondary">Cuma 17:00</span>
+<span class="px-2 py-1 bg-surface-container-low text-on-surface font-label-sm text-[11px] rounded shrink-0 border border-secondary-container leading-none">Yeni</span>
+</div>
+</div>
+</article>
+<!-- Low Ticket 1 -->
+<article class="relative flex border-b border-secondary-container bg-surface-container-lowest active:bg-surface-container-low transition-colors touch-pan-y">
+<div class="w-[3px] bg-secondary-container shrink-0"></div>
+<div class="flex-1 p-[14px] pl-3">
+<div class="flex justify-between items-start gap-2 mb-1">
+<h2 class="font-body-md text-body-md text-on-surface font-medium truncate">Profil fotoğrafımı yükleyemiyorum boyut hatası</h2>
+</div>
+<div class="font-label-sm text-label-sm text-secondary mb-2 truncate">
+                    Zeynep Şahin · Profil İşlemleri
+                </div>
+<div class="flex justify-between items-end mt-2">
+<span class="font-label-sm text-[13px] text-secondary">Pazartesi</span>
+<span class="px-2 py-1 bg-surface-container-low text-on-surface font-label-sm text-[11px] rounded shrink-0 border border-secondary-container leading-none">Devam Ediyor</span>
+</div>
+</div>
+</article>
+<!-- Normal Ticket 3 -->
+<article class="relative flex border-b border-secondary-container bg-surface-container-lowest active:bg-surface-container-low transition-colors touch-pan-y">
+<div class="w-[3px] bg-secondary shrink-0"></div>
+<div class="flex-1 p-[14px] pl-3">
+<div class="flex justify-between items-start gap-2 mb-1">
+<h2 class="font-body-md text-body-md text-on-surface font-medium truncate">Aylık raporlar oluşturulmadı destek talep ediyorum</h2>
+</div>
+<div class="font-label-sm text-label-sm text-secondary mb-2 truncate">
+                    Caner Bulut · Raporlama
+                </div>
+<div class="flex justify-between items-end mt-2">
+<span class="font-label-sm text-[13px] text-secondary">Yarın 09:00</span>
+<span class="px-2 py-1 bg-surface-container-low text-on-surface font-label-sm text-[11px] rounded shrink-0 border border-secondary-container leading-none">Yeni</span>
+</div>
+</div>
+</article>
+<!-- Low Ticket 2 -->
+<article class="relative flex border-b border-secondary-container bg-surface-container-lowest active:bg-surface-container-low transition-colors touch-pan-y">
+<div class="w-[3px] bg-secondary-container shrink-0"></div>
+<div class="flex-1 p-[14px] pl-3">
+<div class="flex justify-between items-start gap-2 mb-1">
+<h2 class="font-body-md text-body-md text-on-surface font-medium truncate">Kullanım kılavuzunda yazım hataları mevcut</h2>
+</div>
+<div class="font-label-sm text-label-sm text-secondary mb-2 truncate">
+                    Burcu Aslan · Dokümantasyon
+                </div>
+<div class="flex justify-between items-end mt-2">
+<span class="font-label-sm text-[13px] text-secondary">Salı</span>
+<span class="px-2 py-1 bg-surface-container-low text-on-surface font-label-sm text-[11px] rounded shrink-0 border border-secondary-container leading-none">İnceleniyor</span>
+</div>
+</div>
+</article>
+</main>
+<!-- Bottom Nav Bar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center h-[72px] bg-surface border-t border-secondary-container px-2 pb-safe shrink-0 z-50">
+<button class="flex flex-col items-center justify-center text-secondary w-full h-full active:opacity-70 transition-opacity">
+<span class="material-symbols-outlined mb-1 text-[24px]">queue</span>
+<span class="font-label-sm text-[11px] leading-none">Kuyruk</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface w-full h-full active:opacity-70 transition-opacity relative">
+<div class="relative">
+<span class="material-symbols-outlined filled mb-1 text-[24px]">assignment</span>
+<span class="absolute -top-1 -right-2 bg-primary-container text-on-primary text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full leading-none">3</span>
+</div>
+<span class="font-label-sm text-[11px] leading-none font-semibold">Atanan</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary w-full h-full active:opacity-70 transition-opacity">
+<span class="material-symbols-outlined mb-1 text-[24px]">bar_chart</span>
+<span class="font-label-sm text-[11px] leading-none">İstatistik</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary w-full h-full active:opacity-70 transition-opacity">
+<span class="material-symbols-outlined mb-1 text-[24px]">person</span>
+<span class="font-label-sm text-[11px] leading-none">Profil</span>
+</button>
+</nav>
+</body></html>

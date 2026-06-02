@@ -55,6 +55,19 @@ Servis URL'leri:
 - OpenTelemetry OTLP gRPC: `localhost:4317`
 - OpenTelemetry OTLP HTTP: `localhost:4318`
 
+Mobil istemci:
+
+```powershell
+Set-Location apps/mobile
+Copy-Item .env.example .env
+npm install
+npm run start
+```
+
+Android emulator gateway'e host makine uzerinden erisecekse
+`EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:8080` kullanin. Fiziksel cihazda
+host makinenin LAN IP adresi kullanilmalidir.
+
 Trace kurulumu ve servislerin OpenTelemetry Java Agent ile calistirilmasi icin
 `docs/development/observability.md` dosyasini takip edin.
 

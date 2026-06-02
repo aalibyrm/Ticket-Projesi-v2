@@ -1,12 +1,18 @@
-# Web Design Documentation
+# Design Documentation
 
-Bu klasor web frontend tasariminin kaynak dokumanlarini tutar.
+Bu klasor web ve mobil frontend tasariminin kaynak dokumanlarini tutar.
 
-Kaynak artefact:
+Web kaynak artefact:
 
 - `FrontendTasarim/design_kararlari/DESIGN.md`
 - `FrontendTasarim/*/screen.png`
 - `FrontendTasarim/*/code.html`
+
+Mobil kaynak artefact:
+
+- `MobilTasarim/precision_minimalist/DESIGN.md`
+- `MobilTasarim/*/screen.png`
+- `MobilTasarim/*/code.html`
 
 Dokumanlar:
 
@@ -14,6 +20,7 @@ Dokumanlar:
 - `screen-inventory.md`: saglanan ekranlarin route ve feature karsiliklari
 - `role-navigation.md`: role gore shell ve navigation gorunurlugu
 - `component-inventory.md`: React implementasyonuna tasinacak component listesi
+- `mobile-screen-inventory.md`: mobil ekranlarin role, route ve feature
+  karsiliklari
 
-Frontend tech stack bu tasarim kararlari resmi hale getirildikten sonra ayrica
-secilecektir.
+Frontend tech stack karar kayitlari `docs/architecture/adr` altinda tutulur.

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+
+<html class="light" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Taleplerim</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600&amp;family=DM+Sans:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "tertiary-fixed-dim": "#c8c6c5",
+                        "on-secondary-fixed-variant": "#464747",
+                        "on-primary-fixed-variant": "#910b00",
+                        "surface-bright": "#f9f9fe",
+                        "primary-container": "#aa1101",
+                        "on-error": "#ffffff",
+                        "surface-container-high": "#e8e8ed",
+                        "secondary-fixed-dim": "#c7c6c6",
+                        "surface": "#f9f9fe",
+                        "inverse-surface": "#2f3034",
+                        "error-container": "#ffdad6",
+                        "surface-dim": "#d9dade",
+                        "surface-tint": "#b91e0b",
+                        "on-secondary-container": "#646464",
+                        "inverse-primary": "#ffb4a7",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-surface": "#1a1c1f",
+                        "background": "#f9f9fe",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#ffdad4",
+                        "primary-fixed-dim": "#ffb4a7",
+                        "tertiary": "#3e3d3d",
+                        "secondary-container": "#e3e2e2",
+                        "surface-variant": "#e2e2e7",
+                        "surface-container": "#ededf2",
+                        "on-background": "#1a1c1f",
+                        "primary": "#7f0900",
+                        "on-tertiary-fixed-variant": "#474646",
+                        "on-primary-fixed": "#400200",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "outline": "#90706a",
+                        "tertiary-fixed": "#e5e2e1",
+                        "tertiary-container": "#555454",
+                        "surface-container-low": "#f3f3f8",
+                        "secondary": "#5e5e5e",
+                        "inverse-on-surface": "#f0f0f5",
+                        "secondary-fixed": "#e3e2e2",
+                        "on-surface-variant": "#5b403b",
+                        "on-tertiary-container": "#cbc8c8",
+                        "on-tertiary-fixed": "#1c1b1b",
+                        "surface-container-highest": "#e2e2e7",
+                        "on-primary-container": "#ffb8ab",
+                        "error": "#ba1a1a",
+                        "outline-variant": "#e4beb7",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "stack-sm": "8px",
+                        "stack-lg": "32px",
+                        "unit": "4px",
+                        "gutter": "16px",
+                        "stack-md": "16px",
+                        "container-margin": "24px"
+                    },
+                    fontFamily: {
+                        "headline-md": ["Outfit"],
+                        "headline-lg": ["Outfit"],
+                        "body-lg": ["DM Sans"],
+                        "body-md": ["DM Sans"],
+                        "label-sm": ["DM Sans"],
+                        "headline-lg-mobile": ["Outfit"],
+                        "display": ["Outfit"],
+                        "stats-lg": ["Outfit"]
+                    },
+                    fontSize: {
+                        "headline-md": ["20px", { "lineHeight": "1.4", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "body-md": ["15px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "label-sm": ["13px", { "lineHeight": "1.2", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "display": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "stats-lg": ["36px", { "lineHeight": "1", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { -webkit-tap-highlight-color: transparent; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex flex-col pb-[56px] pt-[56px] md:hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full h-[56px] flex items-center justify-between px-gutter z-50 bg-surface dark:bg-surface-dim border-b border-surface-variant dark:border-on-surface-variant transition-colors duration-200">
+<div class="flex items-center text-primary dark:text-primary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-container-highest rounded-full p-1 -ml-1 cursor-pointer">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface dark:text-inverse-on-surface absolute left-1/2 -translate-x-1/2">Taleplerim</h1>
+<div class="flex items-center text-primary dark:text-primary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-container-highest rounded-full p-1 -mr-1 cursor-pointer">
+<span class="material-symbols-outlined text-[24px]">more_vert</span>
+</div>
+</header>
+<!-- Filter Bar -->
+<div class="sticky top-[56px] z-40 bg-surface/95 backdrop-blur-sm border-b border-surface-variant w-full h-[44px] flex items-center overflow-x-auto hide-scrollbar px-gutter gap-6 whitespace-nowrap">
+<button class="font-label-sm text-label-sm text-primary-container font-semibold border-b-2 border-primary-container pb-1 pt-[6px]">Tümü</button>
+<button class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors pb-1 pt-[6px]">Açık</button>
+<button class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors pb-1 pt-[6px]">Beklemede</button>
+<button class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors pb-1 pt-[6px]">Kapalı</button>
+</div>
+<!-- Main Content: Ticket List -->
+<main class="flex-1 flex flex-col w-full">
+<!-- Ticket Item -->
+<a class="flex items-center justify-between px-gutter py-[14px] border-b border-surface-variant bg-surface hover:bg-surface-container-low transition-colors active:bg-surface-container-highest group" href="#">
+<div class="flex flex-col gap-1 w-full pr-4">
+<span class="font-body-md text-body-md font-medium text-on-surface truncate">Sistem Erişimi Hatası</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">#TKT-4821 · 23 May 2026</span>
+</div>
+<div class="flex-shrink-0">
+<span class="inline-flex items-center justify-center px-2 py-1 rounded bg-error-container text-error font-label-sm text-[11px] font-semibold tracking-wide">Açık</span>
+</div>
+</a>
+<!-- Ticket Item -->
+<a class="flex items-center justify-between px-gutter py-[14px] border-b border-surface-variant bg-surface hover:bg-surface-container-low transition-colors active:bg-surface-container-highest group" href="#">
+<div class="flex flex-col gap-1 w-full pr-4">
+<span class="font-body-md text-body-md font-medium text-on-surface truncate">Fatura İtirazı - Nisan Ayı</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">#TKT-4819 · 21 May 2026</span>
+</div>
+<div class="flex-shrink-0">
+<span class="inline-flex items-center justify-center px-2 py-1 rounded bg-surface-container-high text-on-surface-variant font-label-sm text-[11px] font-semibold tracking-wide">Beklemede</span>
+</div>
+</a>
+<!-- Ticket Item -->
+<a class="flex items-center justify-between px-gutter py-[14px] border-b border-surface-variant bg-surface hover:bg-surface-container-low transition-colors active:bg-surface-container-highest group" href="#">
+<div class="flex flex-col gap-1 w-full pr-4">
+<span class="font-body-md text-body-md font-medium text-on-surface truncate">Yeni Cihaz Kurulum Talebi</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">#TKT-4790 · 18 May 2026</span>
+</div>
+<div class="flex-shrink-0">
+<span class="inline-flex items-center justify-center px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-sm text-[11px] font-semibold tracking-wide">Çözüldü</span>
+</div>
+</a>
+<!-- Ticket Item -->
+<a class="flex items-center justify-between px-gutter py-[14px] border-b border-surface-variant bg-surface hover:bg-surface-container-low transition-colors active:bg-surface-container-highest group" href="#">
+<div class="flex flex-col gap-1 w-full pr-4">
+<span class="font-body-md text-body-md font-medium text-on-surface truncate">Şifre Sıfırlama Bağlantısı Gelmedi</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">#TKT-4755 · 15 May 2026</span>
+</div>
+<div class="flex-shrink-0">
+<span class="inline-flex items-center justify-center px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-sm text-[11px] font-semibold tracking-wide">Çözüldü</span>
+</div>
+</a>
+<!-- Ticket Item -->
+<a class="flex items-center justify-between px-gutter py-[14px] border-b border-surface-variant bg-surface hover:bg-surface-container-low transition-colors active:bg-surface-container-highest group" href="#">
+<div class="flex flex-col gap-1 w-full pr-4">
+<span class="font-body-md text-body-md font-medium text-on-surface truncate">Rapor Dışa Aktarım Hatası 500</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">#TKT-4721 · 10 May 2026</span>
+</div>
+<div class="flex-shrink-0">
+<span class="inline-flex items-center justify-center px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-sm text-[11px] font-semibold tracking-wide">Kapalı</span>
+</div>
+</a>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center bg-surface dark:bg-surface-dim h-[56px] border-t border-surface-variant dark:border-on-surface-variant">
+<a class="flex flex-col items-center justify-center text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:opacity-80 active:scale-95 transition-transform w-full h-full" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">add_circle</span>
+<span class="font-label-sm text-label-sm text-[10px]">Yeni Talep</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface dark:text-inverse-on-surface relative before:content-[''] before:absolute before:top-1 before:w-1 before:h-1 before:bg-primary before:rounded-full hover:opacity-80 active:scale-95 transition-transform w-full h-full" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1" style="font-variation-settings: 'FILL' 1;">history</span>
+<span class="font-label-sm text-label-sm text-[10px] font-semibold">Taleplerim</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:opacity-80 active:scale-95 transition-transform w-full h-full relative" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">chat_bubble</span>
+<span class="absolute top-2 right-6 w-2 h-2 bg-error rounded-full border border-surface"></span>
+<span class="font-label-sm text-label-sm text-[10px]">Mesajlar</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-secondary-fixed-variant dark:text-secondary-fixed-dim hover:opacity-80 active:scale-95 transition-transform w-full h-full" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">person</span>
+<span class="font-label-sm text-label-sm text-[10px]">Profil</span>
+</a>
+</nav>
+</body></html>

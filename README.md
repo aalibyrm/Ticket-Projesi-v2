@@ -62,5 +62,8 @@ docs/
 FrontendTasarim/
   design_kararlari/  Web UI karar dokumani
   */                 Referans ekran HTML ve goruntuleri
+MobilTasarim/
+  precision_minimalist/ Mobil UI karar dokumani
+  */                    Referans ekran HTML ve goruntuleri
 scripts/
 ```

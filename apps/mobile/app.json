@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "Ticket Projesi Mobile",
+    "slug": "ticket-projesi-mobile",
+    "scheme": "ticketv2",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ticketmanagement.mobile"
+    },
+    "android": {
+      "package": "com.ticketmanagement.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#fcfcfc"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
