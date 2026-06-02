@@ -63,3 +63,25 @@ Ticket detail responses include attachment metadata by calling file-service's
 internal metadata endpoint after ticket-service authorizes the ticket owner. This
 is API composition only: ticket-service does not own file metadata tables,
 presigned URL generation, validation, object keys, or storage credentials.
+
+## Organization Catalog
+
+Sprint 10 organization routing modeli ticket-service icinde tutulur. #61 ile
+aktif department, support team ve team member katalogu okunabilir hale geldi:
+
+```text
+GET /api/organization/departments
+GET /api/organization/teams
+GET /api/organization/teams/{teamId}/members
+```
+
+Seed edilen department seti:
+
+- `ACCESS_MANAGEMENT`
+- `APPLICATION_SUPPORT`
+- `INFRASTRUCTURE`
+- `FINANCE_OPERATIONS`
+
+Her department altinda iki uzmanlik ekibi bulunur. Triage ayri bir ekip degil;
+#62 kapsaminda deterministic `topic -> department -> team` routing rule olarak
+uygulanacaktir.

@@ -77,5 +77,34 @@ class TicketServiceMigrationTests {
                 Integer.class);
 
         assertThat(assignmentColumnCount).isEqualTo(2);
+
+        Integer organizationTableCount = jdbcTemplate.queryForObject(
+                """
+                        select count(*)
+                        from information_schema.tables
+                        where table_schema = 'ticket_schema'
+                          and table_name in ('departments', 'support_teams', 'team_members')
+                        """,
+                Integer.class);
+
+        assertThat(organizationTableCount).isEqualTo(3);
+
+        Integer departmentCount = jdbcTemplate.queryForObject(
+                "select count(*) from ticket_schema.departments where active = true",
+                Integer.class);
+
+        assertThat(departmentCount).isEqualTo(4);
+
+        Integer activeTeamCount = jdbcTemplate.queryForObject(
+                "select count(*) from ticket_schema.support_teams where active = true",
+                Integer.class);
+
+        assertThat(activeTeamCount).isEqualTo(8);
+
+        Integer activeLeadCount = jdbcTemplate.queryForObject(
+                "select count(*) from ticket_schema.team_members where active = true and team_lead = true",
+                Integer.class);
+
+        assertThat(activeLeadCount).isEqualTo(8);
     }
 }

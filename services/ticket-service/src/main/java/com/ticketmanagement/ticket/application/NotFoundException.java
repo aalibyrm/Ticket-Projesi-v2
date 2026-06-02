@@ -19,5 +19,8 @@ public class NotFoundException extends RuntimeException {
     static NotFoundException ticket(UUID ticketId) {
         return new NotFoundException("Ticket not found: " + ticketId);
     }
-}
 
+    static NotFoundException team(UUID teamId) {
+        return new NotFoundException("Team not found: " + teamId);
+    }
+}

@@ -15,6 +15,16 @@ Bu karar ile:
 - Customer ticket olustururken ekip veya agent atamasi gondermez; yalniz konu
   secimi yapar.
 - Ticket konusu routing rule ile department ve default team'e cozulur.
+- Kullanici department seti icin 1B secimini yapti:
+  `ACCESS_MANAGEMENT`, `APPLICATION_SUPPORT`, `INFRASTRUCTURE`,
+  `FINANCE_OPERATIONS`.
+- Kullanici team yapisi icin B secimini revize ederek triage ekibini cikardi:
+  Her department altinda iki uzmanlik ekibi olur.
+- Kullanici routing algoritmasi icin A secimini yapti: #62 kapsaminda
+  deterministic `topic -> department -> team` rule table uygulanir.
+- Kullanici team lead yetkisi icin 3A secimini yapti: Team lead kendi ekibinde
+  assign, status transition, internal note ve worklog islemlerini yapabilir.
+- Kullanici manager kapsami icin 4A secimini yapti: Manager tum sistemi gorur.
 
 ## Degerlendirilen Secenekler
 
@@ -86,10 +96,13 @@ alinacaktir.
 
 ## Acik Kullanici Kararlari
 
-Uygulama baslamadan once kullanicinin secmesi gereken konular:
+Su kararlar kullanici tarafindan netlestirildi:
 
-- 4 department'in isimleri ve kodlari.
-- Her department altindaki baslangic ekipleri.
-- Team lead rolunun tam yetkisi: sadece assign/transition mi, yoksa ekip ici
-  agent atama ve internal note/worklog yonetimi de dahil mi.
-- Manager kapsami: tum sistem mi, sadece departman bazli mi.
+- Department seti: 1B.
+- Team yapisi: B, ancak triage ayri ekip degil.
+- Routing algoritmasi: A.
+- Team lead yetkisi: 3A.
+- Manager kapsami: 4A.
+
+Sonraki acik kararlar, #62 kapsaminda hangi ticket topic'lerinin hangi
+department/team ile eslesecegidir.
