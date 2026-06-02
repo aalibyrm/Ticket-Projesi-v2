@@ -23,4 +23,8 @@ public class NotFoundException extends RuntimeException {
     static NotFoundException team(UUID teamId) {
         return new NotFoundException("Team not found: " + teamId);
     }
+
+    static NotFoundException topic(String topicCode) {
+        return new NotFoundException("Ticket topic not found: " + topicCode);
+    }
 }

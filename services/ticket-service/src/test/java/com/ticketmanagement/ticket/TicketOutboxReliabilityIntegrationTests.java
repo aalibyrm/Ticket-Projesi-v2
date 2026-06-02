@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,6 +55,7 @@ import com.ticketmanagement.ticket.infrastructure.outbox.OutboxPublisherService;
 class TicketOutboxReliabilityIntegrationTests {
 
     static final String TICKET_EVENTS_TOPIC = "ticket.events.v1";
+    private static final String DEFAULT_TOPIC_CODE = "WEB_PORTAL_BUG";
 
     @Container
     @ServiceConnection
@@ -121,6 +123,7 @@ class TicketOutboxReliabilityIntegrationTests {
         UUID productId = firstProductId();
         CreateTicketRequest request = new CreateTicketRequest(
                 productId,
+                DEFAULT_TOPIC_CODE,
                 "Rollback test ticket",
                 "This transaction must not leave ticket or outbox rows.",
                 TicketPriority.HIGH);
@@ -146,11 +149,19 @@ class TicketOutboxReliabilityIntegrationTests {
 
             int publishedCount = outboxPublisherService.publishPendingBatch();
 
-            assertThat(publishedCount).isEqualTo(1);
-            ConsumerRecord<String, String> record = KafkaTestUtils.getSingleRecord(
+            assertThat(publishedCount).isEqualTo(2);
+            ConsumerRecords<String, String> records = KafkaTestUtils.getRecords(
                     consumer,
-                    TICKET_EVENTS_TOPIC,
                     Duration.ofSeconds(10));
+            ConsumerRecord<String, String> record = null;
+            for (ConsumerRecord<String, String> candidate : records.records(TICKET_EVENTS_TOPIC)) {
+                if (candidate.value().contains("\"eventType\":\"ticket.created\"")) {
+                    record = candidate;
+                    break;
+                }
+            }
+
+            assertThat(record).isNotNull();
             JsonNode envelope = objectMapper.readTree(record.value());
             assertThat(record.key()).isEqualTo(created.id().toString());
             assertThat(envelope.path("eventType").asText()).isEqualTo("ticket.created");
@@ -163,7 +174,7 @@ class TicketOutboxReliabilityIntegrationTests {
                     .doesNotContain(created.description());
         }
 
-        Map<String, Object> outbox = outboxStateFor(created.id());
+        Map<String, Object> outbox = outboxStateFor(created.id(), "ticket.created");
         assertThat(outbox.get("status")).isEqualTo("PUBLISHED");
         assertThat(outbox.get("retry_count")).isEqualTo(0);
         assertThat(outbox.get("published_at")).isNotNull();
@@ -187,6 +198,7 @@ class TicketOutboxReliabilityIntegrationTests {
         ProductResponse product = firstProduct();
         CreateTicketRequest request = new CreateTicketRequest(
                 product.id(),
+                DEFAULT_TOPIC_CODE,
                 "Cannot access dashboard",
                 "Dashboard returns an error after login.",
                 TicketPriority.HIGH);
@@ -228,11 +240,12 @@ class TicketOutboxReliabilityIntegrationTests {
                                payload::text as payload_json
                         from ticket_schema.outbox_events
                         where aggregate_id = ?
+                          and event_type = 'ticket.created'
                         """,
                 ticketId);
     }
 
-    private Map<String, Object> outboxStateFor(UUID ticketId) {
+    private Map<String, Object> outboxStateFor(UUID ticketId, String eventType) {
         return jdbcTemplate.queryForMap(
                 """
                         select status,
@@ -241,8 +254,10 @@ class TicketOutboxReliabilityIntegrationTests {
                                published_at
                         from ticket_schema.outbox_events
                         where aggregate_id = ?
+                          and event_type = ?
                         """,
-                ticketId);
+                ticketId,
+                eventType);
     }
 
     private Integer ticketCountFor(UUID customerId) {

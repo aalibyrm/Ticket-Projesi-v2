@@ -41,6 +41,33 @@ class TicketLifecyclePayloadTests {
     }
 
     @Test
+    void createsAssignedPayloadWithTeamOnlyRouting() {
+        UUID ticketId = UUID.randomUUID();
+        UUID teamId = UUID.randomUUID();
+
+        TicketAssignedPayload payload = new TicketAssignedPayload(
+                ticketId,
+                "TCK-1002",
+                null,
+                teamId);
+
+        assertEquals(ticketId, payload.ticketId());
+        assertEquals(null, payload.assigneeId());
+        assertEquals(teamId, payload.assignedTeamId());
+    }
+
+    @Test
+    void rejectsAssignedPayloadWithoutAssigneeOrTeam() {
+        UUID ticketId = UUID.randomUUID();
+
+        assertThrows(IllegalArgumentException.class, () -> new TicketAssignedPayload(
+                ticketId,
+                "TCK-1002",
+                null,
+                null));
+    }
+
+    @Test
     void createsExternalCommentPayloadWithoutCommentBody() {
         UUID commentId = UUID.randomUUID();
 

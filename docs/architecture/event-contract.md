@@ -111,8 +111,12 @@ kullanici tarafindan yazildigi icin PII veya hassas veri icerebilir.
 
 - `ticketId`
 - `ticketNumber`
-- `assigneeId`
+- `assigneeId` (team-only assignment icin null olabilir)
 - `assignedTeamId`
+
+`assigneeId` ve `assignedTeamId` ayni anda null olamaz. Ticket create sirasinda
+otomatik topic routing yalniz `assignedTeamId` uretebilir; agent atamasi daha
+sonra ayri assignment aksiyonu ile yapilir.
 
 ### `ticket.external-comment-added`
 

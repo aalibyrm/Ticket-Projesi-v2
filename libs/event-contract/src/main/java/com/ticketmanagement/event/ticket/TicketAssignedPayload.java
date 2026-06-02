@@ -14,7 +14,9 @@ public record TicketAssignedPayload(
     public TicketAssignedPayload {
         ticketId = Objects.requireNonNull(ticketId, "ticketId must not be null");
         ticketNumber = requireText(ticketNumber, "ticketNumber");
-        assigneeId = Objects.requireNonNull(assigneeId, "assigneeId must not be null");
+        if (assigneeId == null && assignedTeamId == null) {
+            throw new IllegalArgumentException("assigneeId or assignedTeamId must be provided");
+        }
     }
 
     private static String requireText(String value, String fieldName) {

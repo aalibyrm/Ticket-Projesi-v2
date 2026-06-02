@@ -103,6 +103,5 @@ Su kararlar kullanici tarafindan netlestirildi:
 - Routing algoritmasi: A.
 - Team lead yetkisi: 3A.
 - Manager kapsami: 4A.
-
-Sonraki acik kararlar, #62 kapsaminda hangi ticket topic'lerinin hangi
-department/team ile eslesecegidir.
+- Ticket topic katalogu, `topicCode` request contract'i ve event etkisi:
+  ADR-0042.

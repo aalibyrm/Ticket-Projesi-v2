@@ -28,24 +28,30 @@ public class TicketCommandService {
     private final TicketMapper ticketMapper;
     private final TicketNumberGenerator ticketNumberGenerator;
     private final TicketOutboxService ticketOutboxService;
+    private final TicketRoutingService ticketRoutingService;
 
     // Musteri adina yeni ticket kaydi olusturur.
     @Transactional
     public TicketResponse createTicket(UUID customerId, CreateTicketRequest request) {
         ProductEntity product = productRepository.findByIdAndActiveTrue(request.productId())
                 .orElseThrow(() -> NotFoundException.product(request.productId()));
+        TicketRoutingResolution routing = ticketRoutingService.resolveActiveRoute(request.topicCode());
 
         TicketEntity ticket = TicketEntity.open(
                 UUID.randomUUID(),
                 ticketNumberGenerator.nextTicketNumber(),
                 customerId,
                 product,
+                routing.topic(),
+                routing.department(),
+                routing.team().getId(),
                 request.summary().trim(),
                 request.description().trim(),
                 request.priority() == null ? TicketPriority.MEDIUM : request.priority());
 
         TicketEntity savedTicket = ticketRepository.save(ticket);
         ticketOutboxService.saveTicketCreated(savedTicket, customerId);
+        ticketOutboxService.saveTicketAssigned(savedTicket, customerId);
 
         return ticketMapper.toResponse(savedTicket);
     }

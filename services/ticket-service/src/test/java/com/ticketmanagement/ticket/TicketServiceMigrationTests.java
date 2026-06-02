@@ -106,5 +106,40 @@ class TicketServiceMigrationTests {
                 Integer.class);
 
         assertThat(activeLeadCount).isEqualTo(8);
+
+        Integer routingTableCount = jdbcTemplate.queryForObject(
+                """
+                        select count(*)
+                        from information_schema.tables
+                        where table_schema = 'ticket_schema'
+                          and table_name in ('ticket_topics', 'ticket_routing_rules')
+                        """,
+                Integer.class);
+
+        assertThat(routingTableCount).isEqualTo(2);
+
+        Integer routeColumnCount = jdbcTemplate.queryForObject(
+                """
+                        select count(*)
+                        from information_schema.columns
+                        where table_schema = 'ticket_schema'
+                          and table_name = 'tickets'
+                          and column_name in ('topic_id', 'routed_department_id')
+                        """,
+                Integer.class);
+
+        assertThat(routeColumnCount).isEqualTo(2);
+
+        Integer activeTopicCount = jdbcTemplate.queryForObject(
+                "select count(*) from ticket_schema.ticket_topics where active = true",
+                Integer.class);
+
+        assertThat(activeTopicCount).isEqualTo(8);
+
+        Integer activeRoutingRuleCount = jdbcTemplate.queryForObject(
+                "select count(*) from ticket_schema.ticket_routing_rules where active = true",
+                Integer.class);
+
+        assertThat(activeRoutingRuleCount).isEqualTo(8);
     }
 }

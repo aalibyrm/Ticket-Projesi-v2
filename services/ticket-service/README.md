@@ -54,8 +54,8 @@ rules inside ticket-service:
 
 - `CUSTOMER` can access only their own ticket attachments.
 - `ADMIN` can access any ticket attachment.
-- `AGENT` and assigned team access stays closed until the assignment model is
-  introduced.
+- `AGENT` can access when they are the assigned agent or their team context
+  includes the assigned team.
 
 ## Attachment Metadata Composition
 
@@ -83,5 +83,26 @@ Seed edilen department seti:
 - `FINANCE_OPERATIONS`
 
 Her department altinda iki uzmanlik ekibi bulunur. Triage ayri bir ekip degil;
-#62 kapsaminda deterministic `topic -> department -> team` routing rule olarak
-uygulanacaktir.
+#62 ile deterministic `topic -> department -> team` routing rule olarak
+uygulandi.
+
+## Ticket Topic Routing
+
+Customer ticket acarken assignment alani gondermez; `topicCode` gonderir.
+Ticket-service aktif routing rule uzerinden default department ve team'i cozer.
+
+```text
+GET /api/ticket-topics
+POST /api/tickets
+```
+
+Seed edilen topic routing seti:
+
+- `PASSWORD_RESET` -> `ACCESS_MANAGEMENT` / `IDENTITY_OPERATIONS`
+- `PERMISSION_REQUEST` -> `ACCESS_MANAGEMENT` / `PERMISSION_OPERATIONS`
+- `WEB_PORTAL_BUG` -> `APPLICATION_SUPPORT` / `WEB_APP_SUPPORT`
+- `CORE_SYSTEM_ERROR` -> `APPLICATION_SUPPORT` / `CORE_APP_SUPPORT`
+- `NETWORK_CONNECTIVITY` -> `INFRASTRUCTURE` / `NETWORK_OPERATIONS`
+- `SERVER_PLATFORM` -> `INFRASTRUCTURE` / `PLATFORM_OPERATIONS`
+- `INVOICE_ISSUE` -> `FINANCE_OPERATIONS` / `BILLING_OPERATIONS`
+- `PAYMENT_FAILURE` -> `FINANCE_OPERATIONS` / `PAYMENT_OPERATIONS`

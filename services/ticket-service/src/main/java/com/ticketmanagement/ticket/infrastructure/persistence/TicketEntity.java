@@ -44,6 +44,14 @@ public class TicketEntity {
     @JoinColumn(name = "product_id", nullable = false)
     private ProductEntity product;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "topic_id")
+    private TicketTopicEntity topic;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "routed_department_id")
+    private DepartmentEntity routedDepartment;
+
     @Column(nullable = false, length = 180)
     private String summary;
 
@@ -75,6 +83,9 @@ public class TicketEntity {
             String ticketNumber,
             UUID customerId,
             ProductEntity product,
+            TicketTopicEntity topic,
+            DepartmentEntity routedDepartment,
+            UUID assignedTeamId,
             String summary,
             String description,
             TicketPriority priority) {
@@ -83,6 +94,9 @@ public class TicketEntity {
         ticket.setTicketNumber(ticketNumber);
         ticket.setCustomerId(customerId);
         ticket.setProduct(product);
+        ticket.setTopic(topic);
+        ticket.setRoutedDepartment(routedDepartment);
+        ticket.setAssignedTeamId(assignedTeamId);
         ticket.setSummary(summary);
         ticket.setDescription(description);
         ticket.setPriority(priority);

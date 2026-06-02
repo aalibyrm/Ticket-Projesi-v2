@@ -41,6 +41,8 @@ import com.ticketmanagement.ticket.infrastructure.persistence.ProductJpaReposito
 @Testcontainers(disabledWithoutDocker = true)
 class TicketSecurityIntegrationTests {
 
+    private static final String DEFAULT_TOPIC_CODE = "WEB_PORTAL_BUG";
+
     @Container
     @ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17-alpine")
@@ -89,6 +91,7 @@ class TicketSecurityIntegrationTests {
         UUID productId = productRepository.findByActiveTrueOrderByNameAsc().getFirst().getId();
         CreateTicketRequest request = new CreateTicketRequest(
                 productId,
+                DEFAULT_TOPIC_CODE,
                 "Cannot open invoice",
                 "Invoice page returns a blank screen after login.",
                 TicketPriority.MEDIUM);
@@ -250,6 +253,7 @@ class TicketSecurityIntegrationTests {
         UUID productId = productRepository.findByActiveTrueOrderByNameAsc().getFirst().getId();
         CreateTicketRequest request = new CreateTicketRequest(
                 productId,
+                DEFAULT_TOPIC_CODE,
                 "Cannot download receipt",
                 "Receipt download fails after payment confirmation.",
                 TicketPriority.MEDIUM);

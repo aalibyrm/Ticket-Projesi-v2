@@ -60,6 +60,11 @@ import com.ticketmanagement.ticket.infrastructure.web.CorrelationIdFilter;
 @Testcontainers(disabledWithoutDocker = true)
 class TicketApiIntegrationTests {
 
+    private static final String DEFAULT_TOPIC_CODE = "WEB_PORTAL_BUG";
+    private static final UUID WEB_APP_SUPPORT_TEAM_ID = UUID.fromString("20000000-0000-0000-0000-000000000003");
+    private static final UUID APPLICATION_SUPPORT_DEPARTMENT_ID =
+            UUID.fromString("10000000-0000-0000-0000-000000000002");
+
     @Container
     @ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17-alpine")
@@ -99,6 +104,7 @@ class TicketApiIntegrationTests {
 
         CreateTicketRequest request = new CreateTicketRequest(
                 product.id(),
+                DEFAULT_TOPIC_CODE,
                 "Cannot access dashboard",
                 "Dashboard returns an error after login.",
                 TicketPriority.HIGH);
@@ -115,8 +121,15 @@ class TicketApiIntegrationTests {
         assertThat(created.customerId()).isEqualTo(customerId);
         assertThat(created.status()).isEqualTo(TicketStatus.NEW);
         assertThat(created.priority()).isEqualTo(TicketPriority.HIGH);
+        assertThat(created.topicCode()).isEqualTo(DEFAULT_TOPIC_CODE);
+        assertThat(created.topicName()).isEqualTo("Web Portal Bug");
+        assertThat(created.routedDepartmentId()).isEqualTo(APPLICATION_SUPPORT_DEPARTMENT_ID);
+        assertThat(created.routedDepartmentCode()).isEqualTo("APPLICATION_SUPPORT");
+        assertThat(created.assignedTeamId()).isEqualTo(WEB_APP_SUPPORT_TEAM_ID);
+        assertThat(created.assigneeId()).isNull();
         assertThat(created.ticketNumber()).startsWith("TCK-");
         assertTicketCreatedOutboxEvent(created, customerId);
+        assertLifecycleEvent(created.id(), "ticket.assigned", "assignedTeamId", WEB_APP_SUPPORT_TEAM_ID.toString());
 
         ResponseEntity<java.util.List<TicketResponse>> ownList = restTemplate.exchange(
                 "/api/tickets",
@@ -221,7 +234,7 @@ class TicketApiIntegrationTests {
         String correlationId = "validation-test-correlation";
         HttpHeaders headers = actorHeaders(customerId);
         headers.set(CorrelationIdFilter.HEADER_NAME, correlationId);
-        CreateTicketRequest request = new CreateTicketRequest(null, "", "", null);
+        CreateTicketRequest request = new CreateTicketRequest(null, "", "", "", null);
 
         ResponseEntity<ApiErrorResponse> response = restTemplate.exchange(
                 "/api/tickets",
@@ -236,7 +249,79 @@ class TicketApiIntegrationTests {
         assertThat(response.getBody().correlationId()).isEqualTo(correlationId);
         assertThat(response.getBody().validationErrors())
                 .extracting(error -> error.field())
-                .contains("productId", "summary", "description");
+                .contains("productId", "topicCode", "summary", "description");
+    }
+
+    @Test
+    void invalidTopicCodeIsRejected() {
+        UUID customerId = UUID.randomUUID();
+        ProductResponse product = firstProduct();
+        CreateTicketRequest request = new CreateTicketRequest(
+                product.id(),
+                "UNKNOWN_TOPIC",
+                "Cannot access dashboard",
+                "Dashboard returns an error after login.",
+                TicketPriority.MEDIUM);
+
+        ResponseEntity<ApiErrorResponse> response = restTemplate.exchange(
+                "/api/tickets",
+                HttpMethod.POST,
+                new HttpEntity<>(request, actorHeaders(customerId)),
+                ApiErrorResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().errorCode()).isEqualTo("RESOURCE_NOT_FOUND");
+    }
+
+    @Test
+    void inactiveTopicCodeIsRejected() {
+        insertInactiveTopicRoute();
+        UUID customerId = UUID.randomUUID();
+        ProductResponse product = firstProduct();
+        CreateTicketRequest request = new CreateTicketRequest(
+                product.id(),
+                "LEGACY_TOPIC",
+                "Cannot access legacy topic",
+                "Legacy topic must not be routable.",
+                TicketPriority.MEDIUM);
+
+        ResponseEntity<ApiErrorResponse> response = restTemplate.exchange(
+                "/api/tickets",
+                HttpMethod.POST,
+                new HttpEntity<>(request, actorHeaders(customerId)),
+                ApiErrorResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().errorCode()).isEqualTo("RESOURCE_NOT_FOUND");
+    }
+
+    @Test
+    void createTicketIgnoresClientSuppliedAssignmentFields() {
+        UUID customerId = UUID.randomUUID();
+        ProductResponse product = firstProduct();
+        UUID clientSuppliedTeamId = UUID.randomUUID();
+        Map<String, Object> request = Map.of(
+                "productId", product.id(),
+                "topicCode", DEFAULT_TOPIC_CODE,
+                "summary", "Cannot access dashboard",
+                "description", "Dashboard returns an error after login.",
+                "priority", "HIGH",
+                "assigneeId", UUID.randomUUID(),
+                "assignedTeamId", clientSuppliedTeamId);
+
+        ResponseEntity<TicketResponse> response = restTemplate.exchange(
+                "/api/tickets",
+                HttpMethod.POST,
+                new HttpEntity<>(request, actorHeaders(customerId)),
+                TicketResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().assignedTeamId()).isEqualTo(WEB_APP_SUPPORT_TEAM_ID);
+        assertThat(response.getBody().assignedTeamId()).isNotEqualTo(clientSuppliedTeamId);
+        assertThat(response.getBody().assigneeId()).isNull();
     }
 
     @Test
@@ -298,7 +383,7 @@ class TicketApiIntegrationTests {
         assertThat(worklogResponse.getBody().ticketId()).isEqualTo(created.id());
         assertThat(worklogResponse.getBody().durationMinutes()).isEqualTo(45);
 
-        assertThat(outboxCountFor(created.id())).isEqualTo(5);
+        assertThat(outboxCountFor(created.id())).isEqualTo(6);
         assertLifecycleEvent(created.id(), "ticket.created", "status", "NEW");
         assertLifecycleEvent(created.id(), "ticket.status-changed", "newStatus", "IN_PROGRESS");
         assertLifecycleEvent(created.id(), "ticket.assigned", "assigneeId", agentId.toString());
@@ -437,7 +522,7 @@ class TicketApiIntegrationTests {
         assertThat(response.getBody().errorCode()).isEqualTo("INVALID_TICKET_OPERATION");
         assertThat(response.getBody().message()).contains("NEW -> CLOSED");
         assertThat(ticketStatusFor(created.id())).isEqualTo("NEW");
-        assertThat(outboxCountFor(created.id())).isEqualTo(2);
+        assertThat(outboxCountFor(created.id())).isEqualTo(3);
     }
 
     @Test
@@ -449,8 +534,8 @@ class TicketApiIntegrationTests {
 
         int publishedCount = outboxPublisherService.publishPendingBatch();
 
-        assertThat(publishedCount).isEqualTo(1);
-        Map<String, Object> outbox = outboxFor(created.id());
+        assertThat(publishedCount).isEqualTo(2);
+        Map<String, Object> outbox = outboxFor(created.id(), "ticket.created");
         assertThat(outbox.get("status")).isEqualTo("PUBLISHED");
         assertThat(outbox.get("retry_count")).isEqualTo(0);
         assertThat(outbox.get("published_at")).isNotNull();
@@ -460,11 +545,12 @@ class TicketApiIntegrationTests {
                 eq("ticket.events.v1"),
                 eq(created.id().toString()),
                 messageCaptor.capture());
-        assertThat(messageCaptor.getValue())
-                .contains("\"eventType\":\"ticket.created\"")
-                .contains("\"ticketId\":\"" + created.id())
-                .doesNotContain(created.summary())
-                .doesNotContain(created.description());
+        assertThat(messageCaptor.getAllValues())
+                .anySatisfy(message -> assertThat(message)
+                        .contains("\"eventType\":\"ticket.created\"")
+                        .contains("\"ticketId\":\"" + created.id())
+                        .doesNotContain(created.summary())
+                        .doesNotContain(created.description()));
     }
 
     @Test
@@ -475,16 +561,18 @@ class TicketApiIntegrationTests {
         failedSend.completeExceptionally(new RuntimeException("broker unavailable"));
         when(kafkaTemplate.send(anyString(), anyString(), anyString()))
                 .thenReturn(failedSend)
+                .thenReturn(failedSend)
+                .thenReturn(CompletableFuture.completedFuture(null))
                 .thenReturn(CompletableFuture.completedFuture(null));
 
         int firstPublishedCount = outboxPublisherService.publishPendingBatch();
 
         assertThat(firstPublishedCount).isZero();
-        Map<String, Object> failedOutbox = outboxFor(created.id());
+        Map<String, Object> failedOutbox = outboxFor(created.id(), "ticket.created");
         assertThat(failedOutbox.get("status")).isEqualTo("FAILED");
         assertThat(failedOutbox.get("retry_count")).isEqualTo(1);
         assertThat(failedOutbox.get("next_attempt_at")).isNotNull();
-        assertThat(outboxCountFor(created.id())).isEqualTo(1);
+        assertThat(outboxCountFor(created.id())).isEqualTo(2);
 
         jdbcTemplate.update(
                 "update ticket_schema.outbox_events set next_attempt_at = now() - interval '1 second' where aggregate_id = ?",
@@ -492,17 +580,18 @@ class TicketApiIntegrationTests {
 
         int secondPublishedCount = outboxPublisherService.publishPendingBatch();
 
-        assertThat(secondPublishedCount).isEqualTo(1);
-        Map<String, Object> publishedOutbox = outboxFor(created.id());
+        assertThat(secondPublishedCount).isEqualTo(2);
+        Map<String, Object> publishedOutbox = outboxFor(created.id(), "ticket.created");
         assertThat(publishedOutbox.get("status")).isEqualTo("PUBLISHED");
         assertThat(publishedOutbox.get("retry_count")).isEqualTo(1);
-        assertThat(outboxCountFor(created.id())).isEqualTo(1);
+        assertThat(outboxCountFor(created.id())).isEqualTo(2);
     }
 
     private TicketResponse createTicket(UUID customerId) {
         ProductResponse product = firstProduct();
         CreateTicketRequest request = new CreateTicketRequest(
                 product.id(),
+                DEFAULT_TOPIC_CODE,
                 "Cannot access dashboard",
                 "Dashboard returns an error after login.",
                 TicketPriority.HIGH);
@@ -543,6 +632,7 @@ class TicketApiIntegrationTests {
                                payload::text as payload_json
                         from ticket_schema.outbox_events
                         where aggregate_id = ?
+                          and event_type = 'ticket.created'
                         """,
                 created.id());
 
@@ -562,7 +652,7 @@ class TicketApiIntegrationTests {
         assertThat(outbox.get("payload_json").toString()).doesNotContain(created.description());
     }
 
-    private Map<String, Object> outboxFor(UUID ticketId) {
+    private Map<String, Object> outboxFor(UUID ticketId, String eventType) {
         return jdbcTemplate.queryForMap(
                 """
                         select status,
@@ -571,8 +661,10 @@ class TicketApiIntegrationTests {
                                published_at
                         from ticket_schema.outbox_events
                         where aggregate_id = ?
+                          and event_type = ?
                         """,
-                ticketId);
+                ticketId,
+                eventType);
     }
 
     private Integer outboxCountFor(UUID ticketId) {
@@ -599,15 +691,51 @@ class TicketApiIntegrationTests {
                         from ticket_schema.outbox_events
                         where aggregate_id = ?
                           and event_type = ?
+                          and payload ->> ? = ?
                         """,
                 payloadField,
                 ticketId,
-                eventType);
+                eventType,
+                payloadField,
+                payloadValue);
 
         assertThat(event.get("topic_name")).isEqualTo("ticket.events.v1");
         assertThat(event.get("event_version")).isEqualTo(1);
         assertThat(event.get("status")).isEqualTo("PENDING");
         assertThat(event.get("payload_value")).isEqualTo(payloadValue);
+    }
+
+    private void insertInactiveTopicRoute() {
+        jdbcTemplate.update(
+                """
+                        insert into ticket_schema.ticket_topics (id, code, name, description, active)
+                        values (
+                          '90000000-0000-0000-0000-000000000101',
+                          'LEGACY_TOPIC',
+                          'Legacy Topic',
+                          'Inactive legacy topic.',
+                          false
+                        )
+                        on conflict (code) do nothing
+                        """);
+        jdbcTemplate.update(
+                """
+                        insert into ticket_schema.ticket_routing_rules (
+                          id,
+                          topic_id,
+                          department_id,
+                          team_id,
+                          active
+                        )
+                        values (
+                          '90000000-0000-0000-0000-000000000102',
+                          '90000000-0000-0000-0000-000000000101',
+                          '10000000-0000-0000-0000-000000000002',
+                          '20000000-0000-0000-0000-000000000003',
+                          true
+                        )
+                        on conflict (topic_id) do nothing
+                        """);
     }
 
     private String outboxPayloadFor(UUID ticketId, String eventType) {

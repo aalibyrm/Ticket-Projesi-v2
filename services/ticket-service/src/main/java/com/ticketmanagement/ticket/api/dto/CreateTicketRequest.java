@@ -10,8 +10,8 @@ import com.ticketmanagement.ticket.domain.TicketPriority;
 
 public record CreateTicketRequest(
         @NotNull UUID productId,
+        @NotBlank @Size(max = 80) String topicCode,
         @NotBlank @Size(max = 180) String summary,
         @NotBlank @Size(max = 5000) String description,
         TicketPriority priority) {
 }
-
