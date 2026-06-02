@@ -14,10 +14,12 @@ halinde planlanmistir.
 | 07 | Raporlama | Projection tablolar, manager raporlari, rapor API testleri | 2026-08-30 |
 | 08 | Observability ve DevOps | Log4j2 JSON, OpenTelemetry, OpenSearch, CI/CD | 2026-09-13 |
 | 09 | Web ve Mobil | React web, React Native temel ekranlar, E2E smoke | 2026-09-27 |
+| 10 | Organizasyon ve Routing | Department, team, team lead, ticket topic routing ve yetki genisletmesi | 2026-10-11 |
 
 ## Is Takip Kurali
 
 - Her sprint isleri GitHub issue olarak takip edilir.
 - Her commit mesajinda issue numarasi bulunur.
 - Sprint disi yeni is cikarsa once issue acilir, sonra commit atilir.
-
+- #56 final smoke ve runbook isi, kullanicinin ek kapsam kararlarindan sonra en
+  sonda tamamlanir.
