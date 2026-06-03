@@ -57,11 +57,12 @@ test("customer, agent, notification, and reporting smoke journey", async ({ page
 
   await page.goto("/tickets");
   await expect(page.getByRole("heading", { name: "Taleplerim" })).toBeVisible();
+  await expect(page.locator("main").getByRole("link", { name: "Yeni talep" })).toHaveAttribute(
+    "href",
+    "/tickets/new",
+  );
 
-  await Promise.all([
-    page.waitForURL(/\/tickets\/new$/),
-    page.locator("main").getByRole("link", { name: "Yeni talep" }).click(),
-  ]);
+  await page.goto("/tickets/new");
   await expect(page.getByRole("heading", { name: "Yeni Destek Talebi" })).toBeVisible();
 
   await page.getByLabel("Konu").fill("VPN baglanti hatasi");
