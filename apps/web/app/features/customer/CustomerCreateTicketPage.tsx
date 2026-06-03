@@ -94,7 +94,7 @@ export function CustomerCreateTicketPage() {
       await uploadAttachment.mutateAsync({ file, ticketId: ticket.id });
     }
 
-    navigate(`/tickets/${ticket.id}`);
+    await navigate(`/tickets/${ticket.id}`);
   }
 
   if (productsQuery.isLoading || topicsQuery.isLoading) {
