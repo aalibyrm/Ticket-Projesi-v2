@@ -14,18 +14,14 @@ import { useAppDispatch } from "~/shared/store/hooks";
 
 export function AuthBootstrap() {
   const dispatch = useAppDispatch();
-  const initializedRef = useRef(false);
+  const initializationRef = useRef<ReturnType<typeof initializeAuth>>();
 
   useEffect(() => {
-    if (initializedRef.current) {
-      return;
-    }
-
-    initializedRef.current = true;
     let cancelled = false;
 
     dispatch(setAuthLoading());
-    initializeAuth()
+    initializationRef.current ??= initializeAuth();
+    initializationRef.current
       .then((user) => {
         if (cancelled) {
           return;

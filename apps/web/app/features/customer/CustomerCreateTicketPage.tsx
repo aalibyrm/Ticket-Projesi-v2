@@ -135,7 +135,7 @@ export function CustomerCreateTicketPage() {
           <Stack
             component="form"
             noValidate
-            onSubmit={(event) => void handleSubmit(submitForm)(event)}
+            onSubmit={handleSubmit(submitForm)}
             spacing={3}
           >
             <Controller

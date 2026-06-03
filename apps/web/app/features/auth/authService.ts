@@ -1,9 +1,19 @@
 import type { AppRole, AuthUser } from "~/features/auth/authTypes";
+import {
+  getE2eAccessToken,
+  getE2eAuthUser,
+  isE2eAuthEnabled,
+} from "~/features/auth/e2eAuth";
 import { getKeycloakClient } from "~/features/auth/keycloakClient";
 
 const allowedRoles: AppRole[] = ["CUSTOMER", "AGENT", "MANAGER", "ADMIN"];
 
 export async function initializeAuth() {
+  const e2eUser = getE2eAuthUser();
+  if (e2eUser) {
+    return e2eUser;
+  }
+
   const keycloak = await getKeycloakClient();
   const authenticated = await keycloak.init({
     checkLoginIframe: false,
@@ -16,6 +26,10 @@ export async function initializeAuth() {
 }
 
 export async function login() {
+  if (isE2eAuthEnabled()) {
+    return;
+  }
+
   const keycloak = await getKeycloakClient();
   await keycloak.login({
     redirectUri: `${window.location.origin}/tickets`,
@@ -23,6 +37,10 @@ export async function login() {
 }
 
 export async function logout() {
+  if (isE2eAuthEnabled()) {
+    return;
+  }
+
   const keycloak = await getKeycloakClient();
   await keycloak.logout({
     redirectUri: window.location.origin,
@@ -30,6 +48,11 @@ export async function logout() {
 }
 
 export async function getAccessToken() {
+  const e2eToken = getE2eAccessToken();
+  if (e2eToken) {
+    return e2eToken;
+  }
+
   const keycloak = await getKeycloakClient();
   if (!keycloak.authenticated) {
     return undefined;

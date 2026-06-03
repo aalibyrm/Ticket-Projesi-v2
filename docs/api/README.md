@@ -1,7 +1,46 @@
 # API Documentation
 
-Bu dokuman sprint bazli endpoint contract ozetlerini tutar. Ayrintili runtime
-OpenAPI dokumani final smoke #56 oncesi uretilecektir.
+Bu dokuman sprint bazli endpoint contract ozetlerini tutar. Runtime OpenAPI
+dokumanlari servis seviyesinde uretilir; bu dosya final smoke ve frontend
+contract'lari icin okunabilir API haritasidir.
+
+## API Gateway Public Surface
+
+Public web ve mobil istemciler gateway uzerinden `/api/**` prefix'i ile REST
+endpointlerine erisir. Frontend route guard yalnizca UX icindir; asil
+authorization gateway ve ilgili servis tarafinda uygulanir.
+
+| Alan | Endpoint | Rol | Sahip servis |
+| --- | --- | --- | --- |
+| Customer tickets | `GET /api/tickets`, `POST /api/tickets`, `GET /api/tickets/{ticketId}` | Customer/Admin | ticket-service |
+| Customer comments | `GET /api/tickets/{ticketId}/comments`, `POST /api/tickets/{ticketId}/comments/external` | Customer/Admin | ticket-service |
+| Catalog | `GET /api/products`, `GET /api/ticket-topics` | Customer/Agent/Manager/Admin | ticket-service |
+| Files | `POST /api/files/uploads`, `POST /api/files/uploads/{fileId}/complete`, `POST /api/files/{fileId}/download-url` | Customer/Agent/Admin | file-service |
+| Notifications | `GET /api/notifications`, `PATCH /api/notifications/{notificationId}/read` | Customer/Agent/Manager/Admin | notification-service |
+| Agent tickets | `GET /api/agent/tickets`, `GET /api/agent/tickets/{ticketId}` | Agent/Admin | ticket-service |
+| Agent actions | status, assignment, comments, worklogs under `/api/agent/tickets/{ticketId}` | Agent/Admin | ticket-service |
+| Organization catalog | `GET /api/organization/departments`, `GET /api/organization/teams`, `GET /api/organization/teams/{teamId}/members` | Agent/Manager/Admin | ticket-service |
+| Reports | `/api/reports/**` | Manager/Admin | reporting-service |
+
+## Final Smoke Contract
+
+#56 Playwright smoke testi su contract'lara baglidir:
+
+- Ticket create request customer'dan `productId`, `topicCode`, `summary`,
+  `description`, `priority` alir.
+- Ticket response attachment metadata dahil tek detail view icin yeterli
+  alanlari tasir.
+- File upload presigned URL akisi `create upload url -> object storage PUT ->
+  complete upload` siralamasini kullanir.
+- Agent status update ve external comment aksiyonlari ticket-service event
+  uretim yolunu temsil eder.
+- Notification response customer-visible baslik/mesaj bilgisini tasir.
+- Reporting response'lari status, SLA, closed ticket ve agent performance
+  panellerini besler.
+
+Smoke test backend authorization yerine frontend contract regresyonlarini
+yakalayacak sekilde browser network doubles kullanir. Backend yetki ve event
+guvencesi Maven integration testleriyle korunur.
 
 ## Ticket Organization Fields
 
