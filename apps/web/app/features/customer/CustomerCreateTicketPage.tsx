@@ -16,6 +16,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 import { z } from "zod";
@@ -49,6 +50,7 @@ const createTicketSchema = z.object({
 
 export function CustomerCreateTicketPage() {
   const navigate = useNavigate();
+  const [isFormHydrated, setFormHydrated] = useState(false);
   const productsQuery = useProducts();
   const topicsQuery = useTicketTopics();
   const createTicket = useCreateCustomerTicket();
@@ -73,6 +75,10 @@ export function CustomerCreateTicketPage() {
 
   const selectedFile = watch("attachment")?.item(0);
   const selectedTopic = (topicsQuery.data ?? []).find((topic) => topic.code === watch("topicCode"));
+
+  useEffect(() => {
+    setFormHydrated(true);
+  }, []);
 
   async function submitForm(values: CreateTicketFormValues) {
     const ticket = await createTicket.mutateAsync({
@@ -134,6 +140,8 @@ export function CustomerCreateTicketPage() {
 
           <Stack
             component="form"
+            data-e2e-ready={isFormHydrated ? "true" : "false"}
+            data-testid="create-ticket-form"
             noValidate
             onSubmit={handleSubmit(submitForm)}
             spacing={3}
