@@ -56,6 +56,7 @@ test("customer, agent, notification, and reporting smoke journey", async ({ page
   await registerE2eAuth(page);
 
   await page.goto("/tickets");
+  await waitForAppHydration(page);
   await expect(page.getByRole("heading", { name: "Taleplerim" })).toBeVisible();
   await expect(page.locator("main").getByRole("link", { name: "Yeni talep" })).toHaveAttribute(
     "href",
@@ -63,6 +64,7 @@ test("customer, agent, notification, and reporting smoke journey", async ({ page
   );
 
   await page.goto("/tickets/new");
+  await waitForAppHydration(page);
   await expect(page.getByRole("heading", { name: "Yeni Destek Talebi" })).toBeVisible();
 
   await page.getByLabel("Konu").fill("VPN baglanti hatasi");
@@ -428,4 +430,10 @@ function json(route: Route, value: unknown, status = 200) {
     json: value,
     status,
   });
+}
+
+async function waitForAppHydration(page: Page) {
+  await page.waitForFunction(
+    () => (window as Window & { __TICKET_WEB_HYDRATED__?: boolean }).__TICKET_WEB_HYDRATED__ === true,
+  );
 }
