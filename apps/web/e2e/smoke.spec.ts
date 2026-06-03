@@ -80,7 +80,48 @@ test("customer, agent, notification, and reporting smoke journey", async ({ page
       mimeType: "text/plain",
       name: "vpn-log.txt",
     });
-  await page.getByRole("button", { name: "Gonder" }).click();
+
+  await expect(page.getByLabel("Konu")).toHaveValue("VPN baglanti hatasi");
+  await expect(page.getByLabel("Kategori")).toHaveValue(productId);
+  await expect(page.getByLabel("Talep tipi")).toHaveValue("VPN_ACCESS");
+  await expect(page.getByLabel("Aciklama")).toHaveValue(
+    "VPN baglantisi mesai baslangicinda hata veriyor ve is akisimi durduruyor.",
+  );
+
+  const createTicketResponse = page.waitForResponse(
+    (response) =>
+      response.url() === "http://localhost:8080/api/tickets" &&
+      response.request().method() === "POST" &&
+      response.status() === 201,
+  );
+  const reserveUploadResponse = page.waitForResponse(
+    (response) =>
+      response.url() === "http://localhost:8080/api/files/uploads" &&
+      response.request().method() === "POST" &&
+      response.status() === 200,
+  );
+  const objectStorageResponse = page.waitForResponse((response) => {
+    const url = new URL(response.url());
+    return (
+      url.pathname === `/e2e-object-storage/${fileId}` &&
+      response.request().method() === "PUT" &&
+      response.status() === 200
+    );
+  });
+  const completeUploadResponse = page.waitForResponse(
+    (response) =>
+      response.url() === `http://localhost:8080/api/files/uploads/${fileId}/complete` &&
+      response.request().method() === "POST" &&
+      response.status() === 200,
+  );
+
+  await Promise.all([
+    createTicketResponse,
+    reserveUploadResponse,
+    objectStorageResponse,
+    completeUploadResponse,
+    page.getByRole("button", { name: "Gonder" }).click(),
+  ]);
 
   await expect(page).toHaveURL(new RegExp(`/tickets/${ticketId}$`));
   await expect(page.getByRole("heading", { name: "VPN baglanti hatasi" })).toBeVisible();
@@ -192,7 +233,7 @@ async function registerDemoApi(page: Page, state: ReturnType<typeof createDemoSt
         method: "PUT",
         objectKey: `tickets/${ticketId}/${fileId}`,
         requiredHeaders: { "Content-Type": body.contentType },
-        uploadUrl: `http://localhost:8080/e2e-object-storage/${fileId}`,
+        uploadUrl: `/e2e-object-storage/${fileId}`,
       });
     }
 
