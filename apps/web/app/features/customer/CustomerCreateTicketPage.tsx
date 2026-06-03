@@ -94,7 +94,13 @@ export function CustomerCreateTicketPage() {
       await uploadAttachment.mutateAsync({ file, ticketId: ticket.id });
     }
 
-    await navigate(`/tickets/${ticket.id}`);
+    const detailPath = `/tickets/${ticket.id}`;
+    void navigate(detailPath);
+    window.setTimeout(() => {
+      if (window.location.pathname !== detailPath) {
+        window.location.assign(detailPath);
+      }
+    }, 250);
   }
 
   if (productsQuery.isLoading || topicsQuery.isLoading) {
