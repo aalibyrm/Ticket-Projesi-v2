@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import {
   CustomerEmptyState,
   CustomerErrorState,
@@ -84,8 +84,9 @@ export function CustomerTicketListPage() {
           <Typography variant="h4">Taleplerim</Typography>
         </Stack>
         <Button
-          onClick={() => navigate("/tickets/new")}
+          component={Link}
           startIcon={<AddOutlinedIcon />}
+          to="/tickets/new"
           variant="contained"
         >
           Yeni talep

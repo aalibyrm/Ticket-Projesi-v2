@@ -60,7 +60,7 @@ test("customer, agent, notification, and reporting smoke journey", async ({ page
 
   await Promise.all([
     page.waitForURL(/\/tickets\/new$/),
-    page.getByRole("button", { name: "Yeni talep" }).click(),
+    page.locator("main").getByRole("link", { name: "Yeni talep" }).click(),
   ]);
   await expect(page.getByRole("heading", { name: "Yeni Destek Talebi" })).toBeVisible();
 
