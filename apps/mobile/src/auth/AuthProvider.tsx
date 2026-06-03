@@ -4,7 +4,8 @@ import * as WebBrowser from "expo-web-browser";
 import { setAccessTokenProvider } from "../api/httpClient";
 import { getMissingAuthConfig, isAuthConfigured, mobileEnv } from "../config/env";
 import { clearStoredTokens, loadStoredTokens, storeTokens } from "./secureTokenStorage";
-import type { AuthContextValue, AuthStatus, AuthTokens } from "./authTypes";
+import type { AuthContextValue, AuthStatus, AuthTokens, AuthUser } from "./authTypes";
+import { getAuthUserFromAccessToken } from "./tokenClaims";
 import { isTokenUsable } from "./tokenState";
 
 WebBrowser.maybeCompleteAuthSession();
@@ -13,6 +14,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [tokens, setTokens] = useState<AuthTokens | undefined>();
+  const [user, setUser] = useState<AuthUser | undefined>();
   const [status, setStatus] = useState<AuthStatus>("loading");
   const [error, setError] = useState<string | undefined>();
 
@@ -44,9 +46,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (isTokenUsable(storedTokens)) {
         setTokens(storedTokens);
+        setUser(getAuthUserFromAccessToken(storedTokens?.accessToken));
         setStatus("authenticated");
       } else {
         await clearStoredTokens();
+        setUser(undefined);
         setStatus("unauthenticated");
       }
     }
@@ -103,6 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         await storeTokens(nextTokens);
         setTokens(nextTokens);
+        setUser(getAuthUserFromAccessToken(nextTokens.accessToken));
         setStatus("authenticated");
       } catch {
         if (!cancelled) {
@@ -131,6 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       status,
       accessToken: tokens?.accessToken,
       error,
+      user,
       signIn: async () => {
         if (!isAuthConfigured()) {
           const missingKeys = getMissingAuthConfig().join(", ");
@@ -151,10 +157,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signOut: async () => {
         await clearStoredTokens();
         setTokens(undefined);
+        setUser(undefined);
         setStatus("unauthenticated");
       }
     }),
-    [error, promptAsync, request, status, tokens?.accessToken]
+    [error, promptAsync, request, status, tokens?.accessToken, user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

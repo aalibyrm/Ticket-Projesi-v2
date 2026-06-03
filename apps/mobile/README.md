@@ -9,7 +9,9 @@ scaffold edildi.
 - React Native 0.85
 - React Navigation 7
 - Expo AuthSession + SecureStore
+- Expo DocumentPicker
 - Axios REST client
+- Pure React Native StyleSheet + shared design tokens
 - Vitest ve TypeScript typecheck
 
 ## Local Run
@@ -30,3 +32,6 @@ Access ve refresh token degerleri SecureStore icinde tutulur. `.env` lokal
 secret kabul edilir ve commit'lenmez. Mobil istemci authorization karari
 vermez; gateway ve backend servis authorization kontrolleri authoritative
 kalir.
+
+Token claim'leri yalnizca role-aware navigation icin okunur. Bu okuma backend
+authorization yerine gecmez.

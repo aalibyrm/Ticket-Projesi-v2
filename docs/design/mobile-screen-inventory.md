@@ -46,6 +46,9 @@ Kaynak: `MobilTasarim/precision_minimalist/DESIGN.md`
 - #54 sadece Expo Managed scaffold, auth, navigation, API client ve env config
   kurar.
 - #55 bu ekrani gercek React Native componentlerine tasir.
+- #55 icin kullanici A secenegini secti: ekranlar Pure React Native
+  `StyleSheet` ve shared design token yaklasimiyla uygulanir.
 - Customer, agent ve manager navigation ayni app icinde role gore ayrilir.
-- Dosya ekleme/indirme islemleri file-service presigned URL modelini kullanir;
-  ticket authorization karari backend tarafinda kalir.
+- Dosya ekleme islemi mobilde Expo DocumentPicker ile dosya secer ve
+  file-service presigned URL modelini kullanir; ticket authorization karari
+  backend tarafinda kalir.
