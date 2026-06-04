@@ -14,6 +14,7 @@ import {
 } from "react-router";
 import { AppProviders } from "~/shared/app-providers";
 import { LoadingScreen } from "~/shared/components/LoadingScreen";
+import { UiProviders } from "~/shared/theme/UiProviders";
 
 export function Layout({ children }: { children: ReactNode }) {
   return (
@@ -34,7 +35,11 @@ export function Layout({ children }: { children: ReactNode }) {
 }
 
 export function HydrateFallback() {
-  return <LoadingScreen label="Uygulama yukleniyor" />;
+  return (
+    <UiProviders>
+      <LoadingScreen label="Uygulama yukleniyor" />
+    </UiProviders>
+  );
 }
 
 export default function App() {

@@ -27,6 +27,23 @@ apiClient.interceptors.request.use(async (config) => {
   return config;
 });
 
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error: unknown) => {
+    if (import.meta.env.DEV && axios.isAxiosError(error)) {
+      console.warn("API request failed", {
+        code: error.code,
+        method: error.config?.method,
+        path: error.config?.url,
+        status: error.response?.status,
+        correlationId: error.response?.headers?.["x-correlation-id"],
+      });
+    }
+
+    return Promise.reject(error);
+  },
+);
+
 function createCorrelationId() {
   if (globalThis.crypto?.randomUUID) {
     return globalThis.crypto.randomUUID();

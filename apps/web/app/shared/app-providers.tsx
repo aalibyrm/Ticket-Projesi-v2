@@ -1,11 +1,9 @@
-import { CssBaseline } from "@mui/material";
-import { ThemeProvider } from "@mui/material/styles";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { Provider as ReduxProvider } from "react-redux";
 import { AuthBootstrap } from "~/features/auth/AuthBootstrap";
 import { store } from "~/shared/store/store";
-import { appTheme } from "~/shared/theme/appTheme";
+import { UiProviders } from "~/shared/theme/UiProviders";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,11 +19,10 @@ export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <ReduxProvider store={store}>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider theme={appTheme}>
-          <CssBaseline />
+        <UiProviders>
           <AuthBootstrap />
           {children}
-        </ThemeProvider>
+        </UiProviders>
       </QueryClientProvider>
     </ReduxProvider>
   );

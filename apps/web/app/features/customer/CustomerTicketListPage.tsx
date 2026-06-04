@@ -9,6 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
+import axios from "axios";
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import {
@@ -50,7 +51,7 @@ const columns: GridColDef<TicketResponse>[] = [
 export function CustomerTicketListPage() {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<TicketFilter>("ALL");
-  const { data, isError, isLoading, refetch } = useCustomerTickets();
+  const { data, error, isError, isLoading, refetch } = useCustomerTickets();
 
   const rows = useMemo(() => {
     const tickets = data ?? [];
@@ -68,7 +69,7 @@ export function CustomerTicketListPage() {
   }
 
   if (isError) {
-    return <CustomerErrorState onRetry={() => void refetch()} />;
+    return <CustomerErrorState message={customerTicketErrorMessage(error)} onRetry={() => void refetch()} />;
   }
 
   return (
@@ -131,4 +132,24 @@ export function CustomerTicketListPage() {
       )}
     </Stack>
   );
+}
+
+function customerTicketErrorMessage(error: unknown) {
+  if (!axios.isAxiosError(error)) {
+    return "Veri alinirken hata olustu.";
+  }
+
+  if (!error.response) {
+    return "API Gateway'e ulasilamadi. Gateway ve CORS ayarlarini kontrol edin.";
+  }
+
+  if (error.response.status === 401) {
+    return "Oturum dogrulanamadi. Cikis yapip tekrar giris yapin.";
+  }
+
+  if (error.response.status === 403) {
+    return "Bu ticket listesi icin yetkiniz yok.";
+  }
+
+  return `Veri alinirken hata olustu. HTTP ${error.response.status}`;
 }

@@ -22,7 +22,13 @@ class GatewayCorsConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(origins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Correlation-Id"));
+        config.setAllowedHeaders(List.of(
+                "Authorization",
+                "authorization",
+                "Content-Type",
+                "content-type",
+                "X-Correlation-Id",
+                "x-correlation-id"));
         config.setExposedHeaders(List.of("X-Correlation-Id"));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);

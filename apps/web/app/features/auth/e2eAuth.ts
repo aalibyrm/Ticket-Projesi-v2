@@ -34,7 +34,7 @@ function parseRoles(value: string): AppRole[] {
 }
 
 function isBrowserFlagEnabled() {
-  if (import.meta.env.PROD || typeof window === "undefined") {
+  if (import.meta.env.PROD || import.meta.env.MODE !== "e2e" || typeof window === "undefined") {
     return false;
   }
 

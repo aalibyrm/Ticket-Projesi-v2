@@ -13,7 +13,7 @@ export function ProtectedRoute({ children }: { children: ReactNode }) {
   const error = useAppSelector(selectAuthError);
 
   if (status === "idle" || status === "loading") {
-    return <LoadingScreen label="Oturum kontrol ediliyor" />;
+    return <LoadingScreen label="Uygulama yukleniyor" />;
   }
 
   if (status !== "authenticated") {

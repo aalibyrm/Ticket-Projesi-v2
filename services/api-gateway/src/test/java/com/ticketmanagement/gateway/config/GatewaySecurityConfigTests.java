@@ -1,23 +1,45 @@
 package com.ticketmanagement.gateway.config;
 
-import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.mockJwt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Mono;
 
-@SpringBootTest(properties = "app.security.jwt.enabled=true")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
+        "app.security.jwt.enabled=true",
+        "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.oauth2.resource.reactive.ReactiveOAuth2ResourceServerAutoConfiguration",
+        "TICKET_SERVICE_URL=http://127.0.0.1:1",
+        "WORKFLOW_SLA_SERVICE_URL=http://127.0.0.1:1",
+        "REPORTING_SERVICE_URL=http://127.0.0.1:1"
+})
 @AutoConfigureWebTestClient
 class GatewaySecurityConfigTests {
 
     @Autowired
     private WebTestClient webTestClient;
+
+    @MockBean
+    private ReactiveJwtDecoder reactiveJwtDecoder;
+
+    @BeforeEach
+    void setUpJwtDecoder() {
+        when(reactiveJwtDecoder.decode(anyString()))
+                .thenAnswer(invocation -> Mono.just(jwt(invocation.getArgument(0, String.class))));
+    }
 
     @Test
     void healthEndpointIsPublic() {
@@ -40,111 +62,129 @@ class GatewaySecurityConfigTests {
 
     @Test
     void customerRoleCanReachCustomerTicketRoute() {
-        webTestClient.mutateWith(mockJwt().authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
-                .get()
+        webTestClient.get()
                 .uri("/api/tickets")
+                .header(HttpHeaders.AUTHORIZATION, bearer("customer-token"))
                 .exchange()
                 .expectStatus().is5xxServerError();
     }
 
     @Test
     void customerRoleCanReachTicketTopicRoute() {
-        webTestClient.mutateWith(mockJwt().authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
-                .get()
+        webTestClient.get()
                 .uri("/api/ticket-topics")
+                .header(HttpHeaders.AUTHORIZATION, bearer("customer-token"))
                 .exchange()
                 .expectStatus().is5xxServerError();
     }
 
     @Test
     void agentRoleCanReachTicketOperationRoutes() {
-        webTestClient.mutateWith(mockJwt().authorities(new SimpleGrantedAuthority("ROLE_AGENT")))
-                .get()
+        webTestClient.get()
                 .uri("/api/agent/tickets/queue")
+                .header(HttpHeaders.AUTHORIZATION, bearer("agent-token"))
                 .exchange()
                 .expectStatus().is5xxServerError();
 
-        webTestClient.mutateWith(mockJwt().authorities(new SimpleGrantedAuthority("ROLE_AGENT")))
-                .get()
+        webTestClient.get()
                 .uri("/api/workflows/tickets/00000000-0000-0000-0000-000000000001/transitions")
+                .header(HttpHeaders.AUTHORIZATION, bearer("agent-token"))
                 .exchange()
                 .expectStatus().is5xxServerError();
     }
 
     @Test
     void agentRoleCanReachOrganizationRoutes() {
-        webTestClient.mutateWith(mockJwt().authorities(new SimpleGrantedAuthority("ROLE_AGENT")))
-                .get()
+        webTestClient.get()
                 .uri("/api/organization/teams")
+                .header(HttpHeaders.AUTHORIZATION, bearer("agent-token"))
                 .exchange()
                 .expectStatus().is5xxServerError();
     }
 
     @Test
     void agentRoleCannotReachCustomerTicketOrManagerReportRoutes() {
-        webTestClient.mutateWith(mockJwt().authorities(new SimpleGrantedAuthority("ROLE_AGENT")))
-                .get()
+        webTestClient.get()
                 .uri("/api/tickets")
+                .header(HttpHeaders.AUTHORIZATION, bearer("agent-token"))
                 .exchange()
                 .expectStatus().isForbidden();
 
-        webTestClient.mutateWith(mockJwt().authorities(new SimpleGrantedAuthority("ROLE_AGENT")))
-                .get()
+        webTestClient.get()
                 .uri("/api/reports/status-distribution")
+                .header(HttpHeaders.AUTHORIZATION, bearer("agent-token"))
                 .exchange()
                 .expectStatus().isForbidden();
     }
 
     @Test
     void managerRoleCanReachReportAndSlaRoutes() {
-        webTestClient.mutateWith(mockJwt().authorities(new SimpleGrantedAuthority("ROLE_MANAGER")))
-                .get()
+        webTestClient.get()
                 .uri("/api/reports/status-distribution")
+                .header(HttpHeaders.AUTHORIZATION, bearer("manager-token"))
                 .exchange()
                 .expectStatus().is5xxServerError();
 
-        webTestClient.mutateWith(mockJwt().authorities(new SimpleGrantedAuthority("ROLE_MANAGER")))
-                .get()
+        webTestClient.get()
                 .uri("/api/sla/compliance")
+                .header(HttpHeaders.AUTHORIZATION, bearer("manager-token"))
                 .exchange()
                 .expectStatus().is5xxServerError();
     }
 
     @Test
     void managerRealmRoleClaimCanReachReportRoute() {
-        webTestClient.mutateWith(mockJwt()
-                        .jwt(token -> token.claim("realm_access", Map.of("roles", List.of("MANAGER"))))
-                        .authorities(new GatewayJwtRealmRoleConverter()))
-                .get()
+        webTestClient.get()
                 .uri("/api/reports/status-distribution")
+                .header(HttpHeaders.AUTHORIZATION, bearer("manager-token"))
                 .exchange()
                 .expectStatus().is5xxServerError();
     }
 
     @Test
     void customerRoleCannotReachManagerReportRoute() {
-        webTestClient.mutateWith(mockJwt().authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
-                .get()
+        webTestClient.get()
                 .uri("/api/reports/status-distribution")
+                .header(HttpHeaders.AUTHORIZATION, bearer("customer-token"))
                 .exchange()
                 .expectStatus().isForbidden();
     }
 
     @Test
     void customerRoleCannotReachOrganizationRoutes() {
-        webTestClient.mutateWith(mockJwt().authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
-                .get()
+        webTestClient.get()
                 .uri("/api/organization/teams")
+                .header(HttpHeaders.AUTHORIZATION, bearer("customer-token"))
                 .exchange()
                 .expectStatus().isForbidden();
     }
 
     @Test
     void managerRoleCannotReachAgentOperationRoute() {
-        webTestClient.mutateWith(mockJwt().authorities(new SimpleGrantedAuthority("ROLE_MANAGER")))
-                .get()
+        webTestClient.get()
                 .uri("/api/agent/tickets/queue")
+                .header(HttpHeaders.AUTHORIZATION, bearer("manager-token"))
                 .exchange()
                 .expectStatus().isForbidden();
+    }
+
+    private static String bearer(String token) {
+        return "Bearer " + token;
+    }
+
+    private static Jwt jwt(String token) {
+        String role = switch (token) {
+            case "customer-token" -> "CUSTOMER";
+            case "agent-token" -> "AGENT";
+            case "manager-token" -> "MANAGER";
+            default -> "UNKNOWN";
+        };
+
+        return new Jwt(
+                token,
+                Instant.now(),
+                Instant.now().plusSeconds(300),
+                Map.of("alg", "none"),
+                Map.of("sub", token, "realm_access", Map.of("roles", List.of(role))));
     }
 }
