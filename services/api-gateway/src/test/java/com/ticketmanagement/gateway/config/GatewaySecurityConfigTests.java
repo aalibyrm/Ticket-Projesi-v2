@@ -48,6 +48,15 @@ class GatewaySecurityConfigTests {
     }
 
     @Test
+    void customerRoleCanReachTicketTopicRoute() {
+        webTestClient.mutateWith(mockJwt().authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
+                .get()
+                .uri("/api/ticket-topics")
+                .exchange()
+                .expectStatus().is5xxServerError();
+    }
+
+    @Test
     void agentRoleCanReachTicketOperationRoutes() {
         webTestClient.mutateWith(mockJwt().authorities(new SimpleGrantedAuthority("ROLE_AGENT")))
                 .get()
@@ -58,6 +67,15 @@ class GatewaySecurityConfigTests {
         webTestClient.mutateWith(mockJwt().authorities(new SimpleGrantedAuthority("ROLE_AGENT")))
                 .get()
                 .uri("/api/workflows/tickets/00000000-0000-0000-0000-000000000001/transitions")
+                .exchange()
+                .expectStatus().is5xxServerError();
+    }
+
+    @Test
+    void agentRoleCanReachOrganizationRoutes() {
+        webTestClient.mutateWith(mockJwt().authorities(new SimpleGrantedAuthority("ROLE_AGENT")))
+                .get()
+                .uri("/api/organization/teams")
                 .exchange()
                 .expectStatus().is5xxServerError();
     }
@@ -108,6 +126,15 @@ class GatewaySecurityConfigTests {
         webTestClient.mutateWith(mockJwt().authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
                 .get()
                 .uri("/api/reports/status-distribution")
+                .exchange()
+                .expectStatus().isForbidden();
+    }
+
+    @Test
+    void customerRoleCannotReachOrganizationRoutes() {
+        webTestClient.mutateWith(mockJwt().authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
+                .get()
+                .uri("/api/organization/teams")
                 .exchange()
                 .expectStatus().isForbidden();
     }

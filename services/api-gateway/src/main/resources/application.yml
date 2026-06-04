@@ -25,7 +25,7 @@ spring:
             - id: ticket-service
               uri: ${TICKET_SERVICE_URL:http://localhost:8081}
               predicates:
-                - Path=/api/tickets/**,/api/products/**
+                - Path=/api/tickets/**,/api/products/**,/api/ticket-topics,/api/ticket-topics/**,/api/organization/**
             - id: file-service
               uri: ${FILE_SERVICE_URL:http://localhost:8082}
               predicates:
