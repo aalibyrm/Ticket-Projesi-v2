@@ -10,6 +10,7 @@ Management platform.
 - Remember me: enabled
 - Brute force protection: enabled
 - OTP policy: TOTP configured at realm level
+- Login theme: `ticket`
 
 ## Clients
 
@@ -42,3 +43,7 @@ verification. Web and mobile clients must use Authorization Code + PKCE.
 
 Docker Compose mounts `ticket-management-realm.json` and starts Keycloak with
 `--import-realm`.
+
+Docker Compose also mounts `themes/ticket` as a custom login theme. The theme
+keeps web and mobile clients on Authorization Code + PKCE; user passwords are
+submitted only to Keycloak, not to the React, React Native, or backend services.

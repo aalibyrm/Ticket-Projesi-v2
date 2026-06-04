@@ -2,6 +2,7 @@
   "realm": "ticket-management",
   "enabled": true,
   "displayName": "Ticket Management",
+  "loginTheme": "ticket",
   "registrationAllowed": false,
   "registrationEmailAsUsername": false,
   "rememberMe": true,

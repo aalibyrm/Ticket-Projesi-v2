@@ -9,22 +9,27 @@ export function SignInScreen() {
   const isBusy = status === "loading";
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + spacing.lg }]}>
-      <View style={styles.header}>
-        <Text style={styles.brand}>Support System</Text>
-        <Text style={styles.title}>Mobil destek deneyimi</Text>
-        <Text style={styles.description}>
-          Ticket listeleri, mesajlar ve dosya akislarini gateway uzerinden guvenli
-          oturumla kullan.
-        </Text>
-      </View>
-
+    <View
+      style={[
+        styles.container,
+        {
+          paddingBottom: insets.bottom + spacing.lg,
+          paddingTop: insets.top + spacing.lg
+        }
+      ]}
+    >
       <View style={styles.panel}>
-        <Text style={styles.panelTitle}>Kurumsal oturum</Text>
-        <Text style={styles.panelText}>
-          Keycloak OIDC ve PKCE ile oturum acilir. Token mobil cihazda SecureStore
-          icinde saklanir.
-        </Text>
+        <View style={styles.brandBlock}>
+          <Text style={styles.brand}>
+            Ticket<Text style={styles.brandDot}>.</Text>
+          </Text>
+          <Text style={styles.brandSubtitle}>Destek Portali</Text>
+        </View>
+
+        <View style={styles.headingBlock}>
+          <Text style={styles.title}>Hos geldiniz</Text>
+          <Text style={styles.description}>Devam etmek icin giris yapin</Text>
+        </View>
 
         {error ? <Text style={styles.errorText}>{error}</Text> : undefined}
 
@@ -37,8 +42,18 @@ export function SignInScreen() {
             (pressed || isBusy) && styles.primaryButtonPressed
           ]}
         >
-          <Text style={styles.primaryButtonText}>{isBusy ? "Bekleyin" : "Oturum ac"}</Text>
+          <Text style={styles.primaryButtonText}>{isBusy ? "Yonlendiriliyor" : "Giris Yap"}</Text>
         </Pressable>
+
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>veya</Text>
+          <View style={styles.dividerLine} />
+        </View>
+
+        <Text style={styles.registerText}>
+          Hesabiniz yok mu? <Text style={styles.registerLink}>Kurum yoneticinizle gorusun</Text>
+        </Text>
       </View>
     </View>
   );
@@ -47,40 +62,63 @@ export function SignInScreen() {
 const styles = StyleSheet.create({
   brand: {
     ...typography.heading,
+    color: colors.text,
+    lineHeight: 28
+  },
+  brandBlock: {
+    alignItems: "center",
+    gap: spacing.xs
+  },
+  brandDot: {
     color: colors.primary
   },
+  brandSubtitle: {
+    ...typography.label,
+    color: colors.textMuted
+  },
   container: {
-    backgroundColor: colors.background,
+    alignItems: "center",
+    backgroundColor: "#f0f0f5",
     flex: 1,
-    justifyContent: "space-between",
-    padding: spacing.lg
+    justifyContent: "center",
+    paddingHorizontal: 31
   },
   description: {
     ...typography.body,
     color: colors.textMuted
   },
+  divider: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 14,
+    marginTop: spacing.sm
+  },
+  dividerLine: {
+    backgroundColor: colors.border,
+    flex: 1,
+    height: 1
+  },
+  dividerText: {
+    ...typography.label,
+    color: colors.textMuted,
+    fontSize: 11
+  },
   errorText: {
     ...typography.label,
     color: colors.error
   },
-  header: {
-    gap: spacing.md
+  headingBlock: {
+    gap: spacing.xs
   },
   panel: {
     backgroundColor: colors.surface,
     borderColor: colors.border,
     borderRadius: radius.md,
     borderWidth: 1,
-    gap: spacing.md,
-    padding: spacing.lg
-  },
-  panelText: {
-    ...typography.body,
-    color: colors.textMuted
-  },
-  panelTitle: {
-    ...typography.heading,
-    color: colors.text
+    gap: spacing.lg,
+    maxWidth: 342,
+    padding: spacing.lg,
+    width: "100%"
   },
   primaryButton: {
     alignItems: "center",
@@ -95,6 +133,15 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     ...typography.label,
     color: colors.surface
+  },
+  registerLink: {
+    color: colors.primary,
+    fontWeight: "500"
+  },
+  registerText: {
+    ...typography.label,
+    color: colors.textMuted,
+    textAlign: "center"
   },
   title: {
     ...typography.title,

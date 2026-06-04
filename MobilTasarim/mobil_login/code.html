@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+
+<html lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ticket Support Portal - Login</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Outfit & DM Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;700&amp;family=Outfit:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#e3e2e2",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "primary-fixed": "#ffdad4",
+                        "on-primary-fixed-variant": "#910b00",
+                        "inverse-on-surface": "#f0f0f5",
+                        "surface": "#f9f9fe",
+                        "primary-container": "#aa1101",
+                        "tertiary-fixed": "#e5e2e1",
+                        "error": "#ba1a1a",
+                        "on-error": "#ffffff",
+                        "outline": "#90706a",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-bright": "#f9f9fe",
+                        "on-primary-container": "#ffb8ab",
+                        "on-surface-variant": "#5b403b",
+                        "on-primary": "#ffffff",
+                        "on-surface": "#1a1c1f",
+                        "background": "#f9f9fe",
+                        "tertiary": "#3e3d3d",
+                        "secondary": "#5e5e5e",
+                        "primary": "#7f0900",
+                        "on-tertiary-fixed-variant": "#474646",
+                        "surface-dim": "#d9dade",
+                        "outline-variant": "#e4beb7",
+                        "tertiary-fixed-dim": "#c8c6c5",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#c7c6c6",
+                        "on-secondary-container": "#646464",
+                        "surface-container-highest": "#e2e2e7",
+                        "surface-container-low": "#f3f3f8",
+                        "surface-container-high": "#e8e8ed",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "surface-container": "#ededf2",
+                        "on-background": "#1a1c1f",
+                        "inverse-primary": "#ffb4a7",
+                        "on-tertiary-container": "#cbc8c8",
+                        "on-tertiary-fixed": "#1c1b1b",
+                        "on-primary-fixed": "#400200",
+                        "on-secondary-fixed-variant": "#464747",
+                        "surface-tint": "#b91e0b",
+                        "tertiary-container": "#555454",
+                        "primary-fixed-dim": "#ffb4a7",
+                        "surface-variant": "#e2e2e7",
+                        "inverse-surface": "#2f3034",
+                        "secondary-fixed": "#e3e2e2",
+                        "on-tertiary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-md": "16px",
+                        "stack-sm": "8px",
+                        "gutter": "16px",
+                        "stack-lg": "32px",
+                        "container-margin": "24px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Outfit"],
+                        "body-lg": ["DM Sans"],
+                        "body-md": ["DM Sans"],
+                        "label-sm": ["DM Sans"],
+                        "headline-lg-mobile": ["Outfit"],
+                        "display": ["Outfit"],
+                        "headline-lg": ["Outfit"],
+                        "stats-lg": ["Outfit"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["20px", { "lineHeight": "1.4", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "body-md": ["15px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "label-sm": ["13px", { "lineHeight": "1.2", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "display": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "stats-lg": ["36px", { "lineHeight": "1", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Input underline transition */
+        .input-underline {
+            transition: border-color 0.2s ease-in-out;
+        }
+        .input-underline:focus {
+            border-bottom-color: #111111;
+            outline: none;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body class="bg-[#1a1c1f] flex justify-center items-center min-h-screen">
+<!-- Screen Container -->
+<div class="w-[390px] h-[844px] bg-[#F0F0F5] relative overflow-hidden flex justify-center items-center">
+<!-- Login Card -->
+<div class="w-[342px] max-h-[480px] bg-[#FFFFFF] border border-[#E5E5EA] rounded-[8px] p-[24px] shadow-[0_2px_16px_rgba(0,0,0,0.05)] flex flex-col">
+<!-- Brand Mark -->
+<div class="flex flex-col items-center mb-6">
+<h1 class="font-outfit text-[20px] font-semibold text-[#111111] leading-none mb-1">
+                        Ticket<span class="text-[#AA1101]">.</span>
+</h1>
+<p class="font-dm-sans text-[12px] text-[#737373]">Destek Portalı</p>
+</div>
+<!-- Welcome Text -->
+<div class="mb-6">
+<h2 class="font-outfit text-[20px] font-semibold text-[#111111] mb-1">
+                        Hoş geldiniz
+                    </h2>
+<p class="font-dm-sans text-[13px] text-[#737373]">
+                        Devam etmek için giriş yapın
+                    </p>
+</div>
+<!-- Form -->
+<form class="flex flex-col space-y-4">
+<!-- Email Field -->
+<div class="flex flex-col">
+<label class="font-dm-sans text-[12px] font-medium text-[#737373] tracking-widest mb-1 uppercase" for="email">E-POSTA</label>
+<input class="input-underline w-full h-[32px] border-0 border-b border-[#E5E5EA] bg-transparent px-0 py-1 font-dm-sans text-[16px] text-[#111111]" id="email" placeholder="ornek@sirket.com" required="" type="email"/>
+</div>
+<!-- Password Field -->
+<div class="flex flex-col">
+<label class="font-dm-sans text-[12px] font-medium text-[#737373] tracking-widest mb-1 uppercase" for="password">ŞİFRE</label>
+<div class="relative w-full">
+<input class="input-underline w-full h-[32px] border-0 border-b border-[#E5E5EA] bg-transparent px-0 py-1 font-dm-sans text-[16px] text-[#111111] pr-8" id="password" placeholder="••••••••" required="" type="password"/>
+<button class="absolute right-0 top-1/2 -translate-y-1/2 text-[#737373] hover:text-[#111111] transition-colors flex items-center justify-center h-full w-8" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility_off</span>
+</button>
+</div>
+</div>
+<!-- Remember Me & Forgot Password -->
+<div class="flex justify-between items-center pt-1">
+<label class="flex items-center gap-2 cursor-pointer group">
+<style>input.sr-only:checked + span { color: white; } input.sr-only:checked ~ div, .peer:checked + div { background-color: #AA1101; border-color: #AA1101; }</style><div class="w-3.5 h-3.5 rounded-sm border border-[#E5E5EA] flex items-center justify-center transition-colors">
+<!-- Checkbox visually hidden, custom styled box -->
+<input class="sr-only peer" type="checkbox"/>
+<span class="material-symbols-outlined text-[12px] text-white opacity-0 peer-checked:opacity-100 transition-opacity" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="font-dm-sans text-[12px] text-[#737373]">Beni hatırla</span>
+</label>
+<a class="font-dm-sans text-[12px] font-medium text-[#AA1101] hover:opacity-80 transition-colors" href="#">Şifremi unuttum</a>
+</div>
+<!-- Primary Button -->
+<button class="w-full h-[48px] mt-2 bg-[#AA1101] hover:opacity-90 transition-opacity rounded-[8px] flex items-center justify-center text-white font-dm-sans text-[15px] font-medium" type="button">
+                        Giriş Yap
+                    </button>
+</form>
+<!-- Divider -->
+<div class="flex items-center gap-3 my-5">
+<div class="h-[1px] bg-[#E5E5EA] flex-1"></div>
+<span class="font-dm-sans text-[11px] text-[#737373]">veya</span>
+<div class="h-[1px] bg-[#E5E5EA] flex-1"></div>
+</div>
+<!-- Register Link -->
+<div class="text-center mt-auto">
+<p class="font-dm-sans text-[13px] text-[#737373]">
+                        Hesabınız yok mu? <a class="text-[#AA1101] font-medium hover:opacity-80 transition-colors" href="#">Kayıt olun</a>
+</p>
+</div>
+</div>
+</div>
+<script>
+        // Simple script to toggle password visibility
+        document.addEventListener('DOMContentLoaded', () => {
+            const togglePasswordBtn = document.querySelector('button[type="button"]');
+            const passwordInput = document.getElementById('password');
+            const icon = togglePasswordBtn.querySelector('.material-symbols-outlined');
+
+            togglePasswordBtn.addEventListener('click', () => {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    icon.textContent = 'visibility';
+                } else {
+                    passwordInput.type = 'password';
+                    icon.textContent = 'visibility_off';
+                }
+            });
+        });
+    </script>
+</body></html>
