@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { Provider as ReduxProvider } from "react-redux";
 import { AuthBootstrap } from "~/features/auth/AuthBootstrap";
+import { NotificationLiveUpdates } from "~/features/notifications/NotificationLiveUpdates";
 import { store } from "~/shared/store/store";
 import { UiProviders } from "~/shared/theme/UiProviders";
 
@@ -21,6 +22,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
       <QueryClientProvider client={queryClient}>
         <UiProviders>
           <AuthBootstrap />
+          <NotificationLiveUpdates />
           {children}
         </UiProviders>
       </QueryClientProvider>

@@ -18,6 +18,7 @@ public class WorkflowEventNotificationService {
 
     private final ConsumerIdempotencyService consumerIdempotencyService;
     private final NotificationJpaRepository notificationRepository;
+    private final NotificationLiveUpdateService notificationLiveUpdateService;
 
     // Workflow eventini idempotent sekilde notification side effect'ine cevirir.
     public boolean handleWorkflowEvent(ConsumedEvent event) {
@@ -37,7 +38,8 @@ public class WorkflowEventNotificationService {
         NotificationEntity notification = EventType.WORKFLOW_SLA_RISK_DETECTED.eventName().equals(event.eventType())
                 ? NotificationEntity.slaRisk(UUID.randomUUID(), event.eventId(), recipientId, ticketNumber)
                 : NotificationEntity.slaBreach(UUID.randomUUID(), event.eventId(), recipientId, ticketNumber);
-        notificationRepository.save(notification);
+        NotificationEntity savedNotification = notificationRepository.save(notification);
+        notificationLiveUpdateService.publishNotificationCreated(savedNotification);
     }
 
     // Event tipinin notification uretilen SLA eventi olup olmadigini dondurur.

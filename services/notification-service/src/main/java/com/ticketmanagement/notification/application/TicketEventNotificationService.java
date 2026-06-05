@@ -19,6 +19,7 @@ public class TicketEventNotificationService {
 
     private final ConsumerIdempotencyService consumerIdempotencyService;
     private final NotificationJpaRepository notificationRepository;
+    private final NotificationLiveUpdateService notificationLiveUpdateService;
 
     // Ticket eventini idempotent sekilde notification side effect'ine cevirir.
     public boolean handleTicketEvent(ConsumedEvent event) {
@@ -41,11 +42,12 @@ public class TicketEventNotificationService {
     private void createTicketCreatedNotification(ConsumedEvent event) {
         UUID customerId = UUID.fromString(requiredPayloadText(event, "customerId"));
         String ticketNumber = requiredPayloadText(event, "ticketNumber");
-        notificationRepository.save(NotificationEntity.ticketCreated(
+        NotificationEntity notification = notificationRepository.save(NotificationEntity.ticketCreated(
                 UUID.randomUUID(),
                 event.eventId(),
                 customerId,
                 ticketNumber));
+        notificationLiveUpdateService.publishNotificationCreated(notification);
     }
 
     // External comment payload'indan karsi tarafa minimal UI notification kaydi olusturur.
@@ -55,11 +57,12 @@ public class TicketEventNotificationService {
             return;
         }
         String ticketNumber = requiredPayloadText(event, "ticketNumber");
-        notificationRepository.save(NotificationEntity.externalCommentAdded(
+        NotificationEntity notification = notificationRepository.save(NotificationEntity.externalCommentAdded(
                 UUID.randomUUID(),
                 event.eventId(),
                 recipientId,
                 ticketNumber));
+        notificationLiveUpdateService.publishNotificationCreated(notification);
     }
 
     // Yorum sahibi musteri ise atanmis agent'i, support actor ise musteriyi hedefler.

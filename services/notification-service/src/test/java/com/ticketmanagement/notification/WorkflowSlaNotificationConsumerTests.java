@@ -1,6 +1,10 @@
 package com.ticketmanagement.notification;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -12,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -20,6 +25,7 @@ import com.ticketmanagement.event.EventEnvelope;
 import com.ticketmanagement.event.EventType;
 import com.ticketmanagement.event.workflow.SlaBreachedPayload;
 import com.ticketmanagement.event.workflow.SlaRiskDetectedPayload;
+import com.ticketmanagement.notification.application.NotificationLiveUpdateService;
 import com.ticketmanagement.notification.infrastructure.kafka.WorkflowEventKafkaConsumer;
 
 @SpringBootTest
@@ -45,8 +51,12 @@ class WorkflowSlaNotificationConsumerTests {
     @Autowired
     private WorkflowEventKafkaConsumer workflowEventKafkaConsumer;
 
+    @MockitoBean
+    private NotificationLiveUpdateService notificationLiveUpdateService;
+
     @BeforeEach
     void cleanNotificationData() {
+        reset(notificationLiveUpdateService);
         jdbcTemplate.update("delete from notification_schema.email_deliveries");
         jdbcTemplate.update("delete from notification_schema.notifications");
         jdbcTemplate.update("delete from notification_schema.processed_events");
@@ -74,6 +84,12 @@ class WorkflowSlaNotificationConsumerTests {
         assertThat(notificationTypeFor(breachEnvelope.eventId())).isEqualTo("SLA_BREACH");
         assertThat(notificationRecipientFor(riskEnvelope.eventId())).isEqualTo(riskRecipientId.toString());
         assertThat(notificationRecipientFor(breachEnvelope.eventId())).isEqualTo(breachRecipientId.toString());
+        verify(notificationLiveUpdateService, times(1)).publishNotificationCreated(argThat(notification ->
+                notification.getSourceEventId().equals(riskEnvelope.eventId())
+                        && notification.getRecipientId().equals(riskRecipientId)));
+        verify(notificationLiveUpdateService, times(1)).publishNotificationCreated(argThat(notification ->
+                notification.getSourceEventId().equals(breachEnvelope.eventId())
+                        && notification.getRecipientId().equals(breachRecipientId)));
     }
 
     private static EventEnvelope<SlaRiskDetectedPayload> slaRiskEnvelope(UUID recipientId) {

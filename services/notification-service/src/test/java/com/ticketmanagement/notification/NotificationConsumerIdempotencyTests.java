@@ -1,6 +1,10 @@
 package com.ticketmanagement.notification;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.UUID;
 
@@ -11,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -19,6 +24,7 @@ import com.ticketmanagement.event.EventEnvelope;
 import com.ticketmanagement.event.EventType;
 import com.ticketmanagement.event.ticket.ExternalCommentAddedPayload;
 import com.ticketmanagement.event.ticket.TicketCreatedPayload;
+import com.ticketmanagement.notification.application.NotificationLiveUpdateService;
 import com.ticketmanagement.notification.infrastructure.kafka.TicketEventKafkaConsumer;
 
 @SpringBootTest
@@ -42,8 +48,12 @@ class NotificationConsumerIdempotencyTests {
     @Autowired
     private TicketEventKafkaConsumer ticketEventKafkaConsumer;
 
+    @MockitoBean
+    private NotificationLiveUpdateService notificationLiveUpdateService;
+
     @BeforeEach
     void cleanNotificationData() {
+        reset(notificationLiveUpdateService);
         jdbcTemplate.update("delete from notification_schema.notifications");
         jdbcTemplate.update("delete from notification_schema.processed_events");
     }
@@ -74,6 +84,9 @@ class NotificationConsumerIdempotencyTests {
         assertThat(notificationCount()).isEqualTo(1);
         assertThat(notificationCountFor(envelope.eventId())).isEqualTo(1);
         assertThat(notificationRecipientFor(envelope.eventId())).isEqualTo(customerId.toString());
+        verify(notificationLiveUpdateService, times(1)).publishNotificationCreated(argThat(notification ->
+                notification.getSourceEventId().equals(envelope.eventId())
+                        && notification.getRecipientId().equals(customerId)));
     }
 
     @Test
@@ -105,6 +118,9 @@ class NotificationConsumerIdempotencyTests {
         assertThat(notificationCountFor(envelope.eventId())).isEqualTo(1);
         assertThat(notificationRecipientFor(envelope.eventId())).isEqualTo(customerId.toString());
         assertThat(notificationTypeFor(envelope.eventId())).isEqualTo("TICKET_EXTERNAL_COMMENT_ADDED");
+        verify(notificationLiveUpdateService, times(1)).publishNotificationCreated(argThat(notification ->
+                notification.getSourceEventId().equals(envelope.eventId())
+                        && notification.getRecipientId().equals(customerId)));
     }
 
     @Test
@@ -130,6 +146,9 @@ class NotificationConsumerIdempotencyTests {
         assertThat(processed).isTrue();
         assertThat(notificationCount()).isEqualTo(1);
         assertThat(notificationRecipientFor(envelope.eventId())).isEqualTo(agentId.toString());
+        verify(notificationLiveUpdateService, times(1)).publishNotificationCreated(argThat(notification ->
+                notification.getSourceEventId().equals(envelope.eventId())
+                        && notification.getRecipientId().equals(agentId)));
     }
 
     private Integer processedEventCount() {

@@ -19,6 +19,7 @@ public class NotificationQueryService {
 
     private final NotificationJpaRepository notificationRepository;
     private final NotificationMapper notificationMapper;
+    private final NotificationLiveUpdateService notificationLiveUpdateService;
 
     // Kullaniciya ait notification kayitlarini read filtresiyle listeler.
     @Transactional(readOnly = true)
@@ -37,6 +38,7 @@ public class NotificationQueryService {
         NotificationEntity notification = notificationRepository.findByIdAndRecipientId(notificationId, userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification not found"));
         notification.markRead();
+        notificationLiveUpdateService.publishNotificationRead(notification);
         return notificationMapper.toResponse(notification);
     }
 }

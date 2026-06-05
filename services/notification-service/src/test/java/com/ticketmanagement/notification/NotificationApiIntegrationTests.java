@@ -1,6 +1,9 @@
 package com.ticketmanagement.notification;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,11 +21,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.ticketmanagement.notification.api.dto.NotificationResponse;
+import com.ticketmanagement.notification.application.NotificationLiveUpdateService;
 import com.ticketmanagement.notification.infrastructure.persistence.NotificationEntity;
 import com.ticketmanagement.notification.infrastructure.persistence.NotificationJpaRepository;
 
@@ -47,8 +52,12 @@ class NotificationApiIntegrationTests {
     @Autowired
     private NotificationJpaRepository notificationRepository;
 
+    @MockitoBean
+    private NotificationLiveUpdateService notificationLiveUpdateService;
+
     @BeforeEach
     void cleanNotificationData() {
+        reset(notificationLiveUpdateService);
         jdbcTemplate.update("delete from notification_schema.email_deliveries");
         jdbcTemplate.update("delete from notification_schema.notifications");
         jdbcTemplate.update("delete from notification_schema.processed_events");
@@ -130,6 +139,10 @@ class NotificationApiIntegrationTests {
                 .get()
                 .extracting(NotificationEntity::isRead)
                 .isEqualTo(false);
+        verify(notificationLiveUpdateService).publishNotificationRead(argThat(notification ->
+                notification.getId().equals(ownUnread.getId())
+                        && notification.getRecipientId().equals(userId)
+                        && notification.isRead()));
     }
 
     private ResponseEntity<List<NotificationResponse>> exchangeList(String url, HttpHeaders headers) {
