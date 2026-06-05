@@ -2,13 +2,13 @@
 
 Bu dokuman lokal trace akisini tarif eder. Hedef, gateway'den baslayan bir HTTP
 request'in servisler, Kafka eventleri ve DB islemleri uzerinden Jaeger'da
-izlenebilmesidir.
+izlenebilmesi ve backend JSON loglarinin OpenSearch uzerinden aranabilmesidir.
 
 ## Altyapiyi Baslat
 
 ```powershell
 Copy-Item .env.example .env
-docker compose --env-file .env -f infra/docker/docker-compose.yml up -d
+docker compose --env-file .env -f infra/docker/docker-compose.yml --profile dev up -d
 ```
 
 Trace UI:
@@ -17,6 +17,7 @@ Trace UI:
 - OTel gRPC endpoint: `localhost:4317`
 - OTel HTTP endpoint: `localhost:4318`
 - OpenSearch Dashboards: `http://localhost:5601`
+- OpenSearch log index pattern: `ticket-observability-*`
 
 ## Java Agent'i Indir
 
@@ -27,15 +28,18 @@ ile indirilir:
 mvn -q org.apache.maven.plugins:maven-dependency-plugin:3.8.1:copy "-Dartifact=io.opentelemetry.javaagent:opentelemetry-javaagent:2.12.0" "-DoutputDirectory=infra/observability/agent" "-Dmdep.stripVersion=true"
 ```
 
-## Servisleri Trace ile Calistir
+## Servisleri Trace ve JSON Log ile Calistir
 
-Her servis ayri terminalde calisir. Ortak agent ve config path'i terminale
-tanimlanir, `OTEL_SERVICE_NAME` ise calistirilan servise gore degisir.
+Her servis ayri terminalde repo kokunden calistirilir. Ortak agent ve config
+path'i terminale tanimlanir, `OTEL_SERVICE_NAME` ise calistirilan servise gore
+degisir. Servisler JSON loglari hem stdout'a hem de `logs/<service>.json.log`
+dosyasina yazar.
 
 ```powershell
 $agent = (Resolve-Path infra/observability/agent/opentelemetry-javaagent.jar).Path
 $config = (Resolve-Path infra/observability/opentelemetry-javaagent.properties).Path
-$env:JAVA_TOOL_OPTIONS = "-javaagent:$agent -Dotel.javaagent.configuration-file=$config"
+$logDir = (Resolve-Path logs).Path
+$env:JAVA_TOOL_OPTIONS = "-javaagent:$agent -Dotel.javaagent.configuration-file=$config -Dapp.log.dir=$logDir"
 $env:OTEL_SERVICE_NAME = "ticket-service"
 mvn -pl services/ticket-service spring-boot:run
 ```
@@ -48,6 +52,42 @@ Servis adlari:
 - `workflow-sla-service`
 - `notification-service`
 - `reporting-service`
+
+## Merkezi Log Takibi
+
+#72 icin kullanici B secenegini secti: trace OpenTelemetry/Jaeger hattinda
+kalir, JSON log shipping Fluent Bit/OpenSearch hattindan yapilir.
+
+`dev` veya `full` compose profili acildiginda `fluent-bit` servisi repo
+kokundeki `logs/*.json.log` dosyalarini read-only mount eder ve
+`ticket-observability-*` indexlerine yazar.
+
+```powershell
+docker compose --env-file .env -f infra/docker/docker-compose.yml --profile dev up -d
+docker compose --env-file .env -f infra/docker/docker-compose.yml --profile dev ps
+```
+
+OpenSearch Dashboards icinde data view:
+
+- Name: `ticket-observability-*`
+- Time field: `timestamp`
+
+Aranabilir temel alanlar:
+
+- `serviceName`
+- `level`
+- `traceId`
+- `spanId`
+- `correlationId`
+- `message`
+- `exception`
+- `deployment_environment`
+- `service_namespace`
+- `event_kind`
+
+Gateway yeni veya sanitize edilmis `X-Correlation-Id` degerini downstream
+request header'ina da yazar. Bir request'i takip ederken ayni `correlationId`
+degeri gateway ve downstream servis loglarinda aranabilir.
 
 ## Beklenen Trace Kapsami
 
@@ -72,5 +112,7 @@ service health panelleri icin beklenen index alanlarini ve sorgulari tanimlar.
 
 Header capture acilmaz; boylece `Authorization`, cookie veya musteri verisi
 gibi hassas alanlar trace attribute olarak toplanmaz. DB statement sanitizer
-aktif tutulur. Gercek ortamda collector endpoint'i TLS ve network policy ile
-sinirlandirilmalidir.
+aktif tutulur. Fluent Bit backend JSON log satirlarini tasir; request body,
+response body, R2 secret, dosya icerigi veya e-posta icerigi log pipeline'ina
+eklenmez. Gercek ortamda collector ve OpenSearch endpoint'leri TLS ve network
+policy ile sinirlandirilmalidir.

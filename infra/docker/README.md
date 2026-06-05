@@ -11,6 +11,7 @@ Bu dizin lokal gelistirme ve demo altyapisini barindirir.
 - OpenSearch Dashboards
 - OpenTelemetry Collector
 - Jaeger
+- Fluent Bit
 - Mailpit
 
 ## Profiller
@@ -18,7 +19,7 @@ Bu dizin lokal gelistirme ve demo altyapisini barindirir.
 | Profil | Kapsam | Ne zaman kullanilir |
 | --- | --- | --- |
 | `local` | PostgreSQL, Kafka, Keycloak, Mailpit | Backend servislerini lokal JVM ile gelistirirken minimum altyapi |
-| `dev` | `local` + OpenSearch, OpenSearch Dashboards, Jaeger, OTel Collector | Observability dahil gunluk gelistirme |
+| `dev` | `local` + OpenSearch, OpenSearch Dashboards, Jaeger, OTel Collector, Fluent Bit | Observability dahil gunluk gelistirme |
 | `full` | `dev` ile ayni altyapi; ileride app container'lari icin ayrildi | Demo veya uctan uca ortam |
 
 ## Komutlar
@@ -41,11 +42,13 @@ docker compose --env-file .env -f infra/docker/docker-compose.yml --profile dev 
 Compose container siralamasini `depends_on` ve healthcheck'ler ile yonetir.
 
 1. `postgres`, `kafka`, `keycloak`, `mailpit` core profilde baslar.
-2. `opensearch` saglikli olunca `opensearch-dashboards` ve `otel-collector`
-   baslar.
+2. `opensearch` saglikli olunca `opensearch-dashboards`, `otel-collector` ve
+   `fluent-bit` baslar.
 3. `otel-collector`, `jaeger` container'i baslamadan calistirilmaz.
 4. Backend servisleri container degil lokal JVM process'i olarak baslatilir ve
    hazir altyapiya baglanir.
+5. Backend servisleri repo kokunden calistirildiginda `logs/*.json.log`
+   dosyalari uretilir; `fluent-bit` bu dosyalari OpenSearch'e aktarir.
 
 ## Notlar
 

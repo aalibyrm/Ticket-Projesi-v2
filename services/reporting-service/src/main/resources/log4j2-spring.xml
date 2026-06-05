@@ -1,13 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
+  <Properties>
+    <Property name="LOG_DIR">${sys:app.log.dir:-logs}</Property>
+    <Property name="LOG_PATTERN">{"timestamp":"%d{yyyy-MM-dd&apos;T&apos;HH:mm:ss.SSSXXX}","level":"%p","serviceName":"reporting-service","traceId":"%X{traceId}","spanId":"%X{spanId}","correlationId":"%X{correlationId}","message":"%enc{%m}{JSON}","exception":"%enc{%throwable}{JSON}"}%n</Property>
+  </Properties>
   <Appenders>
     <Console name="Console" target="SYSTEM_OUT">
-      <PatternLayout pattern='{"timestamp":"%d{yyyy-MM-dd&apos;T&apos;HH:mm:ss.SSSXXX}","level":"%p","serviceName":"reporting-service","traceId":"%X{traceId}","spanId":"%X{spanId}","correlationId":"%X{correlationId}","message":"%enc{%m}{JSON}","exception":"%enc{%throwable}{JSON}"}%n'/>
+      <PatternLayout pattern="${LOG_PATTERN}"/>
     </Console>
+    <RollingFile name="JsonFile"
+                 fileName="${LOG_DIR}/reporting-service.json.log"
+                 filePattern="${LOG_DIR}/reporting-service-%d{yyyy-MM-dd}-%i.json.log.gz">
+      <PatternLayout pattern="${LOG_PATTERN}"/>
+      <Policies>
+        <TimeBasedTriggeringPolicy interval="1"/>
+        <SizeBasedTriggeringPolicy size="10 MB"/>
+      </Policies>
+      <DefaultRolloverStrategy max="7"/>
+    </RollingFile>
   </Appenders>
   <Loggers>
     <Root level="INFO">
       <AppenderRef ref="Console"/>
+      <AppenderRef ref="JsonFile"/>
     </Root>
   </Loggers>
 </Configuration>

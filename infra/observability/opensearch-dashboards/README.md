@@ -17,7 +17,7 @@ export alinip bu dizine eklenebilir.
 OpenSearch Dashboards icinde asagidaki data view olusturulur:
 
 - Name: `ticket-observability-*`
-- Time field: `@timestamp`
+- Time field: `timestamp`
 
 ## Paneller
 
@@ -36,15 +36,21 @@ Dashboard ana veri kaynagi normalize edilmis observability indexidir. Minimum
 alanlar:
 
 - `@timestamp`
+- `timestamp`
 - `deployment.environment`
+- `deployment_environment`
 - `service.name`
+- `serviceName`
 - `event.kind`
+- `event_kind`
 - `span.kind`
 - `duration.ms`
 - `http.response.status_code`
 - `service.health.status`
 - `log.level`
+- `level`
 - `correlation.id`
+- `correlationId`
 
 ## Guvenlik
 

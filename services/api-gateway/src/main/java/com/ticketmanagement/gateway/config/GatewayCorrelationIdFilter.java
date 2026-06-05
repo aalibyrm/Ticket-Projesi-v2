@@ -23,7 +23,12 @@ class GatewayCorrelationIdFilter implements WebFilter {
         String correlationId = resolveCorrelationId(exchange.getRequest());
         ThreadContext.put(CONTEXT_KEY, correlationId);
         exchange.getResponse().getHeaders().set(HEADER_NAME, correlationId);
-        return chain.filter(exchange)
+        ServerWebExchange correlatedExchange = exchange.mutate()
+                .request(exchange.getRequest().mutate()
+                        .headers(headers -> headers.set(HEADER_NAME, correlationId))
+                        .build())
+                .build();
+        return chain.filter(correlatedExchange)
                 .doFinally(signalType -> ThreadContext.remove(CONTEXT_KEY));
     }
 

@@ -36,6 +36,9 @@ coverage/
 
 # Logs
 logs/
+!logs/
+logs/*
+!logs/.gitkeep
 *.log
 
 # Docker / local runtime
