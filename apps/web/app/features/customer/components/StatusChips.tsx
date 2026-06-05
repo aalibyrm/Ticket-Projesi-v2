@@ -1,5 +1,5 @@
-import { Chip } from "@mui/material";
 import type { TicketPriority, TicketStatus } from "~/features/customer/customerTypes";
+import { TmStatusChip } from "~/shared/design-system";
 
 const statusLabels: Record<TicketStatus, string> = {
   CLOSED: "Kapali",
@@ -16,25 +16,26 @@ const priorityLabels: Record<TicketPriority, string> = {
 };
 
 export function TicketStatusChip({ status }: { status: TicketStatus }) {
-  const isActive = status === "NEW" || status === "IN_PROGRESS" || status === "WAITING_FOR_CUSTOMER";
+  const tone =
+    status === "NEW" || status === "IN_PROGRESS"
+      ? "active"
+      : status === "WAITING_FOR_CUSTOMER"
+        ? "waiting"
+        : "resolved";
 
   return (
-    <Chip
-      color={isActive ? "primary" : "default"}
+    <TmStatusChip
       label={statusLabels[status] ?? status}
-      size="small"
-      variant={isActive ? "outlined" : "filled"}
+      tone={tone}
     />
   );
 }
 
 export function PriorityChip({ priority }: { priority: TicketPriority }) {
   return (
-    <Chip
-      color={priority === "HIGH" ? "error" : "default"}
+    <TmStatusChip
       label={priorityLabels[priority] ?? priority}
-      size="small"
-      variant={priority === "HIGH" ? "outlined" : "filled"}
+      tone={priority === "HIGH" ? "danger" : "neutral"}
     />
   );
 }

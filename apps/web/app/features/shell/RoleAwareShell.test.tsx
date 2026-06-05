@@ -49,6 +49,7 @@ describe("RoleAwareShell", () => {
     expect(screen.getByLabelText("Raporlar")).toBeInTheDocument();
     expect(screen.getByLabelText("Taleplerim")).toBeInTheDocument();
     expect(screen.queryByLabelText("Yeni talep")).not.toBeInTheDocument();
-    expect(screen.getByText("Manager User")).toBeInTheDocument();
+    expect(screen.getByText("SupportHub")).toBeInTheDocument();
+    expect(screen.getByLabelText("Kullanici: Manager User")).toBeInTheDocument();
   });
 });

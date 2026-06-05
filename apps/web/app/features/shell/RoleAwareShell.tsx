@@ -2,12 +2,11 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 import ConfirmationNumberOutlinedIcon from "@mui/icons-material/ConfirmationNumberOutlined";
 import DashboardCustomizeOutlinedIcon from "@mui/icons-material/DashboardCustomizeOutlined";
+import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import {
   Box,
-  Button,
-  Divider,
   IconButton,
   Stack,
   Tooltip,
@@ -22,6 +21,7 @@ import {
   selectUserRoles,
 } from "~/features/auth/authSlice";
 import { useAppSelector } from "~/shared/store/hooks";
+import { tmTokens } from "~/shared/theme/tmTokens";
 
 interface NavigationItem {
   icon: ReactNode;
@@ -71,23 +71,21 @@ export function RoleAwareShell({ children }: { children: ReactNode }) {
   );
 
   return (
-    <Box sx={{ backgroundColor: "background.default", minHeight: "100vh" }}>
+    <Box sx={{ backgroundColor: tmTokens.colors.background, minHeight: "100vh" }}>
       <Box
         component="aside"
         sx={{
           alignItems: "center",
-          backgroundColor: "background.paper",
-          borderRight: "1px solid",
-          borderColor: "divider",
+          backgroundColor: tmTokens.colors.surfaceLowest,
+          borderRight: `1px solid ${tmTokens.colors.border}`,
           display: "flex",
           flexDirection: "column",
-          gap: 2,
           height: "100vh",
           left: 0,
           position: "fixed",
-          py: 2,
+          py: 1,
           top: 0,
-          width: 72,
+          width: tmTokens.layout.sidebarWidth,
           zIndex: 10,
         }}
       >
@@ -95,22 +93,18 @@ export function RoleAwareShell({ children }: { children: ReactNode }) {
           aria-label="Ticket Management"
           sx={{
             alignItems: "center",
-            border: "1px solid",
-            borderColor: "divider",
-            borderRadius: 2,
-            color: "primary.main",
+            color: tmTokens.colors.primaryContainer,
             display: "flex",
-            fontFamily: "\"Outfit\", Arial, sans-serif",
-            fontWeight: 600,
-            height: 40,
+            height: 56,
             justifyContent: "center",
-            width: 40,
+            mb: 3,
+            mt: 1,
+            ...tmTokens.typography.headlineSm,
           }}
         >
-          TM
+          SH
         </Box>
-        <Divider flexItem />
-        <Stack alignItems="center" component="nav" spacing={1}>
+        <Stack alignItems="center" component="nav" spacing={2} sx={{ width: "100%" }}>
           {visibleItems.map((item) => (
             <Tooltip key={item.path} placement="right" title={item.label}>
               <IconButton
@@ -118,12 +112,27 @@ export function RoleAwareShell({ children }: { children: ReactNode }) {
                 component={NavLink}
                 to={item.path}
                 sx={{
-                  color: "text.secondary",
-                  height: 44,
-                  width: 44,
+                  borderRadius: 0,
+                  color: tmTokens.colors.secondary,
+                  height: 40,
+                  position: "relative",
+                  width: "100%",
                   "&.active": {
-                    backgroundColor: "primary.main",
-                    color: "primary.contrastText",
+                    backgroundColor: "transparent",
+                    color: tmTokens.colors.primaryContainer,
+                    "&::before": {
+                      backgroundColor: tmTokens.colors.primaryContainer,
+                      borderRadius: "0 999px 999px 0",
+                      bottom: 8,
+                      content: "\"\"",
+                      left: 0,
+                      position: "absolute",
+                      top: 8,
+                      width: 4,
+                    },
+                  },
+                  "& svg": {
+                    fontSize: 23,
                   },
                 }}
               >
@@ -133,39 +142,82 @@ export function RoleAwareShell({ children }: { children: ReactNode }) {
           ))}
         </Stack>
       </Box>
-      <Box sx={{ pl: "72px" }}>
+      <Box sx={{ pl: `${tmTokens.layout.sidebarWidth}px` }}>
         <Box
           component="header"
           sx={{
             alignItems: "center",
-            backgroundColor: "background.default",
-            borderBottom: "1px solid",
-            borderColor: "divider",
+            backgroundColor: tmTokens.colors.surfaceLowest,
+            borderBottom: `1px solid ${tmTokens.colors.border}`,
             display: "flex",
+            height: tmTokens.layout.topbarHeight,
             justifyContent: "space-between",
-            minHeight: 72,
-            px: 4,
+            position: "fixed",
+            px: `${tmTokens.layout.pageMargin}px`,
+            right: 0,
+            top: 0,
+            width: `calc(100% - ${tmTokens.layout.sidebarWidth}px)`,
+            zIndex: 9,
           }}
         >
-          <Stack spacing={0.25}>
-            <Typography variant="overline">Operasyon paneli</Typography>
-            <Typography variant="h6">{user?.displayName}</Typography>
-          </Stack>
-          <Stack alignItems="center" direction="row" spacing={2}>
-            <Typography color="text.secondary" variant="body2">
-              {roles.join(", ")}
-            </Typography>
-            <Button
-              color="inherit"
-              onClick={() => void logout()}
-              startIcon={<LogoutOutlinedIcon />}
-              variant="outlined"
-            >
-              Cikis
-            </Button>
+          <Typography
+            sx={{
+              color: tmTokens.colors.primaryContainer,
+              ...tmTokens.typography.headlineMd,
+            }}
+          >
+            SupportHub
+          </Typography>
+          <Stack alignItems="center" direction="row" spacing={1.5}>
+            <Tooltip title="Bildirimler">
+              <IconButton aria-label="Bildirimler">
+                <NotificationsNoneOutlinedIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Yardim">
+              <IconButton aria-label="Yardim">
+                <HelpOutlineOutlinedIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Cikis">
+              <IconButton aria-label="Cikis" onClick={() => void logout()}>
+                <LogoutOutlinedIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title={`${user?.displayName ?? "Kullanici"} - ${roles.join(", ")}`}>
+              <Box
+                aria-label={`Kullanici: ${user?.displayName ?? "Bilinmeyen"}`}
+                sx={{
+                  alignItems: "center",
+                  backgroundColor: tmTokens.colors.surfaceHigh,
+                  borderRadius: "50%",
+                  color: tmTokens.colors.onSurface,
+                  display: "flex",
+                  height: 32,
+                  justifyContent: "center",
+                  ml: 1,
+                  width: 32,
+                  ...tmTokens.typography.labelSm,
+                }}
+              >
+                {user?.displayName?.slice(0, 1).toUpperCase() ?? "U"}
+              </Box>
+            </Tooltip>
           </Stack>
         </Box>
-        <Box component="main" sx={{ p: 4 }}>{children}</Box>
+        <Box
+          component="main"
+          sx={{
+            maxWidth: tmTokens.layout.maxContentWidth,
+            mx: "auto",
+            px: `${tmTokens.layout.pageMargin}px`,
+            py: `${tmTokens.layout.pageMargin}px`,
+            pt: `calc(${tmTokens.layout.topbarHeight}px + ${tmTokens.layout.pageMargin}px)`,
+            width: "100%",
+          }}
+        >
+          {children}
+        </Box>
       </Box>
     </Box>
   );

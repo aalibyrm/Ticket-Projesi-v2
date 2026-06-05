@@ -1,16 +1,15 @@
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import {
   Alert,
-  Button,
-  Paper,
   Skeleton,
   Stack,
   Typography,
 } from "@mui/material";
+import { TmButton, TmSurface } from "~/shared/design-system";
 
 export function CustomerLoadingState({ label = "Veriler yukleniyor" }: { label?: string }) {
   return (
-    <Paper sx={{ p: 3 }}>
+    <TmSurface sx={{ p: 3 }}>
       <Stack spacing={1.5}>
         <Typography color="text.secondary" variant="body2">
           {label}
@@ -19,7 +18,7 @@ export function CustomerLoadingState({ label = "Veriler yukleniyor" }: { label?:
         <Skeleton height={36} variant="rounded" />
         <Skeleton height={36} variant="rounded" />
       </Stack>
-    </Paper>
+    </TmSurface>
   );
 }
 
@@ -34,9 +33,9 @@ export function CustomerErrorState({
     <Alert
       action={
         onRetry ? (
-          <Button color="inherit" onClick={onRetry} size="small" startIcon={<RefreshOutlinedIcon />}>
+          <TmButton color="inherit" onClick={onRetry} size="small" startIcon={<RefreshOutlinedIcon />}>
             Tekrar dene
-          </Button>
+          </TmButton>
         ) : undefined
       }
       severity="error"
@@ -49,8 +48,8 @@ export function CustomerErrorState({
 
 export function CustomerEmptyState({ message }: { message: string }) {
   return (
-    <Paper sx={{ p: 4, textAlign: "center" }}>
+    <TmSurface sx={{ p: 4, textAlign: "center" }}>
       <Typography color="text.secondary">{message}</Typography>
-    </Paper>
+    </TmSurface>
   );
 }

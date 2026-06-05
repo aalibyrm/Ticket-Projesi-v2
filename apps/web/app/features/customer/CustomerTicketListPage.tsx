@@ -1,50 +1,80 @@
-import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import {
-  Box,
-  Button,
-  Paper,
   Stack,
-  Tab,
-  Tabs,
   Typography,
 } from "@mui/material";
-import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import axios from "axios";
 import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import {
   CustomerEmptyState,
   CustomerErrorState,
   CustomerLoadingState,
 } from "~/features/customer/components/CustomerState";
-import { PriorityChip, TicketStatusChip } from "~/features/customer/components/StatusChips";
+import { TicketStatusChip } from "~/features/customer/components/StatusChips";
 import { formatDate } from "~/features/customer/formatters";
 import { useCustomerTickets } from "~/features/customer/customerQueries";
 import type { TicketResponse } from "~/features/customer/customerTypes";
+import {
+  TmButton,
+  TmDataTable,
+  type TmDataTableColumn,
+  TmFilterTabs,
+  TmSurface,
+} from "~/shared/design-system";
+import { tmTokens } from "~/shared/theme/tmTokens";
 
 type TicketFilter = "ALL" | "OPEN" | "CLOSED";
 
-const columns: GridColDef<TicketResponse>[] = [
-  { field: "ticketNumber", flex: 1, headerName: "ID", minWidth: 150 },
-  { field: "summary", flex: 2, headerName: "Konu", minWidth: 240 },
-  { field: "productName", flex: 1.2, headerName: "Kategori", minWidth: 160 },
+const filterItems = [
+  { label: "Tumu", value: "ALL" },
+  { label: "Acik", value: "OPEN" },
+  { label: "Kapali", value: "CLOSED" },
+] satisfies Array<{ label: string; value: TicketFilter }>;
+
+const columns: TmDataTableColumn<TicketResponse>[] = [
   {
-    field: "priority",
-    headerName: "Oncelik",
-    minWidth: 130,
-    renderCell: ({ row }) => <PriorityChip priority={row.priority} />,
+    header: "ID",
+    id: "ticketNumber",
+    render: (row) => (
+      <Typography color="text.secondary" sx={tmTokens.typography.bodyMd}>
+        {row.ticketNumber}
+      </Typography>
+    ),
+    width: "minmax(132px, 0.9fr)",
   },
   {
-    field: "updatedAt",
-    headerName: "Tarih",
-    minWidth: 160,
-    valueFormatter: (value: string) => formatDate(value),
+    header: "Konu",
+    id: "summary",
+    render: (row) => (
+      <Typography
+        sx={{
+          ...tmTokens.typography.headlineSm,
+          color: tmTokens.colors.onSurface,
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {row.summary}
+      </Typography>
+    ),
+    width: "minmax(260px, 3fr)",
   },
   {
-    field: "status",
-    headerName: "Durum",
-    minWidth: 170,
-    renderCell: ({ row }) => <TicketStatusChip status={row.status} />,
+    header: "Tarih",
+    id: "updatedAt",
+    render: (row) => (
+      <Typography color="text.secondary" sx={tmTokens.typography.bodyMd}>
+        {formatDate(row.updatedAt)}
+      </Typography>
+    ),
+    width: "minmax(140px, 1fr)",
+  },
+  {
+    header: "Durum",
+    id: "status",
+    render: (row) => <TicketStatusChip status={row.status} />,
+    width: "minmax(132px, 0.9fr)",
   },
 ];
 
@@ -74,62 +104,38 @@ export function CustomerTicketListPage() {
 
   return (
     <Stack spacing={3}>
-      <Stack
-        alignItems={{ md: "center", xs: "flex-start" }}
-        direction={{ md: "row", xs: "column" }}
-        justifyContent="space-between"
-        spacing={2}
-      >
-        <Stack spacing={0.75}>
-          <Typography variant="overline">Musteri portali</Typography>
-          <Typography variant="h4">Taleplerim</Typography>
-        </Stack>
-        <Button
-          component={Link}
-          startIcon={<AddOutlinedIcon />}
-          to="/tickets/new"
-          variant="contained"
-        >
-          Yeni talep
-        </Button>
+      <Stack spacing={1.5}>
+        <Typography component="h1" sx={tmTokens.typography.headlineXl}>
+          Taleplerim
+        </Typography>
+        <TmFilterTabs items={filterItems} onChange={setFilter} value={filter} />
       </Stack>
-
-      <Tabs
-        onChange={(_, value: TicketFilter) => setFilter(value)}
-        value={filter}
-        sx={{ borderBottom: "1px solid", borderColor: "divider", minHeight: 40 }}
-      >
-        <Tab label="Tumu" value="ALL" />
-        <Tab label="Acik" value="OPEN" />
-        <Tab label="Kapali" value="CLOSED" />
-      </Tabs>
 
       {rows.length === 0 ? (
         <CustomerEmptyState message="Bu filtrede ticket bulunmuyor." />
       ) : (
-        <Paper sx={{ p: 2 }}>
-          <Box sx={{ height: 520, width: "100%" }}>
-            <DataGrid
-              columns={columns}
-              disableRowSelectionOnClick
-              getRowId={(row) => row.id}
-              initialState={{
-                pagination: {
-                  paginationModel: { pageSize: 10 },
-                },
-              }}
-              onRowClick={({ row }) => navigate(`/tickets/${row.id}`)}
-              pageSizeOptions={[10, 25]}
-              rows={rows}
-              sx={{
-                "& .MuiDataGrid-row": {
-                  cursor: "pointer",
-                },
-              }}
-            />
-          </Box>
-        </Paper>
+        <TmSurface>
+          <TmDataTable
+            columns={columns}
+            getRowId={(row) => row.id}
+            onRowClick={(row) => navigate(`/tickets/${row.id}`)}
+            rowAriaLabel={(row) => `${row.ticketNumber} ticket detayini ac`}
+            rows={rows}
+          />
+        </TmSurface>
       )}
+
+      <Stack alignItems="center" direction="row" justifyContent="space-between">
+        <TmButton disabled variant="outlined">
+          Onceki
+        </TmButton>
+        <Typography color="text.secondary" sx={tmTokens.typography.bodyMd}>
+          Sayfa 1 / 1
+        </Typography>
+        <TmButton disabled={rows.length <= 10} variant="outlined">
+          Sonraki
+        </TmButton>
+      </Stack>
     </Stack>
   );
 }

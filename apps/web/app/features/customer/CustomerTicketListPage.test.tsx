@@ -57,6 +57,6 @@ describe("CustomerTicketListPage", () => {
 
     await waitFor(() => expect(screen.getByText("Dashboard acilmiyor")).toBeInTheDocument());
     expect(screen.getByText("TCK-2026-0001")).toBeInTheDocument();
-    expect(screen.getByText("Yuksek")).toBeInTheDocument();
+    expect(screen.getByRole("row", { name: "TCK-2026-0001 ticket detayini ac" })).toBeInTheDocument();
   });
 });
