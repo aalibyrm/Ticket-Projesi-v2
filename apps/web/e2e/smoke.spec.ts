@@ -57,7 +57,7 @@ test("customer, agent, notification, and reporting smoke journey", async ({ page
 
   await page.goto("/tickets");
   await expect(page.getByRole("heading", { name: "Taleplerim" })).toBeVisible();
-  await expect(page.locator("main").getByRole("link", { name: "Yeni talep" })).toHaveAttribute(
+  await expect(page.getByRole("navigation").getByRole("link", { name: "Yeni talep" })).toHaveAttribute(
     "href",
     "/tickets/new",
   );
