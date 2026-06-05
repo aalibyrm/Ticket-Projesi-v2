@@ -1,5 +1,6 @@
 import type {
   DownloadUrlResponse,
+  ConversationReadStateResponse,
   TicketAttachmentResponse,
   TicketCommentResponse,
   TicketPriority,
@@ -10,6 +11,7 @@ import type {
 
 export type {
   DownloadUrlResponse,
+  ConversationReadStateResponse,
   TicketAttachmentResponse,
   TicketCommentResponse,
   TicketPriority,

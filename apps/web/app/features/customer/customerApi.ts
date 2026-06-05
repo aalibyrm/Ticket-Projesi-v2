@@ -1,5 +1,6 @@
 import type {
   CreateTicketRequest,
+  ConversationReadStateResponse,
   DownloadUrlResponse,
   NotificationResponse,
   ProductResponse,
@@ -44,6 +45,16 @@ export async function addCustomerTicketComment(ticketId: string, body: string) {
   const response = await apiClient.post<TicketCommentResponse>(`/api/tickets/${ticketId}/comments/external`, {
     body,
   });
+  return response.data;
+}
+
+export async function getCustomerTicketConversationReadState(ticketId: string) {
+  const response = await apiClient.get<ConversationReadStateResponse>(`/api/tickets/${ticketId}/comments/read-state`);
+  return response.data;
+}
+
+export async function markCustomerTicketConversationRead(ticketId: string) {
+  const response = await apiClient.post<ConversationReadStateResponse>(`/api/tickets/${ticketId}/comments/read`);
   return response.data;
 }
 

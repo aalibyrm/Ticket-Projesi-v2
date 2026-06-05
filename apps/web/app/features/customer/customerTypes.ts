@@ -53,6 +53,12 @@ export interface TicketCommentResponse {
   visibility: "EXTERNAL" | "INTERNAL";
 }
 
+export interface ConversationReadStateResponse {
+  lastReadAt?: string;
+  ticketId: string;
+  unreadCount: number;
+}
+
 export interface TicketWorklogResponse {
   agentId: string;
   createdAt: string;

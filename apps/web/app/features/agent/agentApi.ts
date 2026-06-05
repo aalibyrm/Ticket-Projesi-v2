@@ -5,6 +5,7 @@ import type {
   AddWorklogRequest,
   AssignTicketRequest,
   ChangeTicketStatusRequest,
+  ConversationReadStateResponse,
   DownloadUrlResponse,
   SupportTeamResponse,
   TeamMemberResponse,
@@ -50,6 +51,18 @@ export async function addAgentInternalNote(ticketId: string, body: string) {
   const response = await apiClient.post<TicketCommentResponse>(`/api/agent/tickets/${ticketId}/comments/internal`, {
     body,
   });
+  return response.data;
+}
+
+export async function getAgentTicketConversationReadState(ticketId: string) {
+  const response = await apiClient.get<ConversationReadStateResponse>(
+    `/api/agent/tickets/${ticketId}/comments/read-state`,
+  );
+  return response.data;
+}
+
+export async function markAgentTicketConversationRead(ticketId: string) {
+  const response = await apiClient.post<ConversationReadStateResponse>(`/api/agent/tickets/${ticketId}/comments/read`);
   return response.data;
 }
 

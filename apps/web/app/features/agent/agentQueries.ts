@@ -7,11 +7,13 @@ import {
   changeAgentTicketStatus,
   createAgentAttachmentDownloadUrl,
   getAgentTicket,
+  getAgentTicketConversationReadState,
   listAgentTicketComments,
   listAgentTickets,
   listAgentWorklogs,
   listSupportTeamMembers,
   listSupportTeams,
+  markAgentTicketConversationRead,
 } from "~/features/agent/agentApi";
 import type {
   AddWorklogRequest,
@@ -21,6 +23,7 @@ import type {
 
 export const agentQueryKeys = {
   comments: (ticketId: string) => ["agent", "ticket", ticketId, "comments"] as const,
+  readState: (ticketId: string) => ["agent", "ticket", ticketId, "comments", "read-state"] as const,
   teamMembers: (teamId: string) => ["agent", "organization", "teams", teamId, "members"] as const,
   teams: ["agent", "organization", "teams"] as const,
   ticket: (ticketId: string) => ["agent", "ticket", ticketId] as const,
@@ -65,6 +68,14 @@ export function useAgentTicketComments(ticketId: string) {
     enabled: Boolean(ticketId),
     queryFn: () => listAgentTicketComments(ticketId),
     queryKey: agentQueryKeys.comments(ticketId),
+  });
+}
+
+export function useAgentTicketConversationReadState(ticketId: string) {
+  return useQuery({
+    enabled: Boolean(ticketId),
+    queryFn: () => getAgentTicketConversationReadState(ticketId),
+    queryKey: agentQueryKeys.readState(ticketId),
   });
 }
 
@@ -130,11 +141,24 @@ export function useAgentAttachmentDownloadUrl() {
   });
 }
 
+export function useMarkAgentTicketConversationRead(ticketId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => markAgentTicketConversationRead(ticketId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: agentQueryKeys.readState(ticketId) });
+      void queryClient.invalidateQueries({ queryKey: agentQueryKeys.tickets });
+    },
+  });
+}
+
 function invalidateTicketWorkspace(
   queryClient: ReturnType<typeof useQueryClient>,
   ticketId: string,
 ) {
   void queryClient.invalidateQueries({ queryKey: agentQueryKeys.comments(ticketId) });
+  void queryClient.invalidateQueries({ queryKey: agentQueryKeys.readState(ticketId) });
   void queryClient.invalidateQueries({ queryKey: agentQueryKeys.ticket(ticketId) });
   void queryClient.invalidateQueries({ queryKey: agentQueryKeys.tickets });
 }

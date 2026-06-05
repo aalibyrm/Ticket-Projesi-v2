@@ -4,11 +4,13 @@ import {
   createAttachmentDownloadUrl,
   createCustomerTicket,
   getCustomerTicket,
+  getCustomerTicketConversationReadState,
   listCustomerTicketComments,
   listCustomerTickets,
   listNotifications,
   listProducts,
   listTicketTopics,
+  markCustomerTicketConversationRead,
   markNotificationRead,
   uploadTicketAttachment,
 } from "~/features/customer/customerApi";
@@ -18,6 +20,7 @@ export const customerQueryKeys = {
   comments: (ticketId: string) => ["customer", "ticket", ticketId, "comments"] as const,
   notifications: (read?: boolean) => ["customer", "notifications", read ?? "all"] as const,
   products: ["customer", "products"] as const,
+  readState: (ticketId: string) => ["customer", "ticket", ticketId, "comments", "read-state"] as const,
   ticket: (ticketId: string) => ["customer", "ticket", ticketId] as const,
   tickets: ["customer", "tickets"] as const,
   topics: ["customer", "ticket-topics"] as const,
@@ -62,6 +65,14 @@ export function useCustomerTicketComments(ticketId: string) {
   });
 }
 
+export function useCustomerTicketConversationReadState(ticketId: string) {
+  return useQuery({
+    enabled: Boolean(ticketId),
+    queryFn: () => getCustomerTicketConversationReadState(ticketId),
+    queryKey: customerQueryKeys.readState(ticketId),
+  });
+}
+
 export function useCreateCustomerTicket() {
   const queryClient = useQueryClient();
 
@@ -78,7 +89,21 @@ export function useAddCustomerTicketComment(ticketId: string) {
     mutationFn: (body: string) => addCustomerTicketComment(ticketId, body),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: customerQueryKeys.comments(ticketId) });
+      void queryClient.invalidateQueries({ queryKey: customerQueryKeys.readState(ticketId) });
       void queryClient.invalidateQueries({ queryKey: customerQueryKeys.ticket(ticketId) });
+    },
+  });
+}
+
+export function useMarkCustomerTicketConversationRead(ticketId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => markCustomerTicketConversationRead(ticketId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: customerQueryKeys.readState(ticketId) });
+      void queryClient.invalidateQueries({ queryKey: customerQueryKeys.notifications() });
+      void queryClient.invalidateQueries({ queryKey: customerQueryKeys.notifications(false) });
     },
   });
 }

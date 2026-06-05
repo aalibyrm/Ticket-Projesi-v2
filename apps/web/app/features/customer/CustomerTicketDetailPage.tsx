@@ -6,6 +6,7 @@ import {
   Alert,
   Box,
   Button,
+  Chip,
   Divider,
   IconButton,
   List,
@@ -17,7 +18,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { z } from "zod";
 import {
@@ -30,7 +31,9 @@ import {
   useAddCustomerTicketComment,
   useAttachmentDownloadUrl,
   useCustomerTicket,
+  useCustomerTicketConversationReadState,
   useCustomerTicketComments,
+  useMarkCustomerTicketConversationRead,
   useUploadTicketAttachment,
 } from "~/features/customer/customerQueries";
 import type { TicketAttachmentResponse } from "~/features/customer/customerTypes";
@@ -47,9 +50,40 @@ export function CustomerTicketDetailPage() {
 
   const ticketQuery = useCustomerTicket(ticketId);
   const commentsQuery = useCustomerTicketComments(ticketId);
+  const readStateQuery = useCustomerTicketConversationReadState(ticketId);
   const addComment = useAddCustomerTicketComment(ticketId);
+  const {
+    isPending: isMarkingConversationRead,
+    mutate: markConversationRead,
+  } = useMarkCustomerTicketConversationRead(ticketId);
   const uploadAttachment = useUploadTicketAttachment();
   const downloadUrl = useAttachmentDownloadUrl();
+  const comments = commentsQuery.data ?? [];
+  const unreadCount = readStateQuery.data?.unreadCount ?? 0;
+  const lastMarkReadRequestRef = useRef<string>();
+
+  useEffect(() => {
+    const markReadRequestKey = `${ticketId}:${commentsQuery.dataUpdatedAt}:${unreadCount}`;
+    if (
+      !ticketId
+      || !commentsQuery.isSuccess
+      || unreadCount <= 0
+      || isMarkingConversationRead
+      || lastMarkReadRequestRef.current === markReadRequestKey
+    ) {
+      return;
+    }
+
+    lastMarkReadRequestRef.current = markReadRequestKey;
+    markConversationRead();
+  }, [
+    commentsQuery.dataUpdatedAt,
+    commentsQuery.isSuccess,
+    isMarkingConversationRead,
+    markConversationRead,
+    ticketId,
+    unreadCount,
+  ]);
 
   async function submitComment() {
     const parsed = commentSchema.safeParse(comment);
@@ -92,7 +126,6 @@ export function CustomerTicketDetailPage() {
   }
 
   const ticket = ticketQuery.data;
-  const comments = commentsQuery.data ?? [];
   const isCommentInvalid = comment.length > 0 && !commentSchema.safeParse(comment).success;
 
   return (
@@ -131,7 +164,15 @@ export function CustomerTicketDetailPage() {
       <Stack direction={{ lg: "row", xs: "column" }} spacing={3}>
         <Paper sx={{ flex: 2, p: 3 }}>
           <Stack spacing={2}>
-            <Typography variant="h6">Mesajlar</Typography>
+            <Stack alignItems="center" direction="row" justifyContent="space-between" spacing={1}>
+              <Typography variant="h6">Mesajlar</Typography>
+              {unreadCount > 0 && <Chip color="primary" label={`${unreadCount} yeni mesaj`} size="small" />}
+            </Stack>
+            {readStateQuery.isError && (
+              <Alert severity="warning" variant="outlined">
+                Okunma durumu alinamadi.
+              </Alert>
+            )}
             {commentsQuery.isError && <CustomerErrorState message="Mesajlar alinamadi." onRetry={() => void commentsQuery.refetch()} />}
             {commentsQuery.isLoading && <CustomerLoadingState label="Mesajlar yukleniyor" />}
             {!commentsQuery.isLoading && comments.length === 0 && (

@@ -10,12 +10,14 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import {
   useAddAgentExternalComment,
   useAddAgentInternalNote,
+  useAgentTicketConversationReadState,
   useAgentTicketComments,
+  useMarkAgentTicketConversationRead,
 } from "~/features/agent/agentQueries";
 import { AgentErrorState, AgentLoadingState } from "~/features/agent/components/AgentState";
 import type { TicketResponse } from "~/features/agent/agentTypes";
@@ -25,10 +27,40 @@ const messageSchema = z.string().trim().min(3).max(5000);
 
 export function AgentTicketConversation({ ticket }: { ticket: TicketResponse }) {
   const commentsQuery = useAgentTicketComments(ticket.id);
+  const readStateQuery = useAgentTicketConversationReadState(ticket.id);
   const externalComment = useAddAgentExternalComment(ticket.id);
   const internalNote = useAddAgentInternalNote(ticket.id);
+  const {
+    isPending: isMarkingConversationRead,
+    mutate: markConversationRead,
+  } = useMarkAgentTicketConversationRead(ticket.id);
   const [reply, setReply] = useState("");
   const [note, setNote] = useState("");
+  const comments = commentsQuery.data ?? [];
+  const unreadCount = readStateQuery.data?.unreadCount ?? 0;
+  const lastMarkReadRequestRef = useRef<string>();
+
+  useEffect(() => {
+    const markReadRequestKey = `${ticket.id}:${commentsQuery.dataUpdatedAt}:${unreadCount}`;
+    if (
+      !commentsQuery.isSuccess
+      || unreadCount <= 0
+      || isMarkingConversationRead
+      || lastMarkReadRequestRef.current === markReadRequestKey
+    ) {
+      return;
+    }
+
+    lastMarkReadRequestRef.current = markReadRequestKey;
+    markConversationRead();
+  }, [
+    commentsQuery.dataUpdatedAt,
+    commentsQuery.isSuccess,
+    isMarkingConversationRead,
+    markConversationRead,
+    ticket.id,
+    unreadCount,
+  ]);
 
   async function submitReply() {
     const parsed = messageSchema.safeParse(reply);
@@ -48,7 +80,6 @@ export function AgentTicketConversation({ ticket }: { ticket: TicketResponse }) 
     setNote("");
   }
 
-  const comments = commentsQuery.data ?? [];
   const isReplyInvalid = reply.length > 0 && !messageSchema.safeParse(reply).success;
   const isNoteInvalid = note.length > 0 && !messageSchema.safeParse(note).success;
 
@@ -64,6 +95,16 @@ export function AgentTicketConversation({ ticket }: { ticket: TicketResponse }) 
         <Box sx={{ display: "flex", justifyContent: "center" }}>
           <Chip label={`Ticket acildi / ${formatDateTime(ticket.createdAt)}`} size="small" />
         </Box>
+        {unreadCount > 0 && (
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
+            <Chip color="primary" label={`${unreadCount} yeni mesaj`} size="small" />
+          </Box>
+        )}
+        {readStateQuery.isError && (
+          <Alert severity="warning" variant="outlined">
+            Okunma durumu alinamadi.
+          </Alert>
+        )}
         <MessageBubble
           align="left"
           author="Musteri"
