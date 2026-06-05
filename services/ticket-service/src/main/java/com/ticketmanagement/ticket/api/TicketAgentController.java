@@ -30,6 +30,7 @@ import com.ticketmanagement.ticket.api.dto.AddInternalNoteRequest;
 import com.ticketmanagement.ticket.api.dto.AddWorklogRequest;
 import com.ticketmanagement.ticket.api.dto.AssignTicketRequest;
 import com.ticketmanagement.ticket.api.dto.ChangeTicketStatusRequest;
+import com.ticketmanagement.ticket.api.dto.ConversationReadStateResponse;
 import com.ticketmanagement.ticket.api.dto.TicketCommentResponse;
 import com.ticketmanagement.ticket.api.dto.TicketResponse;
 import com.ticketmanagement.ticket.api.dto.TicketWorklogResponse;
@@ -39,6 +40,7 @@ import com.ticketmanagement.ticket.application.SupportActorContext;
 import com.ticketmanagement.ticket.application.SupportActorContextService;
 import com.ticketmanagement.ticket.application.TicketAgentCommandService;
 import com.ticketmanagement.ticket.application.TicketAgentQueryService;
+import com.ticketmanagement.ticket.application.TicketConversationReadService;
 
 @RestController
 @RequestMapping("/api/agent/tickets")
@@ -55,6 +57,7 @@ class TicketAgentController {
 
     private final TicketAgentCommandService ticketAgentCommandService;
     private final TicketAgentQueryService ticketAgentQueryService;
+    private final TicketConversationReadService ticketConversationReadService;
     private final SupportActorContextService supportActorContextService;
 
     // Support actor'un gorebilecegi ticket kuyrugunu dondurur.
@@ -152,6 +155,28 @@ class TicketAgentController {
         SupportActorContext context = resolveSupportActorContext(jwt, localActorId, localRoles);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ticketAgentCommandService.addInternalNote(context, id, request));
+    }
+
+    // Agent'in gorebildigi ticket mesajlari icin okunmamis yorum sayisini dondurur.
+    @GetMapping("/{id}/comments/read-state")
+    ConversationReadStateResponse getCommentReadState(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestHeader(value = "X-Actor-Id", required = false) UUID localActorId,
+            @RequestHeader(value = "X-Actor-Roles", required = false) String localRoles,
+            @PathVariable UUID id) {
+        SupportActorContext context = resolveSupportActorContext(jwt, localActorId, localRoles);
+        return ticketConversationReadService.getSupportReadState(context, id);
+    }
+
+    // Agent'in gorebildigi ticket mesajlarini okundu olarak isaretler.
+    @PostMapping("/{id}/comments/read")
+    ConversationReadStateResponse markCommentsRead(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestHeader(value = "X-Actor-Id", required = false) UUID localActorId,
+            @RequestHeader(value = "X-Actor-Roles", required = false) String localRoles,
+            @PathVariable UUID id) {
+        SupportActorContext context = resolveSupportActorContext(jwt, localActorId, localRoles);
+        return ticketConversationReadService.markSupportConversationRead(context, id);
     }
 
     // Agent'in ticket uzerinde harcadigi sureyi worklog olarak kaydeder.

@@ -22,11 +22,13 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.ticketmanagement.ticket.api.dto.AddExternalCommentRequest;
+import com.ticketmanagement.ticket.api.dto.ConversationReadStateResponse;
 import com.ticketmanagement.ticket.api.dto.CreateTicketRequest;
 import com.ticketmanagement.ticket.api.dto.TicketCommentResponse;
 import com.ticketmanagement.ticket.api.dto.TicketResponse;
 import com.ticketmanagement.ticket.application.AttachmentLookupContext;
 import com.ticketmanagement.ticket.application.ForbiddenOperationException;
+import com.ticketmanagement.ticket.application.TicketConversationReadService;
 import com.ticketmanagement.ticket.application.TicketCommandService;
 import com.ticketmanagement.ticket.application.TicketQueryService;
 
@@ -40,6 +42,7 @@ class TicketController {
     private static final String CUSTOMER_ROLE = "CUSTOMER";
 
     private final TicketCommandService ticketCommandService;
+    private final TicketConversationReadService ticketConversationReadService;
     private final TicketQueryService ticketQueryService;
 
     // Musterinin yeni bir ticket acmasini saglar.
@@ -98,6 +101,26 @@ class TicketController {
         UUID customerId = resolveCustomerId(jwt, localActorId);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ticketCommandService.addCustomerExternalComment(customerId, id, request));
+    }
+
+    // Musterinin kendi ticket'indaki okunmamis external yorum sayisini dondurur.
+    @GetMapping("/{id}/comments/read-state")
+    ConversationReadStateResponse getOwnTicketCommentReadState(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestHeader(value = "X-Actor-Id", required = false) UUID localActorId,
+            @PathVariable UUID id) {
+        UUID customerId = resolveCustomerId(jwt, localActorId);
+        return ticketConversationReadService.getCustomerReadState(customerId, id);
+    }
+
+    // Musterinin kendi ticket'indaki external yorumlari okundu olarak isaretler.
+    @PostMapping("/{id}/comments/read")
+    ConversationReadStateResponse markOwnTicketCommentsRead(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestHeader(value = "X-Actor-Id", required = false) UUID localActorId,
+            @PathVariable UUID id) {
+        UUID customerId = resolveCustomerId(jwt, localActorId);
+        return ticketConversationReadService.markCustomerConversationRead(customerId, id);
     }
 
     // JWT subject degerinden veya local test header'indan musteri kimligini cozer.

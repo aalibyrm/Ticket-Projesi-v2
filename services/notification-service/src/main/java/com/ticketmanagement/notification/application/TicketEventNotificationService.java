@@ -15,19 +15,26 @@ public class TicketEventNotificationService {
 
     static final String CONSUMER_NAME = "notification-service.ticket-events";
     private static final String TICKET_CREATED = "ticket.created";
+    private static final String TICKET_EXTERNAL_COMMENT_ADDED = "ticket.external-comment-added";
 
     private final ConsumerIdempotencyService consumerIdempotencyService;
     private final NotificationJpaRepository notificationRepository;
 
     // Ticket eventini idempotent sekilde notification side effect'ine cevirir.
     public boolean handleTicketEvent(ConsumedEvent event) {
-        if (!TICKET_CREATED.equals(event.eventType())) {
-            return false;
+        if (TICKET_CREATED.equals(event.eventType())) {
+            return consumerIdempotencyService.processOnce(
+                    CONSUMER_NAME,
+                    event,
+                    () -> createTicketCreatedNotification(event));
         }
-        return consumerIdempotencyService.processOnce(
-                CONSUMER_NAME,
-                event,
-                () -> createTicketCreatedNotification(event));
+        if (TICKET_EXTERNAL_COMMENT_ADDED.equals(event.eventType())) {
+            return consumerIdempotencyService.processOnce(
+                    CONSUMER_NAME,
+                    event,
+                    () -> createExternalCommentNotification(event));
+        }
+        return false;
     }
 
     // TicketCreated payload'indan minimal UI notification kaydi olusturur.
@@ -41,6 +48,30 @@ public class TicketEventNotificationService {
                 ticketNumber));
     }
 
+    // External comment payload'indan karsi tarafa minimal UI notification kaydi olusturur.
+    private void createExternalCommentNotification(ConsumedEvent event) {
+        UUID recipientId = resolveExternalCommentRecipient(event);
+        if (recipientId == null) {
+            return;
+        }
+        String ticketNumber = requiredPayloadText(event, "ticketNumber");
+        notificationRepository.save(NotificationEntity.externalCommentAdded(
+                UUID.randomUUID(),
+                event.eventId(),
+                recipientId,
+                ticketNumber));
+    }
+
+    // Yorum sahibi musteri ise atanmis agent'i, support actor ise musteriyi hedefler.
+    private UUID resolveExternalCommentRecipient(ConsumedEvent event) {
+        UUID authorId = UUID.fromString(requiredPayloadText(event, "authorId"));
+        UUID customerId = optionalPayloadUuid(event, "customerId");
+        if (customerId != null && !customerId.equals(authorId)) {
+            return customerId;
+        }
+        return optionalPayloadUuid(event, "assigneeId");
+    }
+
     // Zorunlu payload alanini guvenli sekilde okur.
     private static String requiredPayloadText(ConsumedEvent event, String fieldName) {
         if (event.payload() == null || event.payload().path(fieldName).isMissingNode()) {
@@ -51,5 +82,17 @@ public class TicketEventNotificationService {
             throw new IllegalArgumentException("Blank event payload field: " + fieldName);
         }
         return value;
+    }
+
+    // Opsiyonel UUID payload alanini bos veya eksikse null olarak dondurur.
+    private static UUID optionalPayloadUuid(ConsumedEvent event, String fieldName) {
+        if (event.payload() == null || event.payload().path(fieldName).isMissingNode()) {
+            return null;
+        }
+        String value = event.payload().path(fieldName).asText();
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return UUID.fromString(value);
     }
 }

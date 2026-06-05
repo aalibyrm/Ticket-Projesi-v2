@@ -138,6 +138,16 @@ class TicketSecurityIntegrationTests {
                         .with(jwtWithRoles(otherCustomerId, "CUSTOMER")))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+
+        mockMvc.perform(get("/api/tickets/{id}/comments/read-state", ticketId)
+                        .with(jwtWithRoles(otherCustomerId, "CUSTOMER")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+
+        mockMvc.perform(post("/api/tickets/{id}/comments/read", ticketId)
+                        .with(jwtWithRoles(otherCustomerId, "CUSTOMER")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
     }
 
     @Test
@@ -321,6 +331,16 @@ class TicketSecurityIntegrationTests {
         mockMvc.perform(post("/api/agent/tickets/{id}/comments/internal", ticketId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new AddInternalNoteRequest("Cross access note.")))
+                        .with(jwtWithRoles(otherAgentId, "AGENT")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+
+        mockMvc.perform(get("/api/agent/tickets/{id}/comments/read-state", ticketId)
+                        .with(jwtWithRoles(otherAgentId, "AGENT")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+
+        mockMvc.perform(post("/api/agent/tickets/{id}/comments/read", ticketId)
                         .with(jwtWithRoles(otherAgentId, "AGENT")))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));

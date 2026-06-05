@@ -94,7 +94,10 @@ public class TicketOutboxService {
                 ticket.getId(),
                 ticket.getTicketNumber(),
                 comment.getId(),
-                comment.getAuthorId());
+                comment.getAuthorId(),
+                ticket.getCustomerId(),
+                ticket.getAssigneeId(),
+                ticket.getAssignedTeamId());
         saveEvent(EventType.TICKET_EXTERNAL_COMMENT_ADDED, actorId, ticket.getId(), payload);
     }
 

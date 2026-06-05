@@ -61,6 +61,22 @@ public class NotificationEntity {
         return notification;
     }
 
+    public static NotificationEntity externalCommentAdded(
+            UUID id,
+            UUID sourceEventId,
+            UUID recipientId,
+            String ticketNumber) {
+        NotificationEntity notification = new NotificationEntity();
+        notification.id = id;
+        notification.sourceEventId = sourceEventId;
+        notification.recipientId = recipientId;
+        notification.type = NotificationType.TICKET_EXTERNAL_COMMENT_ADDED;
+        notification.title = "New ticket message";
+        notification.message = "Ticket " + ticketNumber + " has a new message.";
+        notification.read = false;
+        return notification;
+    }
+
     public static NotificationEntity slaRisk(UUID id, UUID sourceEventId, UUID recipientId, String ticketNumber) {
         NotificationEntity notification = new NotificationEntity();
         notification.id = id;

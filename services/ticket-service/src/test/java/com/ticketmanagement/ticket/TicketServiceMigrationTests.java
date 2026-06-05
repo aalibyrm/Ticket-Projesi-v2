@@ -60,11 +60,11 @@ class TicketServiceMigrationTests {
                         select count(*)
                         from information_schema.tables
                         where table_schema = 'ticket_schema'
-                          and table_name in ('ticket_comments', 'ticket_worklogs')
+                          and table_name in ('ticket_comments', 'ticket_worklogs', 'ticket_conversation_reads')
                         """,
                 Integer.class);
 
-        assertThat(lifecycleTableCount).isEqualTo(2);
+        assertThat(lifecycleTableCount).isEqualTo(3);
 
         Integer assignmentColumnCount = jdbcTemplate.queryForObject(
                 """

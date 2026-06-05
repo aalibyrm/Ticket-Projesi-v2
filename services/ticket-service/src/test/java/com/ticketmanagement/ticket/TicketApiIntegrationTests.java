@@ -42,6 +42,7 @@ import com.ticketmanagement.ticket.api.dto.AddInternalNoteRequest;
 import com.ticketmanagement.ticket.api.dto.AddWorklogRequest;
 import com.ticketmanagement.ticket.api.dto.AssignTicketRequest;
 import com.ticketmanagement.ticket.api.dto.ChangeTicketStatusRequest;
+import com.ticketmanagement.ticket.api.dto.ConversationReadStateResponse;
 import com.ticketmanagement.ticket.api.dto.CreateTicketRequest;
 import com.ticketmanagement.ticket.api.dto.ProductResponse;
 import com.ticketmanagement.ticket.api.dto.TicketAttachmentResponse;
@@ -93,6 +94,7 @@ class TicketApiIntegrationTests {
     @BeforeEach
     void cleanTicketData() {
         jdbcTemplate.update("delete from ticket_schema.outbox_events");
+        jdbcTemplate.update("delete from ticket_schema.ticket_conversation_reads");
         jdbcTemplate.update("delete from ticket_schema.ticket_comments");
         jdbcTemplate.update("delete from ticket_schema.ticket_worklogs");
         jdbcTemplate.update("delete from ticket_schema.tickets");
@@ -228,6 +230,99 @@ class TicketApiIntegrationTests {
         assertThat(otherCustomerComment.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
         assertThat(otherCustomerComment.getBody()).isNotNull();
         assertThat(otherCustomerComment.getBody().errorCode()).isEqualTo("ACCESS_DENIED");
+    }
+
+    @Test
+    void customerReadStateTracksAgentExternalMessages() {
+        UUID customerId = UUID.randomUUID();
+        UUID agentId = WEB_APP_SUPPORT_LEAD_ID;
+        TicketResponse created = createTicket(customerId);
+
+        ResponseEntity<TicketCommentResponse> agentReply = restTemplate.exchange(
+                "/api/agent/tickets/{id}/comments/external",
+                HttpMethod.POST,
+                new HttpEntity<>(new AddExternalCommentRequest("We are checking the incident."),
+                        actorHeaders(agentId)),
+                TicketCommentResponse.class,
+                created.id());
+
+        assertThat(agentReply.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        ResponseEntity<ConversationReadStateResponse> unreadState = restTemplate.exchange(
+                "/api/tickets/{id}/comments/read-state",
+                HttpMethod.GET,
+                new HttpEntity<>(actorHeaders(customerId)),
+                ConversationReadStateResponse.class,
+                created.id());
+
+        assertThat(unreadState.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(unreadState.getBody()).isNotNull();
+        assertThat(unreadState.getBody().ticketId()).isEqualTo(created.id());
+        assertThat(unreadState.getBody().unreadCount()).isEqualTo(1);
+        assertThat(unreadState.getBody().lastReadAt()).isNull();
+
+        ResponseEntity<ConversationReadStateResponse> readState = restTemplate.exchange(
+                "/api/tickets/{id}/comments/read",
+                HttpMethod.POST,
+                new HttpEntity<>(actorHeaders(customerId)),
+                ConversationReadStateResponse.class,
+                created.id());
+
+        assertThat(readState.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(readState.getBody()).isNotNull();
+        assertThat(readState.getBody().unreadCount()).isZero();
+        assertThat(readState.getBody().lastReadAt()).isNotNull();
+
+        ResponseEntity<ConversationReadStateResponse> afterReadState = restTemplate.exchange(
+                "/api/tickets/{id}/comments/read-state",
+                HttpMethod.GET,
+                new HttpEntity<>(actorHeaders(customerId)),
+                ConversationReadStateResponse.class,
+                created.id());
+
+        assertThat(afterReadState.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(afterReadState.getBody()).isNotNull();
+        assertThat(afterReadState.getBody().unreadCount()).isZero();
+    }
+
+    @Test
+    void supportReadStateTracksCustomerExternalMessages() {
+        UUID customerId = UUID.randomUUID();
+        UUID supportMemberId = WEB_APP_SUPPORT_MEMBER_ID;
+        TicketResponse created = createTicket(customerId);
+
+        ResponseEntity<TicketCommentResponse> customerComment = restTemplate.exchange(
+                "/api/tickets/{id}/comments/external",
+                HttpMethod.POST,
+                new HttpEntity<>(new AddExternalCommentRequest("The issue is still happening."),
+                        actorHeaders(customerId)),
+                TicketCommentResponse.class,
+                created.id());
+
+        assertThat(customerComment.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        ResponseEntity<ConversationReadStateResponse> unreadState = restTemplate.exchange(
+                "/api/agent/tickets/{id}/comments/read-state",
+                HttpMethod.GET,
+                new HttpEntity<>(actorHeaders(supportMemberId)),
+                ConversationReadStateResponse.class,
+                created.id());
+
+        assertThat(unreadState.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(unreadState.getBody()).isNotNull();
+        assertThat(unreadState.getBody().unreadCount()).isEqualTo(1);
+
+        ResponseEntity<ConversationReadStateResponse> readState = restTemplate.exchange(
+                "/api/agent/tickets/{id}/comments/read",
+                HttpMethod.POST,
+                new HttpEntity<>(actorHeaders(supportMemberId)),
+                ConversationReadStateResponse.class,
+                created.id());
+
+        assertThat(readState.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(readState.getBody()).isNotNull();
+        assertThat(readState.getBody().unreadCount()).isZero();
+        assertThat(readState.getBody().lastReadAt()).isNotNull();
     }
 
     @Test
@@ -393,6 +488,9 @@ class TicketApiIntegrationTests {
         assertLifecycleEvent(created.id(), "ticket.worklog-added", "worklogId", worklogResponse.getBody().id().toString());
 
         assertThat(outboxPayloadFor(created.id(), "ticket.external-comment-added"))
+                .contains("\"customerId\": \"" + customerId)
+                .contains("\"assigneeId\": \"" + agentId)
+                .contains("\"assignedTeamId\": \"" + teamId)
                 .doesNotContain("Customer-visible investigation update.");
         assertThat(outboxPayloadFor(created.id(), "ticket.worklog-added"))
                 .doesNotContain("Investigated dashboard authentication logs.");

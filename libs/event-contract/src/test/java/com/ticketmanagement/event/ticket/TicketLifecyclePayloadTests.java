@@ -70,14 +70,21 @@ class TicketLifecyclePayloadTests {
     @Test
     void createsExternalCommentPayloadWithoutCommentBody() {
         UUID commentId = UUID.randomUUID();
+        UUID customerId = UUID.randomUUID();
+        UUID assigneeId = UUID.randomUUID();
 
         ExternalCommentAddedPayload payload = new ExternalCommentAddedPayload(
                 UUID.randomUUID(),
                 "TCK-1003",
                 commentId,
-                UUID.randomUUID());
+                UUID.randomUUID(),
+                customerId,
+                assigneeId,
+                null);
 
         assertEquals(commentId, payload.commentId());
+        assertEquals(customerId, payload.customerId());
+        assertEquals(assigneeId, payload.assigneeId());
     }
 
     @Test

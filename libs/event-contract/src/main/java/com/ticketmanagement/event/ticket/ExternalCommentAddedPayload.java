@@ -9,7 +9,18 @@ public record ExternalCommentAddedPayload(
         UUID ticketId,
         String ticketNumber,
         UUID commentId,
-        UUID authorId) implements EventPayload {
+        UUID authorId,
+        UUID customerId,
+        UUID assigneeId,
+        UUID assignedTeamId) implements EventPayload {
+
+    public ExternalCommentAddedPayload(
+            UUID ticketId,
+            String ticketNumber,
+            UUID commentId,
+            UUID authorId) {
+        this(ticketId, ticketNumber, commentId, authorId, null, null, null);
+    }
 
     public ExternalCommentAddedPayload {
         ticketId = Objects.requireNonNull(ticketId, "ticketId must not be null");

@@ -17,6 +17,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.ticketmanagement.event.EventEnvelope;
 import com.ticketmanagement.event.EventType;
+import com.ticketmanagement.event.ticket.ExternalCommentAddedPayload;
 import com.ticketmanagement.event.ticket.TicketCreatedPayload;
 import com.ticketmanagement.notification.infrastructure.kafka.TicketEventKafkaConsumer;
 
@@ -75,6 +76,62 @@ class NotificationConsumerIdempotencyTests {
         assertThat(notificationRecipientFor(envelope.eventId())).isEqualTo(customerId.toString());
     }
 
+    @Test
+    void externalCommentByAgentProducesCustomerNotificationOnce() throws Exception {
+        UUID customerId = UUID.randomUUID();
+        UUID agentId = UUID.randomUUID();
+        UUID ticketId = UUID.randomUUID();
+        EventEnvelope<ExternalCommentAddedPayload> envelope = EventEnvelope.of(
+                EventType.TICKET_EXTERNAL_COMMENT_ADDED,
+                agentId,
+                ticketId,
+                new ExternalCommentAddedPayload(
+                        ticketId,
+                        "TCK-2002",
+                        UUID.randomUUID(),
+                        agentId,
+                        customerId,
+                        agentId,
+                        UUID.randomUUID()));
+        String message = objectMapper.writeValueAsString(envelope);
+
+        boolean firstDeliveryProcessed = ticketEventKafkaConsumer.handleTicketEvent(message);
+        boolean duplicateDeliveryProcessed = ticketEventKafkaConsumer.handleTicketEvent(message);
+
+        assertThat(firstDeliveryProcessed).isTrue();
+        assertThat(duplicateDeliveryProcessed).isFalse();
+        assertThat(processedEventCount()).isEqualTo(1);
+        assertThat(notificationCount()).isEqualTo(1);
+        assertThat(notificationCountFor(envelope.eventId())).isEqualTo(1);
+        assertThat(notificationRecipientFor(envelope.eventId())).isEqualTo(customerId.toString());
+        assertThat(notificationTypeFor(envelope.eventId())).isEqualTo("TICKET_EXTERNAL_COMMENT_ADDED");
+    }
+
+    @Test
+    void externalCommentByCustomerProducesAssignedAgentNotificationOnce() throws Exception {
+        UUID customerId = UUID.randomUUID();
+        UUID agentId = UUID.randomUUID();
+        UUID ticketId = UUID.randomUUID();
+        EventEnvelope<ExternalCommentAddedPayload> envelope = EventEnvelope.of(
+                EventType.TICKET_EXTERNAL_COMMENT_ADDED,
+                customerId,
+                ticketId,
+                new ExternalCommentAddedPayload(
+                        ticketId,
+                        "TCK-2003",
+                        UUID.randomUUID(),
+                        customerId,
+                        customerId,
+                        agentId,
+                        UUID.randomUUID()));
+
+        boolean processed = ticketEventKafkaConsumer.handleTicketEvent(objectMapper.writeValueAsString(envelope));
+
+        assertThat(processed).isTrue();
+        assertThat(notificationCount()).isEqualTo(1);
+        assertThat(notificationRecipientFor(envelope.eventId())).isEqualTo(agentId.toString());
+    }
+
     private Integer processedEventCount() {
         return jdbcTemplate.queryForObject("select count(*) from notification_schema.processed_events", Integer.class);
     }
@@ -93,6 +150,13 @@ class NotificationConsumerIdempotencyTests {
     private String notificationRecipientFor(UUID eventId) {
         return jdbcTemplate.queryForObject(
                 "select recipient_id::text from notification_schema.notifications where source_event_id = ?",
+                String.class,
+                eventId);
+    }
+
+    private String notificationTypeFor(UUID eventId) {
+        return jdbcTemplate.queryForObject(
+                "select type from notification_schema.notifications where source_event_id = ?",
                 String.class,
                 eventId);
     }
