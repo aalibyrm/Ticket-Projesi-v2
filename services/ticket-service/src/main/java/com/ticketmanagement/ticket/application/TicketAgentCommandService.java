@@ -92,7 +92,7 @@ public class TicketAgentCommandService {
             UUID ticketId,
             AddInternalNoteRequest request) {
         TicketEntity ticket = findTicketForUpdate(ticketId);
-        ticketSupportAccessService.assertCanManageTicket(ticket, context);
+        ticketSupportAccessService.assertCanAddInternalNote(ticket, context);
         TicketCommentEntity comment = ticketCommentRepository.save(TicketCommentEntity.internal(
                 UUID.randomUUID(),
                 ticket,

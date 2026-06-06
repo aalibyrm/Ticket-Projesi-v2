@@ -39,6 +39,15 @@ public class TicketSupportAccessService {
         throw ForbiddenOperationException.accessDenied();
     }
 
+    // Support actor'un atanmadan internal note ekleyip ekleyemeyecegini dogrular.
+    public void assertCanAddInternalNote(TicketEntity ticket, SupportActorContext context) {
+        if (canAddInternalNote(ticket, context)) {
+            return;
+        }
+
+        throw ForbiddenOperationException.accessDenied();
+    }
+
     // Support actor'un ticket assignment islemini yapip yapamayacagini dogrular.
     public void assertCanAssignTicket(
             TicketEntity ticket,
@@ -67,6 +76,12 @@ public class TicketSupportAccessService {
         return context.hasRole(ROLE_ADMIN)
                 || canAssignedAgentAccess(ticket, context)
                 || canTeamLeadManage(ticket, context);
+    }
+
+    // Support actor'un internal note ekleyip ekleyemeyecegini boolean olarak dondurur.
+    public boolean canAddInternalNote(TicketEntity ticket, SupportActorContext context) {
+        return context.hasRole(ROLE_ADMIN)
+                || canAssignedTeamRead(ticket, context);
     }
 
     // Actor'un ticket uzerindeki mevcut assignee olup olmadigini kontrol eder.

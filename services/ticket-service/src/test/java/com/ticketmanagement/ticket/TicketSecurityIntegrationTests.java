@@ -264,6 +264,34 @@ class TicketSecurityIntegrationTests {
     }
 
     @Test
+    void teamMemberCanAddInternalNoteToOwnTeamTicketWithoutAssignment() throws Exception {
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID ticketId = createTicketFor(ownerCustomerId);
+
+        mockMvc.perform(post("/api/agent/tickets/{id}/comments/internal", ticketId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new AddInternalNoteRequest(
+                                "Payment team should inspect this before customer reply.")))
+                        .with(jwtWithRoles(WEB_APP_SUPPORT_MEMBER_ID, "AGENT")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.visibility").value("INTERNAL"));
+    }
+
+    @Test
+    void teamMemberCannotAddInternalNoteToOtherTeamTicket() throws Exception {
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID ticketId = createTicketFor(ownerCustomerId, CORE_TOPIC_CODE);
+
+        mockMvc.perform(post("/api/agent/tickets/{id}/comments/internal", ticketId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new AddInternalNoteRequest(
+                                "Cross-team internal note attempt.")))
+                        .with(jwtWithRoles(WEB_APP_SUPPORT_MEMBER_ID, "AGENT")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+    }
+
+    @Test
     void teamMemberCanSelfAssignOwnTeamTicketThenManageIt() throws Exception {
         UUID ownerCustomerId = UUID.randomUUID();
         UUID ticketId = createTicketFor(ownerCustomerId);
