@@ -12,6 +12,10 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 class SecurityConfig {
 
+    private static final String[] OPENAPI_ROUTES = {
+            "/v3/api-docs", "/v3/api-docs/**"
+    };
+
     @Bean
     SecurityFilterChain securityFilterChain(
             HttpSecurity http,
@@ -27,6 +31,7 @@ class SecurityConfig {
         return http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                        .requestMatchers(OPENAPI_ROUTES).permitAll()
                         .requestMatchers("/api/**", "/internal/**").authenticated()
                         .anyRequest().denyAll())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))

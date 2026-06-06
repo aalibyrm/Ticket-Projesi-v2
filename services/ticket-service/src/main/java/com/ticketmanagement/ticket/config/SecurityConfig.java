@@ -15,6 +15,10 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 class SecurityConfig {
 
+    private static final String[] OPENAPI_ROUTES = {
+            "/v3/api-docs", "/v3/api-docs/**"
+    };
+
     @Bean
     SecurityFilterChain securityFilterChain(
             HttpSecurity http,
@@ -30,6 +34,7 @@ class SecurityConfig {
         return http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                        .requestMatchers(OPENAPI_ROUTES).permitAll()
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
                         .requestMatchers("/api/**", "/internal/**").authenticated()
                         .anyRequest().denyAll())

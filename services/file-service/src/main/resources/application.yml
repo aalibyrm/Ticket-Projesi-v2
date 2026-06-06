@@ -33,6 +33,12 @@ spring:
     table: flyway_schema_history
     locations: classpath:db/migration
 
+springdoc:
+  api-docs:
+    enabled: ${SPRINGDOC_API_DOCS_ENABLED:true}
+  paths-to-match:
+    - /api/**
+
 management:
   endpoints:
     web:

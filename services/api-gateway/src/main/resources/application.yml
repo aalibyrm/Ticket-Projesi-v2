@@ -18,6 +18,36 @@ spring:
             - RemoveRequestHeader=Set-Cookie
             - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
           routes:
+            - id: ticket-service-openapi
+              uri: ${TICKET_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/v3/api-docs/ticket-service
+              filters:
+                - RewritePath=/v3/api-docs/ticket-service, /v3/api-docs
+            - id: file-service-openapi
+              uri: ${FILE_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/v3/api-docs/file-service
+              filters:
+                - RewritePath=/v3/api-docs/file-service, /v3/api-docs
+            - id: workflow-sla-service-openapi
+              uri: ${WORKFLOW_SLA_SERVICE_URL:http://localhost:8083}
+              predicates:
+                - Path=/v3/api-docs/workflow-sla-service
+              filters:
+                - RewritePath=/v3/api-docs/workflow-sla-service, /v3/api-docs
+            - id: notification-service-openapi
+              uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8084}
+              predicates:
+                - Path=/v3/api-docs/notification-service
+              filters:
+                - RewritePath=/v3/api-docs/notification-service, /v3/api-docs
+            - id: reporting-service-openapi
+              uri: ${REPORTING_SERVICE_URL:http://localhost:8085}
+              predicates:
+                - Path=/v3/api-docs/reporting-service
+              filters:
+                - RewritePath=/v3/api-docs/reporting-service, /v3/api-docs
             - id: ticket-service-agent-v1
               uri: ${TICKET_SERVICE_URL:http://localhost:8081}
               predicates:
@@ -89,6 +119,24 @@ app:
     enabled: ${GATEWAY_RATE_LIMIT_ENABLED:true}
     capacity: ${GATEWAY_RATE_LIMIT_CAPACITY:120}
     window: ${GATEWAY_RATE_LIMIT_WINDOW:PT1M}
+
+springdoc:
+  api-docs:
+    enabled: ${SPRINGDOC_API_DOCS_ENABLED:true}
+  swagger-ui:
+    enabled: ${SPRINGDOC_SWAGGER_UI_ENABLED:true}
+    path: /swagger-ui.html
+    urls:
+      - name: ticket-service
+        url: /v3/api-docs/ticket-service
+      - name: file-service
+        url: /v3/api-docs/file-service
+      - name: workflow-sla-service
+        url: /v3/api-docs/workflow-sla-service
+      - name: notification-service
+        url: /v3/api-docs/notification-service
+      - name: reporting-service
+        url: /v3/api-docs/reporting-service
 
 management:
   endpoints:

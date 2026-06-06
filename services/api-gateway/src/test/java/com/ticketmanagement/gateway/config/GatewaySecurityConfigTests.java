@@ -53,6 +53,14 @@ class GatewaySecurityConfigTests {
     }
 
     @Test
+    void openApiDocsArePublicThroughGatewayAggregation() {
+        webTestClient.get()
+                .uri("/v3/api-docs/ticket-service")
+                .exchange()
+                .expectStatus().is5xxServerError();
+    }
+
+    @Test
     void securedEndpointRequiresAuthentication() {
         webTestClient.get()
                 .uri("/api/v1/tickets")

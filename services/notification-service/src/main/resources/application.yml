@@ -52,6 +52,12 @@ spring:
       mail.smtp.timeout: ${NOTIFICATION_SMTP_READ_TIMEOUT_MS:5000}
       mail.smtp.writetimeout: ${NOTIFICATION_SMTP_WRITE_TIMEOUT_MS:5000}
 
+springdoc:
+  api-docs:
+    enabled: ${SPRINGDOC_API_DOCS_ENABLED:true}
+  paths-to-match:
+    - /api/**
+
 app:
   kafka:
     topics:

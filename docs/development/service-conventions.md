@@ -50,6 +50,12 @@ loglamayi ve domain kimligi hatalarini engellemek icindir.
 - Public endpointler gateway arkasindan `/api/v1/...` prefix'i ile yayinlanir.
   Servis-local controller path'leri bu fazda `/api/...` kalir ve gateway v1
   prefix'ini servis-local path'e rewrite eder.
+- Servisler kendi OpenAPI JSON ciktisini `/v3/api-docs` uzerinden uretir.
+  Spec sadece public `/api/**` controllerlarini kapsar ve dokumanda path'ler
+  gateway kontratiyla uyumlu olarak `/api/v1/**` gorunur.
+- Gateway Swagger UI `/swagger-ui.html` uzerinden servis spec'lerini aggregate
+  eder. Production ortaminda gerekirse dokuman endpointleri Springdoc env
+  flag'leri ile kapatilabilir.
 - Request validation zorunludur.
 - Error response formati standarttir.
 - Internal exception detayi client'a sizdirilmaz.

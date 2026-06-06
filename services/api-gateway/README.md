@@ -17,6 +17,21 @@ Default port: `8088`
 Legacy `/api/**` route'lari migration penceresinde ayni authorization matrisiyle
 korunarak calismaya devam eder.
 
+## Swagger/OpenAPI
+
+Gateway lokal Swagger UI'yi `/swagger-ui.html` uzerinden sunar ve servis
+OpenAPI JSON'larini asagidaki path'lerden aggregate eder:
+
+- `/v3/api-docs/ticket-service`
+- `/v3/api-docs/file-service`
+- `/v3/api-docs/workflow-sla-service`
+- `/v3/api-docs/notification-service`
+- `/v3/api-docs/reporting-service`
+
+Servis spec'leri public kontrat olarak `/api/v1/**` path'lerini gosterir.
+Production ortaminda gerekiyorsa `SPRINGDOC_API_DOCS_ENABLED=false` ve
+`SPRINGDOC_SWAGGER_UI_ENABLED=false` ile dokuman endpointleri kapatilabilir.
+
 ## Guvenlik
 
 Default profil JWT resource server davranisini acik kabul eder:

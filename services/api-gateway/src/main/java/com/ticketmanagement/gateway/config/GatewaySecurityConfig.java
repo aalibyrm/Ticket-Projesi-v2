@@ -25,6 +25,9 @@ class GatewaySecurityConfig {
     private static final String ROLE_AGENT = "AGENT";
     private static final String ROLE_CUSTOMER = "CUSTOMER";
     private static final String ROLE_MANAGER = "MANAGER";
+    private static final String[] OPENAPI_ROUTES = {
+            "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**"
+    };
     private static final String[] REPORT_ROUTES = {
             "/api/reports", "/api/reports/**", "/api/v1/reports", "/api/v1/reports/**"
     };
@@ -68,6 +71,7 @@ class GatewaySecurityConfig {
                     .authorizeExchange(exchanges -> exchanges
                             .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                             .pathMatchers("/actuator/health", "/actuator/info").permitAll()
+                            .pathMatchers(OPENAPI_ROUTES).permitAll()
                             .pathMatchers("/actuator/**").hasRole(ROLE_ADMIN)
                             .pathMatchers(REPORT_ROUTES)
                             .hasAnyRole(ROLE_MANAGER, ROLE_ADMIN)

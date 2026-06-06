@@ -10,6 +10,23 @@ Public web ve mobil istemciler gateway uzerinden `/api/v1/**` prefix'i ile REST
 endpointlerine erisir. Frontend route guard yalnizca UX icindir; asil
 authorization gateway ve ilgili servis tarafinda uygulanir.
 
+Swagger UI lokal ortamda API Gateway uzerinden acilir:
+`http://localhost:8088/swagger-ui.html`.
+
+Gateway Swagger UI servis OpenAPI JSON endpointlerini aggregate eder:
+
+| Service | Aggregated OpenAPI URL |
+| --- | --- |
+| ticket-service | `/v3/api-docs/ticket-service` |
+| file-service | `/v3/api-docs/file-service` |
+| workflow-sla-service | `/v3/api-docs/workflow-sla-service` |
+| notification-service | `/v3/api-docs/notification-service` |
+| reporting-service | `/v3/api-docs/reporting-service` |
+
+Servisler sadece public `/api/**` controllerlarini dokumana dahil eder ve spec
+ciktisinda path'leri public gateway kontrati olan `/api/v1/**` olarak gosterir.
+`/internal/**` endpointleri Swagger spec'lerine dahil edilmez.
+
 | Alan | Endpoint | Rol | Sahip servis |
 | --- | --- | --- | --- |
 | Customer tickets | `GET /api/v1/tickets`, `POST /api/v1/tickets`, `GET /api/v1/tickets/{ticketId}` | Customer/Admin | ticket-service |
