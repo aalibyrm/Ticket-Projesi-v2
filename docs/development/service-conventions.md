@@ -47,7 +47,9 @@ loglamayi ve domain kimligi hatalarini engellemek icindir.
 
 ## API Standartlari
 
-- Tum endpointler gateway arkasindan `/api/...` prefix'i ile yayinlanir.
+- Public endpointler gateway arkasindan `/api/v1/...` prefix'i ile yayinlanir.
+  Servis-local controller path'leri bu fazda `/api/...` kalir ve gateway v1
+  prefix'ini servis-local path'e rewrite eder.
 - Request validation zorunludur.
 - Error response formati standarttir.
 - Internal exception detayi client'a sizdirilmaz.

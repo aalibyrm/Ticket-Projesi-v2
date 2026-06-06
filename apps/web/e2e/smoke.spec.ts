@@ -90,13 +90,13 @@ test("customer, agent, notification, and reporting smoke journey", async ({ page
 
   const createTicketResponse = page.waitForResponse(
     (response) =>
-      response.url() === "http://localhost:8080/api/tickets" &&
+      response.url() === "http://localhost:8080/api/v1/tickets" &&
       response.request().method() === "POST" &&
       response.status() === 201,
   );
   const reserveUploadResponse = page.waitForResponse(
     (response) =>
-      response.url() === "http://localhost:8080/api/files/uploads" &&
+      response.url() === "http://localhost:8080/api/v1/files/uploads" &&
       response.request().method() === "POST" &&
       response.status() === 200,
   );
@@ -110,7 +110,7 @@ test("customer, agent, notification, and reporting smoke journey", async ({ page
   });
   const completeUploadResponse = page.waitForResponse(
     (response) =>
-      response.url() === `http://localhost:8080/api/files/uploads/${fileId}/complete` &&
+      response.url() === `http://localhost:8080/api/v1/files/uploads/${fileId}/complete` &&
       response.request().method() === "POST" &&
       response.status() === 200,
   );
@@ -184,17 +184,17 @@ async function registerE2eAuth(page: Page) {
 }
 
 async function registerDemoApi(page: Page, state: ReturnType<typeof createDemoState>) {
-  await page.route("http://localhost:8080/api/**", async (route) => {
+  await page.route("http://localhost:8080/api/v1/**", async (route) => {
     const request = route.request();
     const url = new URL(request.url());
     const method = request.method();
     const path = url.pathname;
 
-    if (method === "GET" && path === "/api/products") {
+    if (method === "GET" && path === "/api/v1/products") {
       return json(route, [{ code: "NETWORK", id: productId, name: "Ag ve VPN" }]);
     }
 
-    if (method === "GET" && path === "/api/ticket-topics") {
+    if (method === "GET" && path === "/api/v1/ticket-topics") {
       return json(route, [
         {
           code: "VPN_ACCESS",
@@ -205,17 +205,17 @@ async function registerDemoApi(page: Page, state: ReturnType<typeof createDemoSt
       ]);
     }
 
-    if (method === "GET" && path === "/api/tickets") {
+    if (method === "GET" && path === "/api/v1/tickets") {
       return json(route, state.ticket ? [state.ticket] : []);
     }
 
-    if (method === "POST" && path === "/api/tickets") {
+    if (method === "POST" && path === "/api/v1/tickets") {
       const body = await request.postDataJSON();
       state.ticket = createTicket(body);
       return json(route, state.ticket, 201);
     }
 
-    if (method === "POST" && path === "/api/files/uploads") {
+    if (method === "POST" && path === "/api/v1/files/uploads") {
       const body = await request.postDataJSON();
       state.ticket?.attachments.push({
         contentType: body.contentType,
@@ -237,32 +237,32 @@ async function registerDemoApi(page: Page, state: ReturnType<typeof createDemoSt
       });
     }
 
-    if (method === "POST" && path === `/api/files/uploads/${fileId}/complete`) {
+    if (method === "POST" && path === `/api/v1/files/uploads/${fileId}/complete`) {
       completeAttachment(state);
       return json(route, { status: "COMPLETED" });
     }
 
-    if (method === "GET" && path === `/api/tickets/${ticketId}`) {
+    if (method === "GET" && path === `/api/v1/tickets/${ticketId}`) {
       return json(route, requireTicket(state));
     }
 
-    if (method === "GET" && path === `/api/tickets/${ticketId}/comments`) {
+    if (method === "GET" && path === `/api/v1/tickets/${ticketId}/comments`) {
       return json(route, state.comments.filter((comment) => comment.visibility === "EXTERNAL"));
     }
 
-    if (method === "GET" && path === "/api/agent/tickets") {
+    if (method === "GET" && path === "/api/v1/agent/tickets") {
       return json(route, state.ticket ? [state.ticket] : []);
     }
 
-    if (method === "GET" && path === `/api/agent/tickets/${ticketId}`) {
+    if (method === "GET" && path === `/api/v1/agent/tickets/${ticketId}`) {
       return json(route, requireTicket(state));
     }
 
-    if (method === "GET" && path === `/api/agent/tickets/${ticketId}/comments`) {
+    if (method === "GET" && path === `/api/v1/agent/tickets/${ticketId}/comments`) {
       return json(route, state.comments);
     }
 
-    if (method === "PATCH" && path === `/api/agent/tickets/${ticketId}/status`) {
+    if (method === "PATCH" && path === `/api/v1/agent/tickets/${ticketId}/status`) {
       const body = await request.postDataJSON();
       const ticket = requireTicket(state);
       ticket.status = body.status;
@@ -278,7 +278,7 @@ async function registerDemoApi(page: Page, state: ReturnType<typeof createDemoSt
       return json(route, ticket);
     }
 
-    if (method === "POST" && path === `/api/agent/tickets/${ticketId}/comments/external`) {
+    if (method === "POST" && path === `/api/v1/agent/tickets/${ticketId}/comments/external`) {
       const body = await request.postDataJSON();
       const comment = addComment(state, body.body, "EXTERNAL");
       state.notifications.push({
@@ -292,12 +292,12 @@ async function registerDemoApi(page: Page, state: ReturnType<typeof createDemoSt
       return json(route, comment, 201);
     }
 
-    if (method === "POST" && path === `/api/agent/tickets/${ticketId}/comments/internal`) {
+    if (method === "POST" && path === `/api/v1/agent/tickets/${ticketId}/comments/internal`) {
       const body = await request.postDataJSON();
       return json(route, addComment(state, body.body, "INTERNAL"), 201);
     }
 
-    if (method === "GET" && path === "/api/organization/teams") {
+    if (method === "GET" && path === "/api/v1/organization/teams") {
       return json(route, [
         {
           code: "NETOPS-L1",
@@ -310,15 +310,15 @@ async function registerDemoApi(page: Page, state: ReturnType<typeof createDemoSt
       ]);
     }
 
-    if (method === "GET" && path === `/api/organization/teams/${teamId}/members`) {
+    if (method === "GET" && path === `/api/v1/organization/teams/${teamId}/members`) {
       return json(route, [{ actorId: agentId, teamCode: "NETOPS-L1", teamId, teamLead: true }]);
     }
 
-    if (method === "GET" && path === `/api/agent/tickets/${ticketId}/worklogs`) {
+    if (method === "GET" && path === `/api/v1/agent/tickets/${ticketId}/worklogs`) {
       return json(route, state.worklogs);
     }
 
-    if (method === "POST" && path === `/api/agent/tickets/${ticketId}/worklogs`) {
+    if (method === "POST" && path === `/api/v1/agent/tickets/${ticketId}/worklogs`) {
       const body = await request.postDataJSON();
       const worklog = {
         agentId,
@@ -333,11 +333,11 @@ async function registerDemoApi(page: Page, state: ReturnType<typeof createDemoSt
       return json(route, worklog, 201);
     }
 
-    if (method === "GET" && path === "/api/notifications") {
+    if (method === "GET" && path === "/api/v1/notifications") {
       return json(route, state.notifications);
     }
 
-    if (method === "GET" && path === "/api/reports/tickets/status-distribution") {
+    if (method === "GET" && path === "/api/v1/reports/tickets/status-distribution") {
       return json(route, {
         counts: [{ count: 1, status: requireTicket(state).status }],
         departmentCounts: [
@@ -354,7 +354,7 @@ async function registerDemoApi(page: Page, state: ReturnType<typeof createDemoSt
       });
     }
 
-    if (method === "GET" && path === "/api/reports/tickets/closed") {
+    if (method === "GET" && path === "/api/v1/reports/tickets/closed") {
       return json(route, {
         averageResolutionMinutes: 120,
         dailyCounts: [{ count: 1, date: "2026-06-03" }],
@@ -366,7 +366,7 @@ async function registerDemoApi(page: Page, state: ReturnType<typeof createDemoSt
       });
     }
 
-    if (method === "GET" && path === "/api/reports/agents/performance") {
+    if (method === "GET" && path === "/api/v1/reports/agents/performance") {
       return json(route, {
         generatedAt: now,
         rows: [
@@ -381,7 +381,7 @@ async function registerDemoApi(page: Page, state: ReturnType<typeof createDemoSt
       });
     }
 
-    if (method === "GET" && path === "/api/reports/sla/compliance") {
+    if (method === "GET" && path === "/api/v1/reports/sla/compliance") {
       return json(route, {
         activeTicketCount: 1,
         atRiskTicketCount: 0,

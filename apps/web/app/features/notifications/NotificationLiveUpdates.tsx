@@ -4,6 +4,7 @@ import { getAccessToken } from "~/features/auth/authService";
 import { selectAuthStatus } from "~/features/auth/authSlice";
 import { agentQueryKeys } from "~/features/agent/agentQueries";
 import { customerQueryKeys } from "~/features/customer/customerQueries";
+import { versionedApiPath } from "~/shared/api/httpClient";
 import { useAppSelector } from "~/shared/store/hooks";
 import { appConfig } from "~/shared/config/appConfig";
 
@@ -38,7 +39,7 @@ export function NotificationLiveUpdates() {
           return;
         }
 
-        const response = await fetch(`${appConfig.apiBaseUrl}/api/notifications/stream`, {
+        const response = await fetch(`${appConfig.apiBaseUrl}${versionedApiPath("/api/notifications/stream")}`, {
           headers: {
             Accept: "text/event-stream",
             Authorization: `Bearer ${token}`,

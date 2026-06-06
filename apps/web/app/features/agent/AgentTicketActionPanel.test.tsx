@@ -52,7 +52,7 @@ describe("AgentTicketActionPanel", () => {
     }));
 
     server.use(
-      http.get("*/api/organization/teams", () =>
+      http.get("*/api/v1/organization/teams", () =>
         HttpResponse.json([
           {
             code: "WEB_APP_SUPPORT",
@@ -64,7 +64,7 @@ describe("AgentTicketActionPanel", () => {
           },
         ]),
       ),
-      http.get(`*/api/organization/teams/${teamId}/members`, () =>
+      http.get(`*/api/v1/organization/teams/${teamId}/members`, () =>
         HttpResponse.json([
           {
             actorId: "30000000-0000-0000-0000-000000000003",
@@ -84,8 +84,8 @@ describe("AgentTicketActionPanel", () => {
           },
         ]),
       ),
-      http.get("*/api/agent/tickets/:ticketId/worklogs", () => HttpResponse.json([])),
-      http.patch("*/api/agent/tickets/:ticketId/assignment", async ({ request }) => {
+      http.get("*/api/v1/agent/tickets/:ticketId/worklogs", () => HttpResponse.json([])),
+      http.patch("*/api/v1/agent/tickets/:ticketId/assignment", async ({ request }) => {
         assignmentBody = await request.json() as Record<string, unknown>;
         return HttpResponse.json({
           ...ticket,

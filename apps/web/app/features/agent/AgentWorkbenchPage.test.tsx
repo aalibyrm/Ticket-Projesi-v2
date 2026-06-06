@@ -30,7 +30,7 @@ function renderPage() {
 describe("AgentWorkbenchPage", () => {
   it("renders assigned ticket queue from REST API", async () => {
     server.use(
-      http.get("*/api/agent/tickets", () =>
+      http.get("*/api/v1/agent/tickets", () =>
         HttpResponse.json([
           {
             assigneeId: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",

@@ -8,11 +8,14 @@ Default port: `8088`
 
 ## Route Placeholder'lari
 
-- `/api/tickets/**`, `/api/products/**` -> `ticket-service`
-- `/api/files/**` -> `file-service`
-- `/api/workflows/**`, `/api/sla/**` -> `workflow-sla-service`
-- `/api/notifications/**` -> `notification-service`
-- `/api/reports/**` -> `reporting-service`
+- `/api/v1/tickets/**`, `/api/v1/products/**` -> `ticket-service`
+- `/api/v1/files/**` -> `file-service`
+- `/api/v1/workflows/**`, `/api/v1/sla/**` -> `workflow-sla-service`
+- `/api/v1/notifications/**` -> `notification-service`
+- `/api/v1/reports/**` -> `reporting-service`
+
+Legacy `/api/**` route'lari migration penceresinde ayni authorization matrisiyle
+korunarak calismaya devam eder.
 
 ## Guvenlik
 
@@ -33,13 +36,13 @@ Gateway route bazli ilk authorization filtresini uygular:
 
 | Route | Roller |
 | --- | --- |
-| `/api/tickets/**` | `CUSTOMER`, `ADMIN` |
-| `/api/agent/tickets/**` | `AGENT`, `ADMIN` |
-| `/api/workflows/**` | `AGENT`, `ADMIN` |
-| `/api/reports/**` | `MANAGER`, `ADMIN` |
-| `/api/sla/**` | `MANAGER`, `ADMIN` |
-| `/api/products/**` | `CUSTOMER`, `AGENT`, `MANAGER`, `ADMIN` |
-| `/api/files/**`, `/api/notifications/**` | Authenticated user |
+| `/api/v1/tickets/**` | `CUSTOMER`, `ADMIN` |
+| `/api/v1/agent/tickets/**` | `AGENT`, `ADMIN` |
+| `/api/v1/workflows/**` | `AGENT`, `ADMIN` |
+| `/api/v1/reports/**` | `MANAGER`, `ADMIN` |
+| `/api/v1/sla/**` | `MANAGER`, `ADMIN` |
+| `/api/v1/products/**` | `CUSTOMER`, `AGENT`, `MANAGER`, `ADMIN` |
+| `/api/v1/files/**`, `/api/v1/notifications/**` | Authenticated user |
 
 Servisler kendi domain authorization kontrollerini ayrica uygular; gateway tek
 guvenlik siniri kabul edilmez.

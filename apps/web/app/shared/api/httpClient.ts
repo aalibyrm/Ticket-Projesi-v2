@@ -4,6 +4,7 @@ import { appConfig } from "~/shared/config/appConfig";
 type AccessTokenProvider = () => Promise<string | undefined>;
 
 let accessTokenProvider: AccessTokenProvider | undefined;
+export const publicApiVersionPrefix = "/api/v1";
 
 export function setAccessTokenProvider(provider: AccessTokenProvider | undefined) {
   accessTokenProvider = provider;
@@ -17,6 +18,7 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(async (config) => {
   const headers = AxiosHeaders.from(config.headers);
   headers.set("X-Correlation-Id", createCorrelationId());
+  config.url = versionedApiPath(config.url);
 
   const token = await accessTokenProvider?.();
   if (token) {
@@ -50,4 +52,12 @@ function createCorrelationId() {
   }
 
   return `web-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+export function versionedApiPath(path: string | undefined) {
+  if (!path || !path.startsWith("/api/") || path.startsWith(`${publicApiVersionPrefix}/`)) {
+    return path;
+  }
+
+  return `${publicApiVersionPrefix}${path.substring("/api".length)}`;
 }

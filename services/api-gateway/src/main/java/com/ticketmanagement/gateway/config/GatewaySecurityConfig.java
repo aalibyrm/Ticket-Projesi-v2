@@ -25,6 +25,34 @@ class GatewaySecurityConfig {
     private static final String ROLE_AGENT = "AGENT";
     private static final String ROLE_CUSTOMER = "CUSTOMER";
     private static final String ROLE_MANAGER = "MANAGER";
+    private static final String[] REPORT_ROUTES = {
+            "/api/reports", "/api/reports/**", "/api/v1/reports", "/api/v1/reports/**"
+    };
+    private static final String[] SLA_ROUTES = {
+            "/api/sla", "/api/sla/**", "/api/v1/sla", "/api/v1/sla/**"
+    };
+    private static final String[] WORKFLOW_ROUTES = {
+            "/api/workflows", "/api/workflows/**", "/api/v1/workflows", "/api/v1/workflows/**"
+    };
+    private static final String[] AGENT_TICKET_ROUTES = {
+            "/api/agent/tickets", "/api/agent/tickets/**", "/api/v1/agent/tickets", "/api/v1/agent/tickets/**"
+    };
+    private static final String[] CUSTOMER_TICKET_ROUTES = {
+            "/api/tickets", "/api/tickets/**", "/api/v1/tickets", "/api/v1/tickets/**"
+    };
+    private static final String[] PRODUCT_ROUTES = {
+            "/api/products", "/api/products/**", "/api/v1/products", "/api/v1/products/**"
+    };
+    private static final String[] TICKET_TOPIC_ROUTES = {
+            "/api/ticket-topics", "/api/ticket-topics/**", "/api/v1/ticket-topics", "/api/v1/ticket-topics/**"
+    };
+    private static final String[] ORGANIZATION_ROUTES = {
+            "/api/organization", "/api/organization/**", "/api/v1/organization", "/api/v1/organization/**"
+    };
+    private static final String[] AUTHENTICATED_ROUTES = {
+            "/api/files", "/api/files/**", "/api/notifications", "/api/notifications/**",
+            "/api/v1/files", "/api/v1/files/**", "/api/v1/notifications", "/api/v1/notifications/**"
+    };
 
     @Bean
     SecurityWebFilterChain securityWebFilterChain(
@@ -41,23 +69,23 @@ class GatewaySecurityConfig {
                             .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                             .pathMatchers("/actuator/health", "/actuator/info").permitAll()
                             .pathMatchers("/actuator/**").hasRole(ROLE_ADMIN)
-                            .pathMatchers("/api/reports", "/api/reports/**")
+                            .pathMatchers(REPORT_ROUTES)
                             .hasAnyRole(ROLE_MANAGER, ROLE_ADMIN)
-                            .pathMatchers("/api/sla", "/api/sla/**")
+                            .pathMatchers(SLA_ROUTES)
                             .hasAnyRole(ROLE_MANAGER, ROLE_ADMIN)
-                            .pathMatchers("/api/workflows", "/api/workflows/**")
+                            .pathMatchers(WORKFLOW_ROUTES)
                             .hasAnyRole(ROLE_AGENT, ROLE_ADMIN)
-                            .pathMatchers("/api/agent/tickets", "/api/agent/tickets/**")
+                            .pathMatchers(AGENT_TICKET_ROUTES)
                             .hasAnyRole(ROLE_AGENT, ROLE_ADMIN)
-                            .pathMatchers("/api/tickets", "/api/tickets/**")
+                            .pathMatchers(CUSTOMER_TICKET_ROUTES)
                             .hasAnyRole(ROLE_CUSTOMER, ROLE_ADMIN)
-                            .pathMatchers("/api/products", "/api/products/**")
+                            .pathMatchers(PRODUCT_ROUTES)
                             .hasAnyRole(ROLE_CUSTOMER, ROLE_AGENT, ROLE_MANAGER, ROLE_ADMIN)
-                            .pathMatchers("/api/ticket-topics", "/api/ticket-topics/**")
+                            .pathMatchers(TICKET_TOPIC_ROUTES)
                             .hasAnyRole(ROLE_CUSTOMER, ROLE_AGENT, ROLE_MANAGER, ROLE_ADMIN)
-                            .pathMatchers("/api/organization", "/api/organization/**")
+                            .pathMatchers(ORGANIZATION_ROUTES)
                             .hasAnyRole(ROLE_AGENT, ROLE_MANAGER, ROLE_ADMIN)
-                            .pathMatchers("/api/files", "/api/files/**", "/api/notifications", "/api/notifications/**")
+                            .pathMatchers(AUTHENTICATED_ROUTES)
                             .authenticated()
                             .anyExchange().denyAll())
                     .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt

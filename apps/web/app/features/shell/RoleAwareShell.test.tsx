@@ -15,7 +15,7 @@ import { server } from "~/test/msw/server";
 
 function renderShell(roles: AppRole[], unreadNotifications: NotificationResponse[] = []) {
   server.use(
-    http.get("*/api/notifications", ({ request }) => {
+    http.get("*/api/v1/notifications", ({ request }) => {
       const url = new URL(request.url);
       if (url.searchParams.get("read") === "false") {
         return HttpResponse.json(unreadNotifications);

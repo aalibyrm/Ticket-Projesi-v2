@@ -6,21 +6,21 @@ contract'lari icin okunabilir API haritasidir.
 
 ## API Gateway Public Surface
 
-Public web ve mobil istemciler gateway uzerinden `/api/**` prefix'i ile REST
+Public web ve mobil istemciler gateway uzerinden `/api/v1/**` prefix'i ile REST
 endpointlerine erisir. Frontend route guard yalnizca UX icindir; asil
 authorization gateway ve ilgili servis tarafinda uygulanir.
 
 | Alan | Endpoint | Rol | Sahip servis |
 | --- | --- | --- | --- |
-| Customer tickets | `GET /api/tickets`, `POST /api/tickets`, `GET /api/tickets/{ticketId}` | Customer/Admin | ticket-service |
-| Customer comments | `GET /api/tickets/{ticketId}/comments`, `POST /api/tickets/{ticketId}/comments/external` | Customer/Admin | ticket-service |
-| Catalog | `GET /api/products`, `GET /api/ticket-topics` | Customer/Agent/Manager/Admin | ticket-service |
-| Files | `POST /api/files/uploads`, `POST /api/files/uploads/{fileId}/complete`, `POST /api/files/{fileId}/download-url` | Customer/Agent/Admin | file-service |
-| Notifications | `GET /api/notifications`, `PATCH /api/notifications/{notificationId}/read` | Customer/Agent/Manager/Admin | notification-service |
-| Agent tickets | `GET /api/agent/tickets`, `GET /api/agent/tickets/{ticketId}` | Agent/Admin | ticket-service |
-| Agent actions | status, assignment, comments, worklogs under `/api/agent/tickets/{ticketId}` | Agent/Admin | ticket-service |
-| Organization catalog | `GET /api/organization/departments`, `GET /api/organization/teams`, `GET /api/organization/teams/{teamId}/members` | Agent/Manager/Admin | ticket-service |
-| Reports | `/api/reports/**` | Manager/Admin | reporting-service |
+| Customer tickets | `GET /api/v1/tickets`, `POST /api/v1/tickets`, `GET /api/v1/tickets/{ticketId}` | Customer/Admin | ticket-service |
+| Customer comments | `GET /api/v1/tickets/{ticketId}/comments`, `POST /api/v1/tickets/{ticketId}/comments/external` | Customer/Admin | ticket-service |
+| Catalog | `GET /api/v1/products`, `GET /api/v1/ticket-topics` | Customer/Agent/Manager/Admin | ticket-service |
+| Files | `POST /api/v1/files/uploads`, `POST /api/v1/files/uploads/{fileId}/complete`, `POST /api/v1/files/{fileId}/download-url` | Customer/Agent/Admin | file-service |
+| Notifications | `GET /api/v1/notifications`, `PATCH /api/v1/notifications/{notificationId}/read` | Customer/Agent/Manager/Admin | notification-service |
+| Agent tickets | `GET /api/v1/agent/tickets`, `GET /api/v1/agent/tickets/{ticketId}` | Agent/Admin | ticket-service |
+| Agent actions | status, assignment, comments, worklogs under `/api/v1/agent/tickets/{ticketId}` | Agent/Admin | ticket-service |
+| Organization catalog | `GET /api/v1/organization/departments`, `GET /api/v1/organization/teams`, `GET /api/v1/organization/teams/{teamId}/members` | Agent/Manager/Admin | ticket-service |
+| Reports | `/api/v1/reports/**` | Manager/Admin | reporting-service |
 
 ## Final Smoke Contract
 
@@ -65,17 +65,17 @@ Customer create request sadece `topicCode`, `productId`, `summary`,
 
 | Endpoint | Rol | Aciklama |
 | --- | --- | --- |
-| `GET /api/ticket-topics` | Customer/Agent/Manager/Admin | Aktif ticket topic katalogu |
-| `GET /api/organization/departments` | Agent/Manager/Admin | Department ve alt team katalogu |
-| `GET /api/organization/teams` | Agent/Manager/Admin | Aktif support team katalogu |
-| `GET /api/organization/teams/{teamId}/members` | Agent/Manager/Admin | Secili team'in aktif member listesi |
+| `GET /api/v1/ticket-topics` | Customer/Agent/Manager/Admin | Aktif ticket topic katalogu |
+| `GET /api/v1/organization/departments` | Agent/Manager/Admin | Department ve alt team katalogu |
+| `GET /api/v1/organization/teams` | Agent/Manager/Admin | Aktif support team katalogu |
+| `GET /api/v1/organization/teams/{teamId}/members` | Agent/Manager/Admin | Secili team'in aktif member listesi |
 
 ## Reporting Endpoints
 
 `reporting-service` endpointleri `MANAGER` veya `ADMIN` rolune aciktir.
 Frontend route guard sadece UX icindir; backend authorization zorunlu kalir.
 
-### `GET /api/reports/tickets/status-distribution`
+### `GET /api/v1/reports/tickets/status-distribution`
 
 Open ticket status dagilimini ve organization breakdown alanlarini dondurur.
 

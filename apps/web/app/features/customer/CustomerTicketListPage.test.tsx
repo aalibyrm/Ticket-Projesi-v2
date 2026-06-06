@@ -30,7 +30,7 @@ function renderPage() {
 describe("CustomerTicketListPage", () => {
   it("renders customer tickets from REST API", async () => {
     server.use(
-      http.get("*/api/tickets", () =>
+      http.get("*/api/v1/tickets", () =>
         HttpResponse.json([
           {
             assigneeId: null,

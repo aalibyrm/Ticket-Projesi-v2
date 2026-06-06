@@ -36,7 +36,7 @@ describe("CustomerCreateTicketPage", () => {
     let requestBody: Record<string, unknown> | undefined;
 
     server.use(
-      http.get("*/api/products", () =>
+      http.get("*/api/v1/products", () =>
         HttpResponse.json([
           {
             code: "CORE",
@@ -45,7 +45,7 @@ describe("CustomerCreateTicketPage", () => {
           },
         ]),
       ),
-      http.get("*/api/ticket-topics", () =>
+      http.get("*/api/v1/ticket-topics", () =>
         HttpResponse.json([
           {
             code: "WEB_PORTAL_BUG",
@@ -55,7 +55,7 @@ describe("CustomerCreateTicketPage", () => {
           },
         ]),
       ),
-      http.post("*/api/tickets", async ({ request }) => {
+      http.post("*/api/v1/tickets", async ({ request }) => {
         requestBody = await request.json() as Record<string, unknown>;
         return HttpResponse.json({
           ...requestBody,

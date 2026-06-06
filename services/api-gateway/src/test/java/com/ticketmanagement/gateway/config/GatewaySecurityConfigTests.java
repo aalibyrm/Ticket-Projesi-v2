@@ -55,7 +55,7 @@ class GatewaySecurityConfigTests {
     @Test
     void securedEndpointRequiresAuthentication() {
         webTestClient.get()
-                .uri("/api/tickets")
+                .uri("/api/v1/tickets")
                 .exchange()
                 .expectStatus().isUnauthorized();
     }
@@ -63,7 +63,7 @@ class GatewaySecurityConfigTests {
     @Test
     void customerRoleCanReachCustomerTicketRoute() {
         webTestClient.get()
-                .uri("/api/tickets")
+                .uri("/api/v1/tickets")
                 .header(HttpHeaders.AUTHORIZATION, bearer("customer-token"))
                 .exchange()
                 .expectStatus().is5xxServerError();
@@ -72,7 +72,7 @@ class GatewaySecurityConfigTests {
     @Test
     void customerRoleCanReachTicketTopicRoute() {
         webTestClient.get()
-                .uri("/api/ticket-topics")
+                .uri("/api/v1/ticket-topics")
                 .header(HttpHeaders.AUTHORIZATION, bearer("customer-token"))
                 .exchange()
                 .expectStatus().is5xxServerError();
@@ -81,13 +81,13 @@ class GatewaySecurityConfigTests {
     @Test
     void agentRoleCanReachTicketOperationRoutes() {
         webTestClient.get()
-                .uri("/api/agent/tickets/queue")
+                .uri("/api/v1/agent/tickets/queue")
                 .header(HttpHeaders.AUTHORIZATION, bearer("agent-token"))
                 .exchange()
                 .expectStatus().is5xxServerError();
 
         webTestClient.get()
-                .uri("/api/workflows/tickets/00000000-0000-0000-0000-000000000001/transitions")
+                .uri("/api/v1/workflows/tickets/00000000-0000-0000-0000-000000000001/transitions")
                 .header(HttpHeaders.AUTHORIZATION, bearer("agent-token"))
                 .exchange()
                 .expectStatus().is5xxServerError();
@@ -96,7 +96,7 @@ class GatewaySecurityConfigTests {
     @Test
     void agentRoleCanReachOrganizationRoutes() {
         webTestClient.get()
-                .uri("/api/organization/teams")
+                .uri("/api/v1/organization/teams")
                 .header(HttpHeaders.AUTHORIZATION, bearer("agent-token"))
                 .exchange()
                 .expectStatus().is5xxServerError();
@@ -105,13 +105,13 @@ class GatewaySecurityConfigTests {
     @Test
     void agentRoleCannotReachCustomerTicketOrManagerReportRoutes() {
         webTestClient.get()
-                .uri("/api/tickets")
+                .uri("/api/v1/tickets")
                 .header(HttpHeaders.AUTHORIZATION, bearer("agent-token"))
                 .exchange()
                 .expectStatus().isForbidden();
 
         webTestClient.get()
-                .uri("/api/reports/status-distribution")
+                .uri("/api/v1/reports/status-distribution")
                 .header(HttpHeaders.AUTHORIZATION, bearer("agent-token"))
                 .exchange()
                 .expectStatus().isForbidden();
@@ -120,13 +120,13 @@ class GatewaySecurityConfigTests {
     @Test
     void managerRoleCanReachReportAndSlaRoutes() {
         webTestClient.get()
-                .uri("/api/reports/status-distribution")
+                .uri("/api/v1/reports/status-distribution")
                 .header(HttpHeaders.AUTHORIZATION, bearer("manager-token"))
                 .exchange()
                 .expectStatus().is5xxServerError();
 
         webTestClient.get()
-                .uri("/api/sla/compliance")
+                .uri("/api/v1/sla/compliance")
                 .header(HttpHeaders.AUTHORIZATION, bearer("manager-token"))
                 .exchange()
                 .expectStatus().is5xxServerError();
@@ -135,7 +135,7 @@ class GatewaySecurityConfigTests {
     @Test
     void managerRealmRoleClaimCanReachReportRoute() {
         webTestClient.get()
-                .uri("/api/reports/status-distribution")
+                .uri("/api/v1/reports/status-distribution")
                 .header(HttpHeaders.AUTHORIZATION, bearer("manager-token"))
                 .exchange()
                 .expectStatus().is5xxServerError();
@@ -144,7 +144,7 @@ class GatewaySecurityConfigTests {
     @Test
     void customerRoleCannotReachManagerReportRoute() {
         webTestClient.get()
-                .uri("/api/reports/status-distribution")
+                .uri("/api/v1/reports/status-distribution")
                 .header(HttpHeaders.AUTHORIZATION, bearer("customer-token"))
                 .exchange()
                 .expectStatus().isForbidden();
@@ -153,7 +153,7 @@ class GatewaySecurityConfigTests {
     @Test
     void customerRoleCannotReachOrganizationRoutes() {
         webTestClient.get()
-                .uri("/api/organization/teams")
+                .uri("/api/v1/organization/teams")
                 .header(HttpHeaders.AUTHORIZATION, bearer("customer-token"))
                 .exchange()
                 .expectStatus().isForbidden();
@@ -162,10 +162,18 @@ class GatewaySecurityConfigTests {
     @Test
     void managerRoleCannotReachAgentOperationRoute() {
         webTestClient.get()
-                .uri("/api/agent/tickets/queue")
+                .uri("/api/v1/agent/tickets/queue")
                 .header(HttpHeaders.AUTHORIZATION, bearer("manager-token"))
                 .exchange()
                 .expectStatus().isForbidden();
+    }
+
+    @Test
+    void legacyUnversionedApiRoutesRemainProtectedDuringMigration() {
+        webTestClient.get()
+                .uri("/api/tickets")
+                .exchange()
+                .expectStatus().isUnauthorized();
     }
 
     private static String bearer(String token) {

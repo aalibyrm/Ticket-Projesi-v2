@@ -27,7 +27,7 @@ function renderPage() {
 describe("ManagerReportsPage", () => {
   it("renders manager reports from REST APIs", async () => {
     server.use(
-      http.get("*/api/reports/tickets/status-distribution", () =>
+      http.get("*/api/v1/reports/tickets/status-distribution", () =>
         HttpResponse.json({
           counts: [
             { count: 5, status: "NEW" },
@@ -51,7 +51,7 @@ describe("ManagerReportsPage", () => {
           totalOpenTickets: 12,
         }),
       ),
-      http.get("*/api/reports/tickets/closed", () =>
+      http.get("*/api/v1/reports/tickets/closed", () =>
         HttpResponse.json({
           averageResolutionMinutes: 180,
           dailyCounts: [
@@ -68,7 +68,7 @@ describe("ManagerReportsPage", () => {
           totalClosedTickets: 5,
         }),
       ),
-      http.get("*/api/reports/agents/performance", () =>
+      http.get("*/api/v1/reports/agents/performance", () =>
         HttpResponse.json({
           generatedAt: "2026-06-02T08:02:00Z",
           rows: [
@@ -82,7 +82,7 @@ describe("ManagerReportsPage", () => {
           ],
         }),
       ),
-      http.get("*/api/reports/sla/compliance", () =>
+      http.get("*/api/v1/reports/sla/compliance", () =>
         HttpResponse.json({
           activeTicketCount: 12,
           atRiskTicketCount: 2,

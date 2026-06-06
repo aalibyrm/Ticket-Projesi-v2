@@ -18,30 +18,66 @@ spring:
             - RemoveRequestHeader=Set-Cookie
             - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
           routes:
+            - id: ticket-service-agent-v1
+              uri: ${TICKET_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/api/v1/agent/tickets,/api/v1/agent/tickets/**
+              filters:
+                - RewritePath=/api/v1/(?<segment>.*), /api/$\{segment}
+            - id: ticket-service-v1
+              uri: ${TICKET_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/api/v1/tickets,/api/v1/tickets/**,/api/v1/products,/api/v1/products/**,/api/v1/ticket-topics,/api/v1/ticket-topics/**,/api/v1/organization,/api/v1/organization/**
+              filters:
+                - RewritePath=/api/v1/(?<segment>.*), /api/$\{segment}
+            - id: file-service-v1
+              uri: ${FILE_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/api/v1/files,/api/v1/files/**
+              filters:
+                - RewritePath=/api/v1/(?<segment>.*), /api/$\{segment}
+            - id: workflow-sla-service-v1
+              uri: ${WORKFLOW_SLA_SERVICE_URL:http://localhost:8083}
+              predicates:
+                - Path=/api/v1/workflows,/api/v1/workflows/**,/api/v1/sla,/api/v1/sla/**
+              filters:
+                - RewritePath=/api/v1/(?<segment>.*), /api/$\{segment}
+            - id: notification-service-v1
+              uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8084}
+              predicates:
+                - Path=/api/v1/notifications,/api/v1/notifications/**
+              filters:
+                - RewritePath=/api/v1/(?<segment>.*), /api/$\{segment}
+            - id: reporting-service-v1
+              uri: ${REPORTING_SERVICE_URL:http://localhost:8085}
+              predicates:
+                - Path=/api/v1/reports,/api/v1/reports/**
+              filters:
+                - RewritePath=/api/v1/(?<segment>.*), /api/$\{segment}
             - id: ticket-service-agent
               uri: ${TICKET_SERVICE_URL:http://localhost:8081}
               predicates:
-                - Path=/api/agent/tickets/**
+                - Path=/api/agent/tickets,/api/agent/tickets/**
             - id: ticket-service
               uri: ${TICKET_SERVICE_URL:http://localhost:8081}
               predicates:
-                - Path=/api/tickets/**,/api/products/**,/api/ticket-topics,/api/ticket-topics/**,/api/organization/**
+                - Path=/api/tickets,/api/tickets/**,/api/products,/api/products/**,/api/ticket-topics,/api/ticket-topics/**,/api/organization,/api/organization/**
             - id: file-service
               uri: ${FILE_SERVICE_URL:http://localhost:8082}
               predicates:
-                - Path=/api/files/**
+                - Path=/api/files,/api/files/**
             - id: workflow-sla-service
               uri: ${WORKFLOW_SLA_SERVICE_URL:http://localhost:8083}
               predicates:
-                - Path=/api/workflows/**,/api/sla/**
+                - Path=/api/workflows,/api/workflows/**,/api/sla,/api/sla/**
             - id: notification-service
               uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8084}
               predicates:
-                - Path=/api/notifications/**
+                - Path=/api/notifications,/api/notifications/**
             - id: reporting-service
               uri: ${REPORTING_SERVICE_URL:http://localhost:8085}
               predicates:
-                - Path=/api/reports/**
+                - Path=/api/reports,/api/reports/**
 
 app:
   cors:
