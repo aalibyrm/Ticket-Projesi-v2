@@ -25,9 +25,13 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import com.ticketmanagement.event.EventEnvelope;
+import com.ticketmanagement.event.EventType;
+import com.ticketmanagement.event.ticket.TicketCreatedPayload;
 import com.ticketmanagement.notification.application.EmailDeliveryService;
 import com.ticketmanagement.notification.domain.EmailDeliveryStatus;
 import com.ticketmanagement.notification.domain.EmailTemplateKey;
+import com.ticketmanagement.notification.infrastructure.kafka.TicketEventKafkaConsumer;
 import com.ticketmanagement.notification.infrastructure.persistence.EmailDeliveryEntity;
 import com.ticketmanagement.notification.infrastructure.persistence.EmailDeliveryJpaRepository;
 
@@ -63,6 +67,9 @@ class NotificationEmailPipelineIntegrationTests {
 
     @Autowired
     private EmailDeliveryJpaRepository emailDeliveryRepository;
+
+    @Autowired
+    private TicketEventKafkaConsumer ticketEventKafkaConsumer;
 
     @DynamicPropertySource
     static void configureMailpit(DynamicPropertyRegistry registry) {
@@ -115,6 +122,40 @@ class NotificationEmailPipelineIntegrationTests {
                 .contains("Ticket")
                 .contains("TCK-3201")
                 .doesNotContain("<script>");
+    }
+
+    @Test
+    void ticketCreatedNotificationEventEnqueuesAndSendsEmailToMailpit() throws Exception {
+        UUID ticketId = UUID.randomUUID();
+        UUID customerId = UUID.randomUUID();
+        EventEnvelope<TicketCreatedPayload> envelope = EventEnvelope.of(
+                EventType.TICKET_CREATED,
+                customerId,
+                ticketId,
+                new TicketCreatedPayload(
+                        ticketId,
+                        "TCK-8801",
+                        customerId,
+                        UUID.randomUUID(),
+                        "MOBILE_APP",
+                        "Mobile App",
+                        UUID.randomUUID(),
+                        "FINANCE_OPERATIONS",
+                        "Finance Operations",
+                        "HIGH",
+                        "NEW"));
+
+        boolean processed = ticketEventKafkaConsumer.handleTicketEvent(objectMapper.writeValueAsString(envelope));
+        int sentCount = emailDeliveryService.processDueDeliveries();
+
+        JsonNode latestMessage = waitForLatestMailpitMessage();
+        assertThat(processed).isTrue();
+        assertThat(sentCount).isEqualTo(1);
+        assertThat(emailDeliveryRepository.findAll()).hasSize(1);
+        assertThat(latestMessage.path("Subject").asText()).isEqualTo("Ticket TCK-8801 was created");
+        assertThat(latestMessage.path("To").toString()).contains("user-" + customerId.toString().substring(0, 8));
+        assertThat(latestMessage.path("Text").asText()).contains("Ticket TCK-8801 was created.");
+        assertThat(latestMessage.path("HTML").asText()).contains("Open ticket");
     }
 
     private static Map<String, Object> templateModel() {

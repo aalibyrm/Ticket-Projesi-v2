@@ -60,6 +60,8 @@ app:
   security:
     jwt:
       enabled: ${NOTIFICATION_SERVICE_JWT_ENABLED:true}
+  web:
+    base-url: ${WEB_APP_BASE_URL:http://localhost:5173}
   email:
     sender:
       from-address: ${NOTIFICATION_EMAIL_FROM:no-reply@ticket.local}

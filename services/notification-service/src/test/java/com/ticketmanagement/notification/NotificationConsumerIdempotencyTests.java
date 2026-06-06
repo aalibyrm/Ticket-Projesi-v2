@@ -54,6 +54,7 @@ class NotificationConsumerIdempotencyTests {
     @BeforeEach
     void cleanNotificationData() {
         reset(notificationLiveUpdateService);
+        jdbcTemplate.update("delete from notification_schema.email_deliveries");
         jdbcTemplate.update("delete from notification_schema.notifications");
         jdbcTemplate.update("delete from notification_schema.processed_events");
     }
@@ -82,6 +83,9 @@ class NotificationConsumerIdempotencyTests {
         assertThat(duplicateDeliveryProcessed).isFalse();
         assertThat(processedEventCount()).isEqualTo(1);
         assertThat(notificationCount()).isEqualTo(1);
+        assertThat(emailDeliveryCount()).isEqualTo(1);
+        assertThat(emailTemplateKeyFor(envelope.eventId())).isEqualTo("ticket-created");
+        assertThat(emailRecipientFor(envelope.eventId())).isEqualTo(fallbackEmail(customerId));
         assertThat(notificationCountFor(envelope.eventId())).isEqualTo(1);
         assertThat(notificationRecipientFor(envelope.eventId())).isEqualTo(customerId.toString());
         verify(notificationLiveUpdateService, times(1)).publishNotificationCreated(argThat(notification ->
@@ -115,6 +119,9 @@ class NotificationConsumerIdempotencyTests {
         assertThat(duplicateDeliveryProcessed).isFalse();
         assertThat(processedEventCount()).isEqualTo(1);
         assertThat(notificationCount()).isEqualTo(1);
+        assertThat(emailDeliveryCount()).isEqualTo(1);
+        assertThat(emailTemplateKeyFor(envelope.eventId())).isEqualTo("ticket-external-comment-added");
+        assertThat(emailRecipientFor(envelope.eventId())).isEqualTo(fallbackEmail(customerId));
         assertThat(notificationCountFor(envelope.eventId())).isEqualTo(1);
         assertThat(notificationRecipientFor(envelope.eventId())).isEqualTo(customerId.toString());
         assertThat(notificationTypeFor(envelope.eventId())).isEqualTo("TICKET_EXTERNAL_COMMENT_ADDED");
@@ -145,6 +152,9 @@ class NotificationConsumerIdempotencyTests {
 
         assertThat(processed).isTrue();
         assertThat(notificationCount()).isEqualTo(1);
+        assertThat(emailDeliveryCount()).isEqualTo(1);
+        assertThat(emailTemplateKeyFor(envelope.eventId())).isEqualTo("ticket-external-comment-added");
+        assertThat(emailRecipientFor(envelope.eventId())).isEqualTo(fallbackEmail(agentId));
         assertThat(notificationRecipientFor(envelope.eventId())).isEqualTo(agentId.toString());
         verify(notificationLiveUpdateService, times(1)).publishNotificationCreated(argThat(notification ->
                 notification.getSourceEventId().equals(envelope.eventId())
@@ -157,6 +167,10 @@ class NotificationConsumerIdempotencyTests {
 
     private Integer notificationCount() {
         return jdbcTemplate.queryForObject("select count(*) from notification_schema.notifications", Integer.class);
+    }
+
+    private Integer emailDeliveryCount() {
+        return jdbcTemplate.queryForObject("select count(*) from notification_schema.email_deliveries", Integer.class);
     }
 
     private Integer notificationCountFor(UUID eventId) {
@@ -178,5 +192,23 @@ class NotificationConsumerIdempotencyTests {
                 "select type from notification_schema.notifications where source_event_id = ?",
                 String.class,
                 eventId);
+    }
+
+    private String emailTemplateKeyFor(UUID eventId) {
+        return jdbcTemplate.queryForObject(
+                "select template_key from notification_schema.email_deliveries where source_event_id = ?",
+                String.class,
+                eventId);
+    }
+
+    private String emailRecipientFor(UUID eventId) {
+        return jdbcTemplate.queryForObject(
+                "select recipient_email from notification_schema.email_deliveries where source_event_id = ?",
+                String.class,
+                eventId);
+    }
+
+    private static String fallbackEmail(UUID actorId) {
+        return "user-" + actorId.toString().substring(0, 8) + "@example.local";
     }
 }
