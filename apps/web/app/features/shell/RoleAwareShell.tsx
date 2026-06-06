@@ -6,6 +6,7 @@ import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import {
+  Badge,
   Box,
   IconButton,
   Stack,
@@ -20,6 +21,7 @@ import {
   selectAuthUser,
   selectUserRoles,
 } from "~/features/auth/authSlice";
+import { useNotifications } from "~/features/customer/customerQueries";
 import { useAppSelector } from "~/shared/store/hooks";
 import { tmTokens } from "~/shared/theme/tmTokens";
 
@@ -66,9 +68,14 @@ const navigationItems: NavigationItem[] = [
 export function RoleAwareShell({ children }: { children: ReactNode }) {
   const user = useAppSelector(selectAuthUser);
   const roles = useAppSelector(selectUserRoles);
+  const unreadNotifications = useNotifications(false);
   const visibleItems = navigationItems.filter((item) =>
     item.roles.some((role) => roles.includes(role)),
   );
+  const unreadNotificationCount = unreadNotifications.data?.length ?? 0;
+  const notificationButtonLabel = unreadNotificationCount > 0
+    ? `Bildirimler, ${unreadNotificationCount} okunmamis`
+    : "Bildirimler";
 
   return (
     <Box sx={{ backgroundColor: tmTokens.colors.background, minHeight: "100vh" }}>
@@ -169,9 +176,23 @@ export function RoleAwareShell({ children }: { children: ReactNode }) {
             SupportHub
           </Typography>
           <Stack alignItems="center" direction="row" spacing={1.5}>
-            <Tooltip title="Bildirimler">
-              <IconButton aria-label="Bildirimler">
-                <NotificationsNoneOutlinedIcon />
+            <Tooltip title={notificationButtonLabel}>
+              <IconButton aria-label={notificationButtonLabel} component={NavLink} to="/notifications">
+                <Badge
+                  badgeContent={unreadNotificationCount}
+                  color="error"
+                  invisible={unreadNotificationCount === 0}
+                  max={99}
+                  sx={{
+                    "& .MuiBadge-badge": {
+                      backgroundColor: tmTokens.colors.primaryContainer,
+                      minWidth: 18,
+                      ...tmTokens.typography.labelSm,
+                    },
+                  }}
+                >
+                  <NotificationsNoneOutlinedIcon />
+                </Badge>
               </IconButton>
             </Tooltip>
             <Tooltip title="Yardim">
