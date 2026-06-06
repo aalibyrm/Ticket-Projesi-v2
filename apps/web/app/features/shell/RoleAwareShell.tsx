@@ -35,7 +35,7 @@ const navigationItems: NavigationItem[] = [
     icon: <ConfirmationNumberOutlinedIcon />,
     label: "Taleplerim",
     path: "/tickets",
-    roles: ["CUSTOMER", "AGENT", "MANAGER", "ADMIN"],
+    roles: ["CUSTOMER", "ADMIN"],
   },
   {
     icon: <AddCircleOutlineIcon />,

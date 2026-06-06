@@ -32,7 +32,7 @@ export async function login() {
 
   const keycloak = await getKeycloakClient();
   await keycloak.login({
-    redirectUri: `${window.location.origin}/tickets`,
+    redirectUri: window.location.origin,
   });
 }
 

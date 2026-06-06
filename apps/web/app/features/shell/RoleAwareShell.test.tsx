@@ -43,13 +43,21 @@ function renderShell(roles: AppRole[]) {
 }
 
 describe("RoleAwareShell", () => {
-  it("shows manager navigation without customer-only create action", () => {
+  it("shows manager navigation without customer-only ticket actions", () => {
     renderShell(["MANAGER"]);
 
     expect(screen.getByLabelText("Raporlar")).toBeInTheDocument();
-    expect(screen.getByLabelText("Taleplerim")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Taleplerim")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Yeni talep")).not.toBeInTheDocument();
     expect(screen.getByText("SupportHub")).toBeInTheDocument();
     expect(screen.getByLabelText("Kullanici: Manager User")).toBeInTheDocument();
+  });
+
+  it("shows agent navigation without customer ticket list action", () => {
+    renderShell(["AGENT"]);
+
+    expect(screen.getByLabelText("Temsilci paneli")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Taleplerim")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Yeni talep")).not.toBeInTheDocument();
   });
 });
