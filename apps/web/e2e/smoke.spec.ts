@@ -272,6 +272,7 @@ async function registerDemoApi(page: Page, state: ReturnType<typeof createDemoSt
         id: "10000000-0000-4000-8000-000000000202",
         message: "E-posta kuyruya alindi ve musteri bilgilendirilecek.",
         read: false,
+        ticketId,
         title: "Ticket guncellendi",
         type: "TICKET_STATUS_CHANGED",
       });
@@ -286,6 +287,7 @@ async function registerDemoApi(page: Page, state: ReturnType<typeof createDemoSt
         id: "10000000-0000-4000-8000-000000000203",
         message: "E-posta kuyruya alindi ve yeni yanit bildirimi olustu.",
         read: false,
+        ticketId,
         title: "Ticket guncellendi",
         type: "TICKET_EXTERNAL_COMMENT_ADDED",
       });

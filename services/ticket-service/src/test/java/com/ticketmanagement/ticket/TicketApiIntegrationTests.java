@@ -483,6 +483,7 @@ class TicketApiIntegrationTests {
         assertThat(outboxCountFor(created.id())).isEqualTo(6);
         assertLifecycleEvent(created.id(), "ticket.created", "status", "NEW");
         assertLifecycleEvent(created.id(), "ticket.status-changed", "newStatus", "IN_PROGRESS");
+        assertLifecycleEvent(created.id(), "ticket.status-changed", "customerId", customerId.toString());
         assertLifecycleEvent(created.id(), "ticket.assigned", "assigneeId", agentId.toString());
         assertLifecycleEvent(created.id(), "ticket.external-comment-added", "commentId", commentResponse.getBody().id().toString());
         assertLifecycleEvent(created.id(), "ticket.worklog-added", "worklogId", worklogResponse.getBody().id().toString());
@@ -729,6 +730,9 @@ class TicketApiIntegrationTests {
                                payload ->> 'ticketNumber' as payload_ticket_number,
                                payload ->> 'priority' as payload_priority,
                                payload ->> 'status' as payload_status,
+                               payload ->> 'assignedTeamId' as payload_assigned_team_id,
+                               payload ->> 'assignedTeamCode' as payload_assigned_team_code,
+                               payload ->> 'routedSupportActorId' as payload_routed_support_actor_id,
                                payload::text as payload_json
                         from ticket_schema.outbox_events
                         where aggregate_id = ?
@@ -748,6 +752,9 @@ class TicketApiIntegrationTests {
         assertThat(outbox.get("payload_ticket_number")).isEqualTo(created.ticketNumber());
         assertThat(outbox.get("payload_priority")).isEqualTo("HIGH");
         assertThat(outbox.get("payload_status")).isEqualTo("NEW");
+        assertThat(outbox.get("payload_assigned_team_id")).isEqualTo(WEB_APP_SUPPORT_TEAM_ID.toString());
+        assertThat(outbox.get("payload_assigned_team_code")).isEqualTo("WEB_APP_SUPPORT");
+        assertThat(outbox.get("payload_routed_support_actor_id")).isEqualTo(WEB_APP_SUPPORT_MEMBER_ID.toString());
         assertThat(outbox.get("payload_json").toString()).doesNotContain(created.summary());
         assertThat(outbox.get("payload_json").toString()).doesNotContain(created.description());
     }

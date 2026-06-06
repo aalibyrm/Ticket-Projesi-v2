@@ -8,8 +8,17 @@ import com.ticketmanagement.event.EventPayload;
 public record TicketStatusChangedPayload(
         UUID ticketId,
         String ticketNumber,
+        UUID customerId,
         String previousStatus,
         String newStatus) implements EventPayload {
+
+    public TicketStatusChangedPayload(
+            UUID ticketId,
+            String ticketNumber,
+            String previousStatus,
+            String newStatus) {
+        this(ticketId, ticketNumber, null, previousStatus, newStatus);
+    }
 
     public TicketStatusChangedPayload {
         ticketId = Objects.requireNonNull(ticketId, "ticketId must not be null");

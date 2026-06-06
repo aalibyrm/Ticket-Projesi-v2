@@ -33,6 +33,9 @@ public class NotificationEntity {
     @Column(nullable = false, updatable = false)
     private UUID recipientId;
 
+    @Column(updatable = false)
+    private UUID ticketId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 60)
     private NotificationType type;
@@ -49,14 +52,20 @@ public class NotificationEntity {
     @Column(nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
-    public static NotificationEntity ticketCreated(UUID id, UUID sourceEventId, UUID recipientId, String ticketNumber) {
+    public static NotificationEntity ticketCreated(
+            UUID id,
+            UUID sourceEventId,
+            UUID recipientId,
+            UUID ticketId,
+            String ticketNumber) {
         NotificationEntity notification = new NotificationEntity();
         notification.id = id;
         notification.sourceEventId = sourceEventId;
         notification.recipientId = recipientId;
+        notification.ticketId = ticketId;
         notification.type = NotificationType.TICKET_CREATED;
-        notification.title = "Ticket created";
-        notification.message = "Ticket " + ticketNumber + " was created.";
+        notification.title = "New support ticket";
+        notification.message = "Ticket " + ticketNumber + " was created and routed to support.";
         notification.read = false;
         return notification;
     }
@@ -65,14 +74,35 @@ public class NotificationEntity {
             UUID id,
             UUID sourceEventId,
             UUID recipientId,
+            UUID ticketId,
             String ticketNumber) {
         NotificationEntity notification = new NotificationEntity();
         notification.id = id;
         notification.sourceEventId = sourceEventId;
         notification.recipientId = recipientId;
+        notification.ticketId = ticketId;
         notification.type = NotificationType.TICKET_EXTERNAL_COMMENT_ADDED;
         notification.title = "New ticket message";
         notification.message = "Ticket " + ticketNumber + " has a new message.";
+        notification.read = false;
+        return notification;
+    }
+
+    public static NotificationEntity statusChanged(
+            UUID id,
+            UUID sourceEventId,
+            UUID recipientId,
+            UUID ticketId,
+            String ticketNumber,
+            String newStatus) {
+        NotificationEntity notification = new NotificationEntity();
+        notification.id = id;
+        notification.sourceEventId = sourceEventId;
+        notification.recipientId = recipientId;
+        notification.ticketId = ticketId;
+        notification.type = NotificationType.TICKET_STATUS_CHANGED;
+        notification.title = "Ticket status changed";
+        notification.message = "Ticket " + ticketNumber + " status changed to " + newStatus + ".";
         notification.read = false;
         return notification;
     }

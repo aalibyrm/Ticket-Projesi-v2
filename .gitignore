@@ -39,7 +39,9 @@ logs/
 !logs/
 logs/*
 !logs/.gitkeep
+**/logs/*.log.gz
 *.log
+test-results/
 
 # Docker / local runtime
 .docker/

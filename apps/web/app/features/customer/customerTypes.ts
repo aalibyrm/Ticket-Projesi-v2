@@ -86,6 +86,7 @@ export interface NotificationResponse {
   id: string;
   message: string;
   read: boolean;
+  ticketId?: string | null;
   title: string;
   type: string;
 }

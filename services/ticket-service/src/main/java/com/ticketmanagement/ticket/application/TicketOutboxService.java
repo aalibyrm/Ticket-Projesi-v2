@@ -18,6 +18,7 @@ import com.ticketmanagement.event.ticket.TicketCreatedPayload;
 import com.ticketmanagement.event.ticket.TicketStatusChangedPayload;
 import com.ticketmanagement.event.ticket.WorklogAddedPayload;
 import com.ticketmanagement.ticket.infrastructure.persistence.DepartmentEntity;
+import com.ticketmanagement.ticket.infrastructure.persistence.SupportTeamEntity;
 import com.ticketmanagement.ticket.infrastructure.outbox.OutboxEventEntity;
 import com.ticketmanagement.ticket.infrastructure.outbox.OutboxEventJpaRepository;
 import com.ticketmanagement.ticket.infrastructure.persistence.TicketCommentEntity;
@@ -35,7 +36,11 @@ public class TicketOutboxService {
 
     // Yeni ticket olusturma eventini mevcut transaction icinde outbox'a kaydeder.
     @Transactional(propagation = Propagation.MANDATORY)
-    public void saveTicketCreated(TicketEntity ticket, UUID actorId) {
+    public void saveTicketCreated(
+            TicketEntity ticket,
+            SupportTeamEntity assignedTeam,
+            UUID routedSupportActorId,
+            UUID actorId) {
         TicketTopicEntity topic = ticket.getTopic();
         DepartmentEntity routedDepartment = ticket.getRoutedDepartment();
         TicketCreatedPayload payload = new TicketCreatedPayload(
@@ -48,6 +53,10 @@ public class TicketOutboxService {
                 routedDepartment == null ? null : routedDepartment.getId(),
                 routedDepartment == null ? null : routedDepartment.getCode(),
                 routedDepartment == null ? null : routedDepartment.getName(),
+                assignedTeam == null ? ticket.getAssignedTeamId() : assignedTeam.getId(),
+                assignedTeam == null ? null : assignedTeam.getCode(),
+                assignedTeam == null ? null : assignedTeam.getName(),
+                routedSupportActorId,
                 ticket.getPriority().name(),
                 ticket.getStatus().name());
         EventEnvelope<TicketCreatedPayload> envelope = EventEnvelope.of(
@@ -70,6 +79,7 @@ public class TicketOutboxService {
         TicketStatusChangedPayload payload = new TicketStatusChangedPayload(
                 ticket.getId(),
                 ticket.getTicketNumber(),
+                ticket.getCustomerId(),
                 previousStatus.name(),
                 newStatus.name());
         saveEvent(EventType.TICKET_STATUS_CHANGED, actorId, ticket.getId(), payload);

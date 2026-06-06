@@ -28,6 +28,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.ticketmanagement.event.EventEnvelope;
 import com.ticketmanagement.event.EventType;
 import com.ticketmanagement.event.ticket.TicketCreatedPayload;
+import com.ticketmanagement.event.ticket.TicketStatusChangedPayload;
 import com.ticketmanagement.notification.application.EmailDeliveryService;
 import com.ticketmanagement.notification.domain.EmailDeliveryStatus;
 import com.ticketmanagement.notification.domain.EmailTemplateKey;
@@ -128,6 +129,7 @@ class NotificationEmailPipelineIntegrationTests {
     void ticketCreatedNotificationEventEnqueuesAndSendsEmailToMailpit() throws Exception {
         UUID ticketId = UUID.randomUUID();
         UUID customerId = UUID.randomUUID();
+        UUID supportRecipientId = UUID.fromString("40000000-0000-0000-0000-000000000008");
         EventEnvelope<TicketCreatedPayload> envelope = EventEnvelope.of(
                 EventType.TICKET_CREATED,
                 customerId,
@@ -142,6 +144,10 @@ class NotificationEmailPipelineIntegrationTests {
                         UUID.randomUUID(),
                         "FINANCE_OPERATIONS",
                         "Finance Operations",
+                        UUID.randomUUID(),
+                        "PAYMENT_OPERATIONS",
+                        "Payment Operations",
+                        supportRecipientId,
                         "HIGH",
                         "NEW"));
 
@@ -153,8 +159,37 @@ class NotificationEmailPipelineIntegrationTests {
         assertThat(sentCount).isEqualTo(1);
         assertThat(emailDeliveryRepository.findAll()).hasSize(1);
         assertThat(latestMessage.path("Subject").asText()).isEqualTo("Ticket TCK-8801 was created");
-        assertThat(latestMessage.path("To").toString()).contains("user-" + customerId.toString().substring(0, 8));
+        assertThat(latestMessage.path("To").toString()).contains("agent.payment@example.local");
         assertThat(latestMessage.path("Text").asText()).contains("Ticket TCK-8801 was created.");
+        assertThat(latestMessage.path("HTML").asText()).contains("Open ticket");
+    }
+
+    @Test
+    void ticketStatusChangedNotificationEventEnqueuesAndSendsEmailToCustomerMailpit() throws Exception {
+        UUID ticketId = UUID.randomUUID();
+        UUID customerId = UUID.fromString("80000000-0000-0000-0000-000000000001");
+        UUID agentId = UUID.randomUUID();
+        EventEnvelope<TicketStatusChangedPayload> envelope = EventEnvelope.of(
+                EventType.TICKET_STATUS_CHANGED,
+                agentId,
+                ticketId,
+                new TicketStatusChangedPayload(
+                        ticketId,
+                        "TCK-8802",
+                        customerId,
+                        "NEW",
+                        "IN_PROGRESS"));
+
+        boolean processed = ticketEventKafkaConsumer.handleTicketEvent(objectMapper.writeValueAsString(envelope));
+        int sentCount = emailDeliveryService.processDueDeliveries();
+
+        JsonNode latestMessage = waitForLatestMailpitMessage();
+        assertThat(processed).isTrue();
+        assertThat(sentCount).isEqualTo(1);
+        assertThat(emailDeliveryRepository.findAll()).hasSize(1);
+        assertThat(latestMessage.path("Subject").asText()).isEqualTo("Ticket TCK-8802 status changed to IN_PROGRESS");
+        assertThat(latestMessage.path("To").toString()).contains("customer.user@example.local");
+        assertThat(latestMessage.path("Text").asText()).contains("Previous status: NEW");
         assertThat(latestMessage.path("HTML").asText()).contains("Open ticket");
     }
 

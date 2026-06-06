@@ -24,6 +24,7 @@ import com.ticketmanagement.event.EventEnvelope;
 import com.ticketmanagement.event.EventType;
 import com.ticketmanagement.event.ticket.ExternalCommentAddedPayload;
 import com.ticketmanagement.event.ticket.TicketCreatedPayload;
+import com.ticketmanagement.event.ticket.TicketStatusChangedPayload;
 import com.ticketmanagement.notification.application.NotificationLiveUpdateService;
 import com.ticketmanagement.notification.infrastructure.kafka.TicketEventKafkaConsumer;
 
@@ -62,6 +63,7 @@ class NotificationConsumerIdempotencyTests {
     @Test
     void duplicateTicketCreatedEventProducesOneNotification() throws Exception {
         UUID customerId = UUID.randomUUID();
+        UUID supportRecipientId = UUID.randomUUID();
         UUID ticketId = UUID.randomUUID();
         EventEnvelope<TicketCreatedPayload> envelope = EventEnvelope.of(
                 EventType.TICKET_CREATED,
@@ -72,6 +74,15 @@ class NotificationConsumerIdempotencyTests {
                         "TCK-2001",
                         customerId,
                         UUID.randomUUID(),
+                        "PAYMENT_FAILURE",
+                        "Payment Failure",
+                        UUID.randomUUID(),
+                        "FINANCE_OPERATIONS",
+                        "Finance Operations",
+                        UUID.randomUUID(),
+                        "PAYMENT_OPERATIONS",
+                        "Payment Operations",
+                        supportRecipientId,
                         "HIGH",
                         "NEW"));
         String message = objectMapper.writeValueAsString(envelope);
@@ -85,12 +96,14 @@ class NotificationConsumerIdempotencyTests {
         assertThat(notificationCount()).isEqualTo(1);
         assertThat(emailDeliveryCount()).isEqualTo(1);
         assertThat(emailTemplateKeyFor(envelope.eventId())).isEqualTo("ticket-created");
-        assertThat(emailRecipientFor(envelope.eventId())).isEqualTo(fallbackEmail(customerId));
+        assertThat(emailRecipientFor(envelope.eventId())).isEqualTo(fallbackEmail(supportRecipientId));
         assertThat(notificationCountFor(envelope.eventId())).isEqualTo(1);
-        assertThat(notificationRecipientFor(envelope.eventId())).isEqualTo(customerId.toString());
+        assertThat(notificationRecipientFor(envelope.eventId())).isEqualTo(supportRecipientId.toString());
+        assertThat(notificationTicketIdFor(envelope.eventId())).isEqualTo(ticketId.toString());
         verify(notificationLiveUpdateService, times(1)).publishNotificationCreated(argThat(notification ->
                 notification.getSourceEventId().equals(envelope.eventId())
-                        && notification.getRecipientId().equals(customerId)));
+                        && notification.getRecipientId().equals(supportRecipientId)
+                        && notification.getTicketId().equals(ticketId)));
     }
 
     @Test
@@ -124,10 +137,12 @@ class NotificationConsumerIdempotencyTests {
         assertThat(emailRecipientFor(envelope.eventId())).isEqualTo(fallbackEmail(customerId));
         assertThat(notificationCountFor(envelope.eventId())).isEqualTo(1);
         assertThat(notificationRecipientFor(envelope.eventId())).isEqualTo(customerId.toString());
+        assertThat(notificationTicketIdFor(envelope.eventId())).isEqualTo(ticketId.toString());
         assertThat(notificationTypeFor(envelope.eventId())).isEqualTo("TICKET_EXTERNAL_COMMENT_ADDED");
         verify(notificationLiveUpdateService, times(1)).publishNotificationCreated(argThat(notification ->
                 notification.getSourceEventId().equals(envelope.eventId())
-                        && notification.getRecipientId().equals(customerId)));
+                        && notification.getRecipientId().equals(customerId)
+                        && notification.getTicketId().equals(ticketId)));
     }
 
     @Test
@@ -156,9 +171,47 @@ class NotificationConsumerIdempotencyTests {
         assertThat(emailTemplateKeyFor(envelope.eventId())).isEqualTo("ticket-external-comment-added");
         assertThat(emailRecipientFor(envelope.eventId())).isEqualTo(fallbackEmail(agentId));
         assertThat(notificationRecipientFor(envelope.eventId())).isEqualTo(agentId.toString());
+        assertThat(notificationTicketIdFor(envelope.eventId())).isEqualTo(ticketId.toString());
         verify(notificationLiveUpdateService, times(1)).publishNotificationCreated(argThat(notification ->
                 notification.getSourceEventId().equals(envelope.eventId())
-                        && notification.getRecipientId().equals(agentId)));
+                        && notification.getRecipientId().equals(agentId)
+                        && notification.getTicketId().equals(ticketId)));
+    }
+
+    @Test
+    void statusChangedEventProducesCustomerNotificationAndEmailOnce() throws Exception {
+        UUID customerId = UUID.randomUUID();
+        UUID agentId = UUID.randomUUID();
+        UUID ticketId = UUID.randomUUID();
+        EventEnvelope<TicketStatusChangedPayload> envelope = EventEnvelope.of(
+                EventType.TICKET_STATUS_CHANGED,
+                agentId,
+                ticketId,
+                new TicketStatusChangedPayload(
+                        ticketId,
+                        "TCK-2004",
+                        customerId,
+                        "NEW",
+                        "IN_PROGRESS"));
+        String message = objectMapper.writeValueAsString(envelope);
+
+        boolean firstDeliveryProcessed = ticketEventKafkaConsumer.handleTicketEvent(message);
+        boolean duplicateDeliveryProcessed = ticketEventKafkaConsumer.handleTicketEvent(message);
+
+        assertThat(firstDeliveryProcessed).isTrue();
+        assertThat(duplicateDeliveryProcessed).isFalse();
+        assertThat(processedEventCount()).isEqualTo(1);
+        assertThat(notificationCount()).isEqualTo(1);
+        assertThat(emailDeliveryCount()).isEqualTo(1);
+        assertThat(emailTemplateKeyFor(envelope.eventId())).isEqualTo("ticket-status-changed");
+        assertThat(emailRecipientFor(envelope.eventId())).isEqualTo(fallbackEmail(customerId));
+        assertThat(notificationRecipientFor(envelope.eventId())).isEqualTo(customerId.toString());
+        assertThat(notificationTicketIdFor(envelope.eventId())).isEqualTo(ticketId.toString());
+        assertThat(notificationTypeFor(envelope.eventId())).isEqualTo("TICKET_STATUS_CHANGED");
+        verify(notificationLiveUpdateService, times(1)).publishNotificationCreated(argThat(notification ->
+                notification.getSourceEventId().equals(envelope.eventId())
+                        && notification.getRecipientId().equals(customerId)
+                        && notification.getTicketId().equals(ticketId)));
     }
 
     private Integer processedEventCount() {
@@ -190,6 +243,13 @@ class NotificationConsumerIdempotencyTests {
     private String notificationTypeFor(UUID eventId) {
         return jdbcTemplate.queryForObject(
                 "select type from notification_schema.notifications where source_event_id = ?",
+                String.class,
+                eventId);
+    }
+
+    private String notificationTicketIdFor(UUID eventId) {
+        return jdbcTemplate.queryForObject(
+                "select ticket_id::text from notification_schema.notifications where source_event_id = ?",
                 String.class,
                 eventId);
     }

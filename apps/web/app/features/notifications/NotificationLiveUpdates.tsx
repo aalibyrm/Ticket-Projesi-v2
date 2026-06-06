@@ -13,6 +13,7 @@ interface NotificationLiveEvent {
   notification?: {
     id: string;
     read: boolean;
+    ticketId?: string | null;
     type: string;
   };
 }
@@ -138,6 +139,14 @@ function handleLiveEvent(event: NotificationLiveEvent, queryClient: ReturnType<t
 
   invalidateNotificationQueries(queryClient);
 
+  if (event.notification?.type === "TICKET_CREATED") {
+    invalidateTicketLists(queryClient);
+  }
+
+  if (event.notification?.type === "TICKET_STATUS_CHANGED") {
+    invalidateTicketWorkspace(queryClient, event.notification.ticketId);
+  }
+
   if (event.notification?.type === "TICKET_EXTERNAL_COMMENT_ADDED") {
     invalidateConversationQueries(queryClient);
   }
@@ -156,6 +165,20 @@ function invalidateConversationQueries(queryClient: ReturnType<typeof useQueryCl
         || isQueryKeyPrefix(query.queryKey, "agent", "ticket"))
       && query.queryKey.includes("comments"),
   });
+  void queryClient.invalidateQueries({ queryKey: customerQueryKeys.tickets });
+  void queryClient.invalidateQueries({ queryKey: agentQueryKeys.tickets });
+}
+
+function invalidateTicketWorkspace(queryClient: ReturnType<typeof useQueryClient>, ticketId?: string | null) {
+  invalidateTicketLists(queryClient);
+  if (!ticketId) {
+    return;
+  }
+  void queryClient.invalidateQueries({ queryKey: customerQueryKeys.ticket(ticketId) });
+  void queryClient.invalidateQueries({ queryKey: agentQueryKeys.ticket(ticketId) });
+}
+
+function invalidateTicketLists(queryClient: ReturnType<typeof useQueryClient>) {
   void queryClient.invalidateQueries({ queryKey: customerQueryKeys.tickets });
   void queryClient.invalidateQueries({ queryKey: agentQueryKeys.tickets });
 }

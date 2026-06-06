@@ -50,7 +50,11 @@ public class TicketCommandService {
                 request.priority() == null ? TicketPriority.MEDIUM : request.priority());
 
         TicketEntity savedTicket = ticketRepository.save(ticket);
-        ticketOutboxService.saveTicketCreated(savedTicket, customerId);
+        ticketOutboxService.saveTicketCreated(
+                savedTicket,
+                routing.team(),
+                routing.supportNotificationRecipientId(),
+                customerId);
         ticketOutboxService.saveTicketAssigned(savedTicket, customerId);
 
         return ticketMapper.toResponse(savedTicket);

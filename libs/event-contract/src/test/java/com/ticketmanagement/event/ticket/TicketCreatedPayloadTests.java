@@ -36,6 +36,8 @@ class TicketCreatedPayloadTests {
         UUID customerId = UUID.randomUUID();
         UUID productId = UUID.randomUUID();
         UUID departmentId = UUID.randomUUID();
+        UUID teamId = UUID.randomUUID();
+        UUID routedSupportActorId = UUID.randomUUID();
 
         TicketCreatedPayload payload = new TicketCreatedPayload(
                 ticketId,
@@ -47,6 +49,10 @@ class TicketCreatedPayloadTests {
                 departmentId,
                 "APPLICATION_SUPPORT",
                 "Application Support",
+                teamId,
+                "WEB_APP_SUPPORT",
+                "Web App Support",
+                routedSupportActorId,
                 "MEDIUM",
                 "NEW");
 
@@ -55,6 +61,10 @@ class TicketCreatedPayloadTests {
         assertEquals(departmentId, payload.routedDepartmentId());
         assertEquals("APPLICATION_SUPPORT", payload.routedDepartmentCode());
         assertEquals("Application Support", payload.routedDepartmentName());
+        assertEquals(teamId, payload.assignedTeamId());
+        assertEquals("WEB_APP_SUPPORT", payload.assignedTeamCode());
+        assertEquals("Web App Support", payload.assignedTeamName());
+        assertEquals(routedSupportActorId, payload.routedSupportActorId());
     }
 
     @Test

@@ -5,6 +5,7 @@ import java.util.UUID;
 
 public record NotificationResponse(
         UUID id,
+        UUID ticketId,
         String type,
         String title,
         String message,

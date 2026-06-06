@@ -93,6 +93,7 @@ class NotificationApiIntegrationTests {
                 .singleElement()
                 .satisfies(notification -> {
                     assertThat(notification.id()).isEqualTo(ownUnread.getId());
+                    assertThat(notification.ticketId()).isEqualTo(ownUnread.getTicketId());
                     assertThat(notification.read()).isFalse();
                 });
         assertThat(readResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -100,6 +101,7 @@ class NotificationApiIntegrationTests {
                 .singleElement()
                 .satisfies(notification -> {
                     assertThat(notification.id()).isEqualTo(ownRead.getId());
+                    assertThat(notification.ticketId()).isEqualTo(ownRead.getTicketId());
                     assertThat(notification.read()).isTrue();
                 });
     }
@@ -159,6 +161,7 @@ class NotificationApiIntegrationTests {
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 recipientId,
+                UUID.randomUUID(),
                 ticketNumber);
     }
 

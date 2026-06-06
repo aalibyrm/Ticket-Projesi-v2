@@ -11,6 +11,7 @@ class NotificationMapper {
     NotificationResponse toResponse(NotificationEntity entity) {
         return new NotificationResponse(
                 entity.getId(),
+                entity.getTicketId(),
                 entity.getType().name(),
                 entity.getTitle(),
                 entity.getMessage(),

@@ -15,6 +15,10 @@ public record TicketCreatedPayload(
         UUID routedDepartmentId,
         String routedDepartmentCode,
         String routedDepartmentName,
+        UUID assignedTeamId,
+        String assignedTeamCode,
+        String assignedTeamName,
+        UUID routedSupportActorId,
         String priority,
         String status) implements EventPayload {
 
@@ -35,6 +39,40 @@ public record TicketCreatedPayload(
                 null,
                 null,
                 null,
+                null,
+                null,
+                null,
+                null,
+                priority,
+                status);
+    }
+
+    public TicketCreatedPayload(
+            UUID ticketId,
+            String ticketNumber,
+            UUID customerId,
+            UUID productId,
+            String topicCode,
+            String topicName,
+            UUID routedDepartmentId,
+            String routedDepartmentCode,
+            String routedDepartmentName,
+            String priority,
+            String status) {
+        this(
+                ticketId,
+                ticketNumber,
+                customerId,
+                productId,
+                topicCode,
+                topicName,
+                routedDepartmentId,
+                routedDepartmentCode,
+                routedDepartmentName,
+                null,
+                null,
+                null,
+                null,
                 priority,
                 status);
     }
@@ -48,6 +86,8 @@ public record TicketCreatedPayload(
         topicName = optionalText(topicName);
         routedDepartmentCode = optionalText(routedDepartmentCode);
         routedDepartmentName = optionalText(routedDepartmentName);
+        assignedTeamCode = optionalText(assignedTeamCode);
+        assignedTeamName = optionalText(assignedTeamName);
         priority = requireText(priority, "priority");
         status = requireText(status, "status");
     }

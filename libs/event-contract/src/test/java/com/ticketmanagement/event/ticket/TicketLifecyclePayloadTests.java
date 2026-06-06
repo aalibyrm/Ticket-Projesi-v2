@@ -12,14 +12,17 @@ class TicketLifecyclePayloadTests {
     @Test
     void createsStatusChangedPayload() {
         UUID ticketId = UUID.randomUUID();
+        UUID customerId = UUID.randomUUID();
 
         TicketStatusChangedPayload payload = new TicketStatusChangedPayload(
                 ticketId,
                 "TCK-1001",
+                customerId,
                 "NEW",
                 "IN_PROGRESS");
 
         assertEquals(ticketId, payload.ticketId());
+        assertEquals(customerId, payload.customerId());
         assertEquals("NEW", payload.previousStatus());
         assertEquals("IN_PROGRESS", payload.newStatus());
     }
