@@ -8,6 +8,7 @@ Backend servisleri Maven monorepo yapisi ile yonetilir.
 - Spring Boot: 3.5.14
 - Spring Cloud: 2025.0.2
 - Lombok: 1.18.46
+- Maven Javadoc Plugin: 3.12.0
 - Build tool: Maven
 
 Spring Boot 4.x mevcut olsa bile bu projede Spring Boot 3.x secildi. Bunun
@@ -46,6 +47,19 @@ Kullanim kurallari:
 
 Bu tercih boilerplate'i azaltir ama entity davranisini kontrolsuz hale
 getirmemek icin sinirli anotasyon kullanimi zorunludur.
+
+## Aggregate Javadocs
+
+Root Maven reactor aggregate Javadocs uretir. Komut:
+
+```powershell
+mvn -DskipTests javadoc:aggregate
+```
+
+Output dizini: `target/reports/apidocs/index.html`.
+
+Javadocs eksik yorum nedeniyle build'i kirmamak icin doclint kapali calisir,
+ancak Java 21 API linkleri ve UTF-8 encoding merkezi parent POM'da tanimlidir.
 
 ## Log4j2
 

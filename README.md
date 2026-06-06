@@ -27,6 +27,16 @@ OpenTelemetry, OpenSearch ve gercek e-posta gonderimi uzerine kurulacaktir.
 - [Frontend Stack](docs/development/frontend-stack.md)
 - [CI](docs/development/ci.md)
 
+## Backend Javadocs
+
+Aggregate backend Javadocs are generated from the root Maven reactor:
+
+```powershell
+mvn -DskipTests javadoc:aggregate
+```
+
+Output: `target/reports/apidocs/index.html`.
+
 ## Lokal Altyapi
 
 ```powershell
