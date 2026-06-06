@@ -18,6 +18,8 @@ Trace UI:
 - OTel HTTP endpoint: `localhost:4318`
 - OpenSearch Dashboards: `http://localhost:5601`
 - OpenSearch log index pattern: `ticket-observability-*`
+- Prometheus: `http://localhost:9090`
+- Grafana: `http://localhost:3001`
 
 ## Java Agent'i Indir
 
@@ -96,6 +98,42 @@ Gateway yeni veya sanitize edilmis `X-Correlation-Id` degerini downstream
 request header'ina da yazar. Bir request'i takip ederken ayni `correlationId`
 degeri gateway ve downstream servis loglarinda aranabilir.
 
+## Metrics Takibi
+
+#83 icin kullanici A secenegini secti: Spring Boot Actuator Prometheus
+endpointleri Micrometer Prometheus registry ile acilir, Prometheus scrape eder
+ve Grafana Prometheus datasource ile dashboard sunar.
+
+Backend servisleri lokal JVM process'i olarak calistigi icin Prometheus
+container'i servisleri `host.docker.internal:<port>` uzerinden scrape eder.
+Scrape path'i tum servislerde aynidir:
+
+```text
+/actuator/prometheus
+```
+
+Prometheus hedefleri:
+
+- `host.docker.internal:8088` api-gateway
+- `host.docker.internal:8081` ticket-service
+- `host.docker.internal:8082` file-service
+- `host.docker.internal:8083` workflow-sla-service
+- `host.docker.internal:8084` notification-service
+- `host.docker.internal:8085` reporting-service
+
+Grafana provisioning dosyalari:
+
+- Datasource: `infra/observability/grafana/provisioning/datasources/prometheus.yml`
+- Dashboard provider: `infra/observability/grafana/provisioning/dashboards/ticket-metrics.yml`
+- Dashboard: `infra/observability/grafana/dashboards/ticket-backend-metrics.json`
+
+Lokal varsayilan Grafana hesabi `.env` uzerinden gelir:
+
+```properties
+GRAFANA_ADMIN_USER=admin
+GRAFANA_ADMIN_PASSWORD=admin
+```
+
 ## Beklenen Trace Kapsami
 
 OpenTelemetry Java Agent asagidaki span'leri otomatik uretir:
@@ -121,5 +159,8 @@ Header capture acilmaz; boylece `Authorization`, cookie veya musteri verisi
 gibi hassas alanlar trace attribute olarak toplanmaz. DB statement sanitizer
 aktif tutulur. Fluent Bit backend JSON log satirlarini tasir; request body,
 response body, R2 secret, dosya icerigi veya e-posta icerigi log pipeline'ina
-eklenmez. Gercek ortamda collector ve OpenSearch endpoint'leri TLS ve network
-policy ile sinirlandirilmalidir.
+eklenmez.
+
+`/actuator/prometheus` lokal scrape icin public allowlist'e alinir. Gercek
+ortamda Prometheus, Grafana, collector ve OpenSearch endpoint'leri TLS, network
+policy ve servis hesabi bazli erisimle sinirlandirilmalidir.

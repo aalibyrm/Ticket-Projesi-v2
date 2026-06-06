@@ -53,6 +53,14 @@ class GatewaySecurityConfigTests {
     }
 
     @Test
+    void prometheusMetricsEndpointIsPublic() {
+        webTestClient.get()
+                .uri("/actuator/prometheus")
+                .exchange()
+                .expectStatus().isOk();
+    }
+
+    @Test
     void openApiDocsArePublicThroughGatewayAggregation() {
         webTestClient.get()
                 .uri("/v3/api-docs/ticket-service")

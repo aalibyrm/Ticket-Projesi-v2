@@ -12,6 +12,8 @@ Bu dizin lokal gelistirme ve demo altyapisini barindirir.
 - OpenTelemetry Collector
 - Jaeger
 - Fluent Bit
+- Prometheus
+- Grafana
 - Mailpit
 
 ## Profiller
@@ -19,7 +21,7 @@ Bu dizin lokal gelistirme ve demo altyapisini barindirir.
 | Profil | Kapsam | Ne zaman kullanilir |
 | --- | --- | --- |
 | `local` | PostgreSQL, Kafka, Keycloak, Mailpit | Backend servislerini lokal JVM ile gelistirirken minimum altyapi |
-| `dev` | `local` + OpenSearch, OpenSearch Dashboards, Jaeger, OTel Collector, Fluent Bit | Observability dahil gunluk gelistirme |
+| `dev` | `local` + OpenSearch, OpenSearch Dashboards, Jaeger, OTel Collector, Fluent Bit, Prometheus, Grafana | Observability dahil gunluk gelistirme |
 | `full` | `dev` ile ayni altyapi; ileride app container'lari icin ayrildi | Demo veya uctan uca ortam |
 
 ## Komutlar
@@ -45,9 +47,11 @@ Compose container siralamasini `depends_on` ve healthcheck'ler ile yonetir.
 2. `opensearch` saglikli olunca `opensearch-dashboards`, `otel-collector` ve
    `fluent-bit` baslar.
 3. `otel-collector`, `jaeger` container'i baslamadan calistirilmaz.
-4. Backend servisleri container degil lokal JVM process'i olarak baslatilir ve
+4. `prometheus` lokal JVM servislerini `host.docker.internal` uzerinden scrape
+   eder; `grafana` Prometheus datasource ile baslar.
+5. Backend servisleri container degil lokal JVM process'i olarak baslatilir ve
    hazir altyapiya baglanir.
-5. Backend servisleri repo kokunden calistirildiginda `logs/*.json.log`
+6. Backend servisleri repo kokunden calistirildiginda `logs/*.json.log`
    dosyalari uretilir; `fluent-bit` bu dosyalari OpenSearch'e aktarir.
 
 ## Notlar

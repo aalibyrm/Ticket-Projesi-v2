@@ -70,7 +70,7 @@ class GatewaySecurityConfig {
                     .cors(Customizer.withDefaults())
                     .authorizeExchange(exchanges -> exchanges
                             .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                            .pathMatchers("/actuator/health", "/actuator/info").permitAll()
+                            .pathMatchers("/actuator/health", "/actuator/info", "/actuator/prometheus").permitAll()
                             .pathMatchers(OPENAPI_ROUTES).permitAll()
                             .pathMatchers("/actuator/**").hasRole(ROLE_ADMIN)
                             .pathMatchers(REPORT_ROUTES)
