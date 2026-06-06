@@ -21,7 +21,11 @@ schema access is intentionally not granted.
 
 ## Local Run
 
+When running this service by itself, refresh the shared event contract first so
+local Maven does not reuse an older snapshot jar:
+
 ```powershell
+mvn -q -pl libs/event-contract install
 mvn -pl services/ticket-service spring-boot:run -Dspring-boot.run.profiles=local
 ```
 

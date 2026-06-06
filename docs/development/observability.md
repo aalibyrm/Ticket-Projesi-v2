@@ -35,6 +35,13 @@ path'i terminale tanimlanir, `OTEL_SERVICE_NAME` ise calistirilan servise gore
 degisir. Servisler JSON loglari hem stdout'a hem de `logs/<service>.json.log`
 dosyasina yazar.
 
+Paylasilan event contract degistiyse, servisleri tek tek `spring-boot:run` ile
+calistirmadan once local snapshot jar'i guncelle:
+
+```powershell
+mvn -q -pl libs/event-contract install
+```
+
 ```powershell
 $agent = (Resolve-Path infra/observability/agent/opentelemetry-javaagent.jar).Path
 $config = (Resolve-Path infra/observability/opentelemetry-javaagent.properties).Path

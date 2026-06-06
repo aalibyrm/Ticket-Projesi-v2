@@ -45,7 +45,9 @@ public class TicketSupportAccessService {
             SupportActorContext context,
             UUID assigneeId,
             UUID assignedTeamId) {
-        if (!context.hasRole(ROLE_ADMIN) && !canLeadAssignInsideOwnTeam(ticket, context, assignedTeamId)) {
+        if (!context.hasRole(ROLE_ADMIN)
+                && !canLeadAssignInsideOwnTeam(ticket, context, assignedTeamId)
+                && !canSelfAssignOpenTeamTicket(ticket, context, assigneeId, assignedTeamId)) {
             throw ForbiddenOperationException.accessDenied();
         }
 
@@ -88,6 +90,20 @@ public class TicketSupportAccessService {
             SupportActorContext context,
             UUID assignedTeamId) {
         return canTeamLeadManage(ticket, context) && context.isLeadOfTeam(assignedTeamId);
+    }
+
+    // Ekip uyesinin yalniz kendi ekibindeki bos ticket'i uzerine almasina izin verir.
+    private boolean canSelfAssignOpenTeamTicket(
+            TicketEntity ticket,
+            SupportActorContext context,
+            UUID assigneeId,
+            UUID assignedTeamId) {
+        return hasSupportStaffRole(context)
+                && ticket.getAssigneeId() == null
+                && context.actorId().equals(assigneeId)
+                && assignedTeamId != null
+                && assignedTeamId.equals(ticket.getAssignedTeamId())
+                && context.isMemberOfTeam(assignedTeamId);
     }
 
     // Assignment hedefinin aktif ekip ve aktif ekip uyesi oldugunu dogrular.

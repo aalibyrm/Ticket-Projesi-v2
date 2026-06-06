@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -29,6 +30,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketmanagement.ticket.api.dto.AddExternalCommentRequest;
 import com.ticketmanagement.ticket.api.dto.AddInternalNoteRequest;
+import com.ticketmanagement.ticket.api.dto.AddWorklogRequest;
 import com.ticketmanagement.ticket.api.dto.AssignTicketRequest;
 import com.ticketmanagement.ticket.api.dto.ChangeTicketStatusRequest;
 import com.ticketmanagement.ticket.api.dto.CreateTicketRequest;
@@ -44,6 +46,7 @@ class TicketSecurityIntegrationTests {
     private static final String DEFAULT_TOPIC_CODE = "WEB_PORTAL_BUG";
     private static final String CORE_TOPIC_CODE = "CORE_SYSTEM_ERROR";
     private static final UUID WEB_APP_SUPPORT_TEAM_ID = UUID.fromString("20000000-0000-0000-0000-000000000003");
+    private static final UUID CORE_APP_SUPPORT_TEAM_ID = UUID.fromString("20000000-0000-0000-0000-000000000004");
     private static final UUID WEB_APP_SUPPORT_LEAD_ID = UUID.fromString("30000000-0000-0000-0000-000000000003");
     private static final UUID WEB_APP_SUPPORT_MEMBER_ID = UUID.fromString("40000000-0000-0000-0000-000000000003");
 
@@ -255,6 +258,62 @@ class TicketSecurityIntegrationTests {
         mockMvc.perform(patch("/api/agent/tickets/{id}/status", ticketId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new ChangeTicketStatusRequest(TicketStatus.IN_PROGRESS)))
+                        .with(jwtWithRoles(WEB_APP_SUPPORT_MEMBER_ID, "AGENT")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+    }
+
+    @Test
+    void teamMemberCanSelfAssignOwnTeamTicketThenManageIt() throws Exception {
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID ticketId = createTicketFor(ownerCustomerId);
+
+        mockMvc.perform(patch("/api/agent/tickets/{id}/assignment", ticketId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new AssignTicketRequest(
+                                WEB_APP_SUPPORT_MEMBER_ID,
+                                WEB_APP_SUPPORT_TEAM_ID)))
+                        .with(jwtWithRoles(WEB_APP_SUPPORT_MEMBER_ID, "AGENT")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.assigneeId").value(WEB_APP_SUPPORT_MEMBER_ID.toString()))
+                .andExpect(jsonPath("$.assignedTeamId").value(WEB_APP_SUPPORT_TEAM_ID.toString()));
+
+        mockMvc.perform(patch("/api/agent/tickets/{id}/status", ticketId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new ChangeTicketStatusRequest(TicketStatus.IN_PROGRESS)))
+                        .with(jwtWithRoles(WEB_APP_SUPPORT_MEMBER_ID, "AGENT")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(TicketStatus.IN_PROGRESS.name()));
+
+        mockMvc.perform(post("/api/agent/tickets/{id}/comments/external", ticketId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new AddExternalCommentRequest(
+                                "We are checking the payment failure.")))
+                        .with(jwtWithRoles(WEB_APP_SUPPORT_MEMBER_ID, "AGENT")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.visibility").value("EXTERNAL"));
+
+        mockMvc.perform(post("/api/agent/tickets/{id}/worklogs", ticketId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new AddWorklogRequest(
+                                LocalDate.parse("2026-06-06"),
+                                30,
+                                "Checked customer payment logs.")))
+                        .with(jwtWithRoles(WEB_APP_SUPPORT_MEMBER_ID, "AGENT")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.durationMinutes").value(30));
+    }
+
+    @Test
+    void teamMemberCannotSelfAssignOtherTeamTicket() throws Exception {
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID ticketId = createTicketFor(ownerCustomerId, CORE_TOPIC_CODE);
+
+        mockMvc.perform(patch("/api/agent/tickets/{id}/assignment", ticketId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new AssignTicketRequest(
+                                WEB_APP_SUPPORT_MEMBER_ID,
+                                CORE_APP_SUPPORT_TEAM_ID)))
                         .with(jwtWithRoles(WEB_APP_SUPPORT_MEMBER_ID, "AGENT")))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
