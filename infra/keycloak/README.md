@@ -26,15 +26,26 @@ Management platform.
 
 ## Demo Users
 
-| Username | Role | Password |
-| --- | --- | --- |
-| `customer.user` | `CUSTOMER` | `Password123!` |
-| `agent.user` | `AGENT` | `Password123!` |
-| `manager.user` | `MANAGER` | `Password123!` |
-| `admin.user` | `ADMIN` | `Password123!` |
+| Username | Role | Department | Team | Password |
+| --- | --- | --- | --- | --- |
+| `customer.user` | `CUSTOMER` | - | - | `Password123!` |
+| `agent.identity` | `AGENT` | `ACCESS_MANAGEMENT` | `IDENTITY_OPERATIONS` | `Password123!` |
+| `agent.permission` | `AGENT` | `ACCESS_MANAGEMENT` | `PERMISSION_OPERATIONS` | `Password123!` |
+| `agent.web` | `AGENT` | `APPLICATION_SUPPORT` | `WEB_APP_SUPPORT` | `Password123!` |
+| `agent.core` | `AGENT` | `APPLICATION_SUPPORT` | `CORE_APP_SUPPORT` | `Password123!` |
+| `agent.network` | `AGENT` | `INFRASTRUCTURE` | `NETWORK_OPERATIONS` | `Password123!` |
+| `agent.platform` | `AGENT` | `INFRASTRUCTURE` | `PLATFORM_OPERATIONS` | `Password123!` |
+| `agent.billing` | `AGENT` | `FINANCE_OPERATIONS` | `BILLING_OPERATIONS` | `Password123!` |
+| `agent.payment` | `AGENT` | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS` | `Password123!` |
+| `manager.user` | `MANAGER` | - | - | `Password123!` |
+| `admin.user` | `ADMIN` | - | - | `Password123!` |
 
 These credentials are local development placeholders only. They must not be used
 outside local/demo environments.
+
+Agent user ids in this realm export intentionally match the `actor_id` values
+seeded by ticket-service `team_members`. This keeps local authorization aligned
+with the DB-authoritative team membership decision.
 
 `ticket-dev-cli` has direct access grants enabled only for local automated
 verification. Web and mobile clients must use Authorization Code + PKCE.
@@ -47,3 +58,8 @@ Docker Compose mounts `ticket-management-realm.json` and starts Keycloak with
 Docker Compose also mounts `themes/ticket` as a custom login theme. The theme
 keeps web and mobile clients on Authorization Code + PKCE; user passwords are
 submitted only to Keycloak, not to the React, React Native, or backend services.
+
+Keycloak imports this realm into an empty local volume. If a local
+`ticket-v2-keycloak` volume already exists, user changes in the export are not
+automatically replayed; recreate or manually sync the local realm when demo
+users change.

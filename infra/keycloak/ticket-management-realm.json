@@ -177,6 +177,7 @@
   ],
   "users": [
     {
+      "id": "80000000-0000-0000-0000-000000000001",
       "username": "customer.user",
       "enabled": true,
       "emailVerified": true,
@@ -195,12 +196,13 @@
       ]
     },
     {
-      "username": "agent.user",
+      "id": "40000000-0000-0000-0000-000000000001",
+      "username": "agent.identity",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Demo",
+      "firstName": "Identity",
       "lastName": "Agent",
-      "email": "agent.user@example.local",
+      "email": "agent.identity@example.local",
       "credentials": [
         {
           "type": "password",
@@ -213,6 +215,140 @@
       ]
     },
     {
+      "id": "40000000-0000-0000-0000-000000000002",
+      "username": "agent.permission",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Permission",
+      "lastName": "Agent",
+      "email": "agent.permission@example.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "AGENT"
+      ]
+    },
+    {
+      "id": "40000000-0000-0000-0000-000000000003",
+      "username": "agent.web",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Web",
+      "lastName": "Agent",
+      "email": "agent.web@example.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "AGENT"
+      ]
+    },
+    {
+      "id": "40000000-0000-0000-0000-000000000004",
+      "username": "agent.core",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Core",
+      "lastName": "Agent",
+      "email": "agent.core@example.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "AGENT"
+      ]
+    },
+    {
+      "id": "40000000-0000-0000-0000-000000000005",
+      "username": "agent.network",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Network",
+      "lastName": "Agent",
+      "email": "agent.network@example.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "AGENT"
+      ]
+    },
+    {
+      "id": "40000000-0000-0000-0000-000000000006",
+      "username": "agent.platform",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Platform",
+      "lastName": "Agent",
+      "email": "agent.platform@example.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "AGENT"
+      ]
+    },
+    {
+      "id": "40000000-0000-0000-0000-000000000007",
+      "username": "agent.billing",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Billing",
+      "lastName": "Agent",
+      "email": "agent.billing@example.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "AGENT"
+      ]
+    },
+    {
+      "id": "40000000-0000-0000-0000-000000000008",
+      "username": "agent.payment",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Payment",
+      "lastName": "Agent",
+      "email": "agent.payment@example.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "AGENT"
+      ]
+    },
+    {
+      "id": "80000000-0000-0000-0000-000000000002",
       "username": "manager.user",
       "enabled": true,
       "emailVerified": true,
@@ -231,6 +367,7 @@
       ]
     },
     {
+      "id": "80000000-0000-0000-0000-000000000003",
       "username": "admin.user",
       "enabled": true,
       "emailVerified": true,

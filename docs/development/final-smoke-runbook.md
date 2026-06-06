@@ -49,12 +49,23 @@ npm run dev
 
 5. Keycloak local demo kullanicilari:
 
-| Kullanici | Rol | Sifre |
-| --- | --- | --- |
-| `customer.user` | `CUSTOMER` | `Password123!` |
-| `agent.user` | `AGENT` | `Password123!` |
-| `manager.user` | `MANAGER` | `Password123!` |
-| `admin.user` | `ADMIN` | `Password123!` |
+| Kullanici | Rol | Departman | Ekip | Sifre |
+| --- | --- | --- | --- | --- |
+| `customer.user` | `CUSTOMER` | - | - | `Password123!` |
+| `agent.identity` | `AGENT` | `ACCESS_MANAGEMENT` | `IDENTITY_OPERATIONS` | `Password123!` |
+| `agent.permission` | `AGENT` | `ACCESS_MANAGEMENT` | `PERMISSION_OPERATIONS` | `Password123!` |
+| `agent.web` | `AGENT` | `APPLICATION_SUPPORT` | `WEB_APP_SUPPORT` | `Password123!` |
+| `agent.core` | `AGENT` | `APPLICATION_SUPPORT` | `CORE_APP_SUPPORT` | `Password123!` |
+| `agent.network` | `AGENT` | `INFRASTRUCTURE` | `NETWORK_OPERATIONS` | `Password123!` |
+| `agent.platform` | `AGENT` | `INFRASTRUCTURE` | `PLATFORM_OPERATIONS` | `Password123!` |
+| `agent.billing` | `AGENT` | `FINANCE_OPERATIONS` | `BILLING_OPERATIONS` | `Password123!` |
+| `agent.payment` | `AGENT` | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS` | `Password123!` |
+| `manager.user` | `MANAGER` | - | - | `Password123!` |
+| `admin.user` | `ADMIN` | - | - | `Password123!` |
+
+Topic routing'e gore `PAYMENT_FAILURE` ticket'lari `agent.payment`,
+`WEB_PORTAL_BUG` ticket'lari `agent.web`, `CORE_SYSTEM_ERROR` ticket'lari
+`agent.core` hesabinda gorunur.
 
 6. Demo sirasi:
 

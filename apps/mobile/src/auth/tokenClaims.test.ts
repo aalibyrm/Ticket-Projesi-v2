@@ -17,17 +17,17 @@ describe("token claims", () => {
 
   it("maps access token claims to an auth user", () => {
     const token = createUnsignedToken({
-      name: "Agent User",
-      preferred_username: "agent.user",
+      name: "Payment Agent",
+      preferred_username: "agent.payment",
       realm_access: { roles: ["AGENT"] },
       sub: "agent-id"
     });
 
     expect(getAuthUserFromAccessToken(token)).toEqual({
-      displayName: "Agent User",
+      displayName: "Payment Agent",
       id: "agent-id",
       roles: ["AGENT"],
-      username: "agent.user"
+      username: "agent.payment"
     });
   });
 
