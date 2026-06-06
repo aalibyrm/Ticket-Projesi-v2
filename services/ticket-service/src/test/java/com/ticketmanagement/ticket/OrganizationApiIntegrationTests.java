@@ -112,6 +112,12 @@ class OrganizationApiIntegrationTests {
         assertThat(response.getBody())
                 .extracting(TeamMemberResponse::actorId)
                 .doesNotContain(INACTIVE_ACTOR_ID);
+        assertThat(response.getBody())
+                .extracting(TeamMemberResponse::displayName)
+                .contains("Identity Lead", "Identity Agent");
+        assertThat(response.getBody())
+                .extracting(TeamMemberResponse::email)
+                .contains("lead.identity@example.local", "agent.identity@example.local");
     }
 
     @Test

@@ -38,6 +38,7 @@ import type {
 import { selectAuthUser } from "~/features/auth/authSlice";
 import { formatDate, formatDateTime, formatFileSize } from "~/features/customer/formatters";
 import { useAppSelector } from "~/shared/store/hooks";
+import { actorDisplayName } from "~/shared/userDisplay";
 import { backendUuidSchema } from "~/shared/validation/uuid";
 
 const statusLabels: Record<TicketStatus, string> = {
@@ -276,11 +277,11 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
                   : "Agent sec"}
             </option>
             {assigneeId && !selectedAssigneeInMembers && (
-              <option value={assigneeId}>{assigneeId}</option>
+              <option value={assigneeId}>{actorDisplayName(assigneeId, user, "Agent")}</option>
             )}
             {teamMembers.map((member) => (
               <option key={member.actorId} value={member.actorId}>
-                {member.actorId}
+                {member.displayName ?? actorDisplayName(member.actorId, user, "Agent")}
                 {member.teamLead ? " / Lead" : ""}
               </option>
             ))}

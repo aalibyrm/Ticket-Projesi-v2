@@ -6,5 +6,7 @@ public record TeamMemberResponse(
         UUID actorId,
         UUID teamId,
         String teamCode,
+        String displayName,
+        String email,
         boolean teamLead) {
 }

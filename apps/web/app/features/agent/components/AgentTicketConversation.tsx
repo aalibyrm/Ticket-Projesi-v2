@@ -21,11 +21,15 @@ import {
 } from "~/features/agent/agentQueries";
 import { AgentErrorState, AgentLoadingState } from "~/features/agent/components/AgentState";
 import type { TicketResponse } from "~/features/agent/agentTypes";
+import { selectAuthUser } from "~/features/auth/authSlice";
 import { formatDateTime } from "~/features/customer/formatters";
+import { useAppSelector } from "~/shared/store/hooks";
+import { actorDisplayName } from "~/shared/userDisplay";
 
 const messageSchema = z.string().trim().min(3).max(5000);
 
 export function AgentTicketConversation({ ticket }: { ticket: TicketResponse }) {
+  const currentUser = useAppSelector(selectAuthUser);
   const commentsQuery = useAgentTicketComments(ticket.id);
   const readStateQuery = useAgentTicketConversationReadState(ticket.id);
   const externalComment = useAddAgentExternalComment(ticket.id);
@@ -82,6 +86,8 @@ export function AgentTicketConversation({ ticket }: { ticket: TicketResponse }) 
 
   const isReplyInvalid = reply.length > 0 && !messageSchema.safeParse(reply).success;
   const isNoteInvalid = note.length > 0 && !messageSchema.safeParse(note).success;
+  const customerName = actorDisplayName(ticket.customerId, currentUser, "Musteri");
+  const supportAuthorName = (authorId: string) => actorDisplayName(authorId, currentUser, "Destek");
 
   return (
     <Stack
@@ -107,7 +113,7 @@ export function AgentTicketConversation({ ticket }: { ticket: TicketResponse }) 
         )}
         <MessageBubble
           align="left"
-          author="Musteri"
+          author={customerName}
           body={ticket.description}
           createdAt={ticket.createdAt}
           visibility="EXTERNAL"
@@ -119,7 +125,7 @@ export function AgentTicketConversation({ ticket }: { ticket: TicketResponse }) 
         {comments.map((comment) => (
           <MessageBubble
             align={comment.authorId === ticket.customerId ? "left" : "right"}
-            author={comment.authorId === ticket.customerId ? "Musteri" : "Destek"}
+            author={comment.authorId === ticket.customerId ? customerName : supportAuthorName(comment.authorId)}
             body={comment.body}
             createdAt={comment.createdAt}
             key={comment.id}

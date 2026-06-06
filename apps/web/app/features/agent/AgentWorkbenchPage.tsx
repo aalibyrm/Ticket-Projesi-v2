@@ -19,6 +19,7 @@ import { useAgentTicket, useAgentTickets } from "~/features/agent/agentQueries";
 import type { TicketResponse } from "~/features/agent/agentTypes";
 import { PriorityChip, TicketStatusChip } from "~/features/customer/components/StatusChips";
 import { formatDateTime } from "~/features/customer/formatters";
+import { actorDisplayName } from "~/shared/userDisplay";
 
 export function AgentWorkbenchPage() {
   const { ticketId } = useParams();
@@ -108,7 +109,7 @@ function AgentTicketDetailWorkspace({ ticketId }: { ticketId: string }) {
               Guncelleme: {formatDateTime(ticket.updatedAt)}
             </Typography>
             <Typography color="text.secondary" variant="body2">
-              Customer: {ticket.customerId}
+              Musteri: {actorDisplayName(ticket.customerId, undefined, "Musteri")}
             </Typography>
           </Stack>
         </Stack>

@@ -26,6 +26,7 @@ public class OrganizationQueryService {
     private final DepartmentJpaRepository departmentRepository;
     private final SupportTeamJpaRepository teamRepository;
     private final TeamMemberJpaRepository teamMemberRepository;
+    private final ActorProfileDirectory actorProfileDirectory;
 
     // Aktif departmanlari altindaki aktif destek ekipleriyle birlikte dondurur.
     @Transactional(readOnly = true)
@@ -88,10 +89,14 @@ public class OrganizationQueryService {
 
     private TeamMemberResponse toTeamMemberResponse(TeamMemberEntity member) {
         SupportTeamEntity team = member.getTeam();
+        ActorProfileDirectory.ActorProfile profile = actorProfileDirectory.findByActorId(member.getActorId())
+                .orElse(null);
         return new TeamMemberResponse(
                 member.getActorId(),
                 team.getId(),
                 team.getCode(),
+                profile == null ? null : profile.displayName(),
+                profile == null ? null : profile.email(),
                 member.isTeamLead());
     }
 }

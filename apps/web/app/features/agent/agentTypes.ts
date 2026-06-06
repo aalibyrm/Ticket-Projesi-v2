@@ -36,6 +36,8 @@ export interface SupportTeamResponse {
 
 export interface TeamMemberResponse {
   actorId: string;
+  displayName?: string | null;
+  email?: string | null;
   teamCode: string;
   teamId: string;
   teamLead: boolean;
