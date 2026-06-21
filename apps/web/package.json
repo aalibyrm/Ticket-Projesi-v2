@@ -6,6 +6,7 @@
     "dev": "react-router dev",
     "build": "react-router build",
     "e2e": "playwright test",
+    "e2e:fullstack": "playwright test --config playwright.fullstack.config.ts",
     "e2e:ci": "playwright install --with-deps chromium && playwright test",
     "typecheck": "react-router typegen && tsc --noEmit",
     "lint": "npm run typecheck",

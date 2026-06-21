@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
 class OpenApiConfig {
 
     private static final String API_PREFIX = "/api";
+    private static final String INTERNAL_PREFIX = "/internal";
     private static final String PUBLIC_API_PREFIX = "/api/v1";
     private static final String BEARER_JWT = "bearer-jwt";
 
@@ -43,7 +44,11 @@ class OpenApiConfig {
             return target;
         }
 
-        source.forEach((path, item) -> target.addPathItem(publicPath(path), item));
+        source.forEach((path, item) -> {
+            if (!path.startsWith(INTERNAL_PREFIX)) {
+                target.addPathItem(publicPath(path), item);
+            }
+        });
         return target;
     }
 

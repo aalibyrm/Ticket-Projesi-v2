@@ -9,6 +9,7 @@ export default defineConfig({
   fullyParallel: false,
   reporter: process.env.CI ? "github" : "list",
   testDir: "./e2e",
+  testIgnore: ["**/fullstack/**"],
   timeout: 60_000,
   use: {
     baseURL,

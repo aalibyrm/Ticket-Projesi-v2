@@ -22,6 +22,7 @@ class TicketRoutingService {
 
     private final TicketRoutingRuleJpaRepository ticketRoutingRuleRepository;
     private final TeamMemberJpaRepository teamMemberRepository;
+    private final ActorProfileDirectory actorProfileDirectory;
 
     // Ticket topic code degerini aktif routing rule uzerinden department ve ekibe cozer.
     @Transactional(readOnly = true)
@@ -41,10 +42,21 @@ class TicketRoutingService {
         List<TeamMemberEntity> activeMembers = teamMemberRepository.findActiveMembersForActiveTeam(team.getId());
         return activeMembers.stream()
                 .filter(member -> !member.isTeamLead())
+                .filter(this::hasKnownProfile)
                 .findFirst()
+                .or(() -> activeMembers.stream()
+                        .filter(member -> !member.isTeamLead())
+                        .findFirst())
+                .or(() -> activeMembers.stream()
+                        .filter(this::hasKnownProfile)
+                        .findFirst())
                 .or(() -> activeMembers.stream().findFirst())
                 .map(TeamMemberEntity::getActorId)
                 .orElse(team.getLeadActorId());
+    }
+
+    private boolean hasKnownProfile(TeamMemberEntity member) {
+        return actorProfileDirectory.findByActorId(member.getActorId()).isPresent();
     }
 
     private String normalizeTopicCode(String topicCode) {

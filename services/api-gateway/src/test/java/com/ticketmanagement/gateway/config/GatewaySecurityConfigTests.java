@@ -22,9 +22,11 @@ import reactor.core.publisher.Mono;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
         "app.security.jwt.enabled=true",
         "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.oauth2.resource.reactive.ReactiveOAuth2ResourceServerAutoConfiguration",
-        "TICKET_SERVICE_URL=http://127.0.0.1:1",
-        "WORKFLOW_SLA_SERVICE_URL=http://127.0.0.1:1",
-        "REPORTING_SERVICE_URL=http://127.0.0.1:1"
+        "TICKET_SERVICE_URL=no://op",
+        "FILE_SERVICE_URL=no://op",
+        "WORKFLOW_SLA_SERVICE_URL=no://op",
+        "NOTIFICATION_SERVICE_URL=no://op",
+        "REPORTING_SERVICE_URL=no://op"
 })
 @AutoConfigureWebTestClient
 class GatewaySecurityConfigTests {
@@ -65,7 +67,7 @@ class GatewaySecurityConfigTests {
         webTestClient.get()
                 .uri("/v3/api-docs/ticket-service")
                 .exchange()
-                .expectStatus().is5xxServerError();
+                .expectStatus().isOk();
     }
 
     @Test
@@ -82,7 +84,7 @@ class GatewaySecurityConfigTests {
                 .uri("/api/v1/tickets")
                 .header(HttpHeaders.AUTHORIZATION, bearer("customer-token"))
                 .exchange()
-                .expectStatus().is5xxServerError();
+                .expectStatus().isOk();
     }
 
     @Test
@@ -91,7 +93,7 @@ class GatewaySecurityConfigTests {
                 .uri("/api/v1/ticket-topics")
                 .header(HttpHeaders.AUTHORIZATION, bearer("customer-token"))
                 .exchange()
-                .expectStatus().is5xxServerError();
+                .expectStatus().isOk();
     }
 
     @Test
@@ -100,13 +102,13 @@ class GatewaySecurityConfigTests {
                 .uri("/api/v1/agent/tickets/queue")
                 .header(HttpHeaders.AUTHORIZATION, bearer("agent-token"))
                 .exchange()
-                .expectStatus().is5xxServerError();
+                .expectStatus().isOk();
 
         webTestClient.get()
                 .uri("/api/v1/workflows/tickets/00000000-0000-0000-0000-000000000001/transitions")
                 .header(HttpHeaders.AUTHORIZATION, bearer("agent-token"))
                 .exchange()
-                .expectStatus().is5xxServerError();
+                .expectStatus().isOk();
     }
 
     @Test
@@ -115,7 +117,7 @@ class GatewaySecurityConfigTests {
                 .uri("/api/v1/organization/teams")
                 .header(HttpHeaders.AUTHORIZATION, bearer("agent-token"))
                 .exchange()
-                .expectStatus().is5xxServerError();
+                .expectStatus().isOk();
     }
 
     @Test
@@ -139,13 +141,13 @@ class GatewaySecurityConfigTests {
                 .uri("/api/v1/reports/status-distribution")
                 .header(HttpHeaders.AUTHORIZATION, bearer("manager-token"))
                 .exchange()
-                .expectStatus().is5xxServerError();
+                .expectStatus().isOk();
 
         webTestClient.get()
                 .uri("/api/v1/sla/compliance")
                 .header(HttpHeaders.AUTHORIZATION, bearer("manager-token"))
                 .exchange()
-                .expectStatus().is5xxServerError();
+                .expectStatus().isOk();
     }
 
     @Test
@@ -154,7 +156,7 @@ class GatewaySecurityConfigTests {
                 .uri("/api/v1/reports/status-distribution")
                 .header(HttpHeaders.AUTHORIZATION, bearer("manager-token"))
                 .exchange()
-                .expectStatus().is5xxServerError();
+                .expectStatus().isOk();
     }
 
     @Test
