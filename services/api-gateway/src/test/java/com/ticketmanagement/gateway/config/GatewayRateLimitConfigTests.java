@@ -22,14 +22,14 @@ class GatewayRateLimitConfigTests {
     @Test
     void throttlesApiRequestsAfterConfiguredCapacity() {
         webTestClient.get()
-                .uri("/api/v1/products")
+                .uri("/api/v1/rate-limit-test-only")
                 .exchange()
-                .expectStatus().is5xxServerError()
+                .expectStatus().isNotFound()
                 .expectHeader().valueEquals("X-RateLimit-Limit", "1")
                 .expectHeader().valueEquals("X-RateLimit-Remaining", "0");
 
         webTestClient.get()
-                .uri("/api/v1/products")
+                .uri("/api/v1/rate-limit-test-only")
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS)
                 .expectHeader().exists(HttpHeaders.RETRY_AFTER)
