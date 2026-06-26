@@ -21,16 +21,40 @@ Trace UI:
 - Prometheus: `http://localhost:9090`
 - Grafana: `http://localhost:3001`
 
-## Java Agent'i Indir
+## Servisleri Tek Komutla Trace ve JSON Log ile Calistir
 
-Java Agent jar'i repo'ya commit'lenmez. Lokal makinede asagidaki Maven komutu
-ile indirilir:
+Altyapi ayaga kalktiktan sonra tum Java servislerini OpenTelemetry Java Agent
+ile baslatmak icin repo kokunden asagidaki script calistirilir:
+
+```powershell
+.\scripts\start-observability-services.ps1 -Restart
+```
+
+Script su isleri yapar:
+
+- `.env` degerlerini process ortamina yukler.
+- OpenTelemetry Java Agent yoksa Maven ile indirir.
+- `libs/event-contract` local snapshot'ini gunceller.
+- `api-gateway`, `ticket-service`, `file-service`, `workflow-sla-service`,
+  `notification-service` ve `reporting-service` icin dogru `OTEL_SERVICE_NAME`
+  ile ayri JVM process'i baslatir.
+- Servis loglarini `logs/<service>.otel.out` ve `logs/<service>.otel.err`
+  dosyalarina yazar.
+
+Jaeger UI'da sadece 2-3 servis gorunuyorsa genellikle servislerin bir kismi
+OpenTelemetry agent olmadan baslatilmistir veya o servise henuz trafik
+gitmemistir. Bu durumda script `-Restart` ile tekrar calistirilir, ardindan
+uygulamada ticket olusturma, mesaj yazma, status degistirme ve rapor ekranini
+acma gibi trafik uretilir.
+
+## Manuel Servis Baslatma Fallback'i
+
+Java Agent jar'i repo'ya commit'lenmez. Script bunu otomatik indirir. Manuel
+baslatma gerekiyorsa lokal makinede asagidaki Maven komutu ile indirilebilir:
 
 ```powershell
 mvn -q org.apache.maven.plugins:maven-dependency-plugin:3.8.1:copy "-Dartifact=io.opentelemetry.javaagent:opentelemetry-javaagent:2.12.0" "-DoutputDirectory=infra/observability/agent" "-Dmdep.stripVersion=true"
 ```
-
-## Servisleri Trace ve JSON Log ile Calistir
 
 Her servis ayri terminalde repo kokunden calistirilir. Ortak agent ve config
 path'i terminale tanimlanir, `OTEL_SERVICE_NAME` ise calistirilan servise gore

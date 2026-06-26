@@ -34,7 +34,7 @@ export function AgentWorkbenchPage() {
   }
 
   return (
-    <Stack spacing={2}>
+    <Stack spacing={2} sx={{ minHeight: 0 }}>
       <Stack spacing={0.5}>
         <Typography variant="overline">Temsilci paneli</Typography>
         <Typography variant="h4">Is kuyrugu</Typography>
@@ -42,7 +42,8 @@ export function AgentWorkbenchPage() {
       <Paper
         sx={{
           display: "flex",
-          minHeight: "calc(100vh - 184px)",
+          height: "calc(100vh - 184px)",
+          minHeight: 560,
           overflow: "hidden",
         }}
         variant="outlined"
@@ -80,13 +81,13 @@ function AgentTicketDetailWorkspace({ ticketId }: { ticketId: string }) {
   const ticket = ticketQuery.data;
 
   return (
-    <Box sx={{ display: "flex", flex: 1, minWidth: 0 }}>
-      <Stack sx={{ flex: 1, minWidth: 0 }}>
+    <Box sx={{ display: "flex", flex: 1, minHeight: 0, minWidth: 0 }}>
+      <Stack sx={{ flex: 1, minHeight: 0, minWidth: 0 }}>
         <Stack
           direction={{ md: "row", xs: "column" }}
           justifyContent="space-between"
           spacing={2}
-          sx={{ bgcolor: "background.paper", borderBottom: "1px solid", borderColor: "divider", p: 2.5 }}
+          sx={{ bgcolor: "background.paper", borderBottom: "1px solid", borderColor: "divider", flexShrink: 0, p: 2.5 }}
         >
           <Stack spacing={1}>
             <Stack alignItems="center" direction="row" spacing={1}>
@@ -133,7 +134,7 @@ function AgentInboxSummary({ tickets }: { tickets: TicketResponse[] }) {
   }, [tickets]);
 
   return (
-    <Stack spacing={3} sx={{ flex: 1, p: 3 }}>
+    <Stack spacing={3} sx={{ flex: 1, minHeight: 0, overflowY: "auto", p: 3 }}>
       <Stack direction={{ md: "row", xs: "column" }} spacing={2}>
         {metrics.map((item) => (
           <Paper key={item.label} sx={{ flex: 1, p: 2 }} variant="outlined">

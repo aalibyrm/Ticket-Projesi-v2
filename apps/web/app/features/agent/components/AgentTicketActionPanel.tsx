@@ -185,6 +185,7 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
         borderLeft: "1px solid",
         borderColor: "divider",
         flex: "0 0 360px",
+        minHeight: 0,
         overflowY: "auto",
         p: 2.5,
       }}

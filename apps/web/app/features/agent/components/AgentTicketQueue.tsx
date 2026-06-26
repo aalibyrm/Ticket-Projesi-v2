@@ -46,7 +46,7 @@ export function AgentTicketQueue({
         borderRight: "1px solid",
         borderColor: "divider",
         flex: "0 0 320px",
-        minHeight: "calc(100vh - 144px)",
+        minHeight: 0,
       }}
     >
       <Stack spacing={2} sx={{ p: 2.5 }}>
@@ -97,7 +97,7 @@ export function AgentTicketQueue({
         </ToggleButtonGroup>
       </Stack>
       <Divider />
-      <Stack sx={{ flex: 1, overflowY: "auto" }}>
+      <Stack sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
         {visibleTickets.length === 0 ? (
           <Typography color="text.secondary" sx={{ p: 2.5 }}>
             Uygun bilet bulunamadi.

@@ -94,10 +94,10 @@ export function AgentTicketConversation({ ticket }: { ticket: TicketResponse }) 
       sx={{
         bgcolor: "background.default",
         flex: 1,
-        minHeight: 640,
+        minHeight: 0,
       }}
     >
-      <Stack spacing={2} sx={{ flex: 1, overflowY: "auto", p: 3 }}>
+      <Stack spacing={2} sx={{ flex: 1, minHeight: 0, overflowY: "auto", p: 3 }}>
         <Box sx={{ display: "flex", justifyContent: "center" }}>
           <Chip label={`Ticket acildi / ${formatDateTime(ticket.createdAt)}`} size="small" />
         </Box>
@@ -134,7 +134,7 @@ export function AgentTicketConversation({ ticket }: { ticket: TicketResponse }) 
         ))}
       </Stack>
       <Divider />
-      <Stack spacing={2} sx={{ bgcolor: "background.paper", p: 3 }}>
+      <Stack spacing={2} sx={{ bgcolor: "background.paper", flexShrink: 0, p: 3 }}>
         {(externalComment.isError || internalNote.isError) && (
           <Alert severity="error" variant="outlined">
             Mesaj kaydedilemedi.
