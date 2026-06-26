@@ -41,6 +41,12 @@ Script su isleri yapar:
 - Servis loglarini `logs/<service>.otel.out` ve `logs/<service>.otel.err`
   dosyalarina yazar.
 
+Gercek Keycloak login akisini test ederken profile parametresi verilmez. Bu
+durumda servisler varsayilan profil ve `.env` ayarlariyla calisir; JWT resource
+server kontrolleri acik kalir. `local` profili yalniz header tabanli erken
+gelistirme denemeleri icindir ve UI'nin Bearer token akisini kullanmaz. Bu
+mod gerekiyorsa script acikca `-SpringProfile local` ile calistirilir.
+
 Jaeger UI'da sadece 2-3 servis gorunuyorsa genellikle servislerin bir kismi
 OpenTelemetry agent olmadan baslatilmistir veya o servise henuz trafik
 gitmemistir. Bu durumda script `-Restart` ile tekrar calistirilir, ardindan

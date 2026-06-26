@@ -1,5 +1,6 @@
 param(
-    [switch]$Restart
+    [switch]$Restart,
+    [string]$SpringProfile = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -69,11 +70,18 @@ function Start-OtelService {
     $stdoutPath = Join-Path $logDir "$ServiceName.otel.out"
     $stderrPath = Join-Path $logDir "$ServiceName.otel.err"
     $javaToolOptions = "-javaagent:$agentPath -Dotel.javaagent.configuration-file=$agentConfigPath -Dapp.log.dir=$logDir"
+    $profileCommand = ""
+    $profileArgument = ""
+    if (-not [string]::IsNullOrWhiteSpace($SpringProfile)) {
+        $profileCommand = "`$env:SPRING_PROFILES_ACTIVE = `"$SpringProfile`""
+        $profileArgument = " `"-Dspring-boot.run.profiles=$SpringProfile`""
+    }
+
     $command = @"
-`$env:SPRING_PROFILES_ACTIVE = "local"
+$profileCommand
 `$env:JAVA_TOOL_OPTIONS = "$javaToolOptions"
 `$env:OTEL_SERVICE_NAME = "$ServiceName"
-mvn -pl $Module spring-boot:run "-Dspring-boot.run.profiles=local"
+mvn -pl $Module spring-boot:run$profileArgument
 "@
     $encodedCommand = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))
 
