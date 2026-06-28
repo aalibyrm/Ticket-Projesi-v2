@@ -26,6 +26,11 @@ function renderPage() {
 
 describe("ManagerReportsPage", () => {
   it("renders manager reports from REST APIs", async () => {
+    const dailyCounts = Array.from({ length: 30 }, (_, index) => ({
+      count: index === 29 ? 3 : 0,
+      date: `2026-06-${String(index + 1).padStart(2, "0")}`,
+    }));
+
     server.use(
       http.get("*/api/v1/reports/tickets/status-distribution", () =>
         HttpResponse.json({
@@ -54,18 +59,15 @@ describe("ManagerReportsPage", () => {
       http.get("*/api/v1/reports/tickets/closed", () =>
         HttpResponse.json({
           averageResolutionMinutes: 180,
-          dailyCounts: [
-            { count: 2, date: "2026-06-01" },
-            { count: 3, date: "2026-06-02" },
-          ],
-          fromDate: "2026-05-04",
+          dailyCounts,
+          fromDate: "2026-06-01",
           generatedAt: "2026-06-02T08:01:00Z",
           priorityCounts: [
             { count: 4, priority: "HIGH" },
             { count: 1, priority: "MEDIUM" },
           ],
-          toDate: "2026-06-02",
-          totalClosedTickets: 5,
+          toDate: "2026-06-30",
+          totalClosedTickets: 3,
         }),
       ),
       http.get("*/api/v1/reports/agents/performance", () =>
@@ -114,6 +116,8 @@ describe("ManagerReportsPage", () => {
     expect(screen.getByText("Team dagilimi")).toBeInTheDocument();
     expect(screen.getByText("SLA dagilimi")).toBeInTheDocument();
     expect(screen.getByText("Agent performansi")).toBeInTheDocument();
+    expect(screen.getByTestId("closure-volume-chart")).toBeInTheDocument();
+    expect(screen.getAllByTestId("closure-volume-date-label")).toHaveLength(11);
     expect(screen.getAllByText("90.5%")).not.toHaveLength(0);
     expect(screen.getByText("agent-1")).toBeInTheDocument();
   });

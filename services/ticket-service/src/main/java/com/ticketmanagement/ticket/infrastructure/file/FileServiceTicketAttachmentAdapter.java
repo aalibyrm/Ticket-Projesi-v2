@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ class FileServiceTicketAttachmentAdapter implements TicketAttachmentPort {
             new ParameterizedTypeReference<>() {
             };
 
+    @Qualifier("fileServiceRestClient")
     private final RestClient fileServiceRestClient;
 
     @Override

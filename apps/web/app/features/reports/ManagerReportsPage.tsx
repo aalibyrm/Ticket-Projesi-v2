@@ -272,6 +272,10 @@ function ClosedTicketsPanel({ report }: { report: ClosedTicketDateRangeResponse 
     () => maxValue(report.dailyCounts.map((item) => item.count)),
     [report.dailyCounts],
   );
+  const dateLabelStep = useMemo(
+    () => closureDateLabelStep(report.dailyCounts.length),
+    [report.dailyCounts.length],
+  );
   const maxPriorityCount = useMemo(
     () => maxValue(report.priorityCounts.map((item) => item.count)),
     [report.priorityCounts],
@@ -286,35 +290,54 @@ function ClosedTicketsPanel({ report }: { report: ClosedTicketDateRangeResponse 
         />
         <Box
           sx={{
-            alignItems: "end",
-            display: "grid",
-            gap: 1,
-            gridTemplateColumns: `repeat(${Math.max(report.dailyCounts.length, 1)}, minmax(12px, 1fr))`,
-            minHeight: 190,
+            overflowX: "auto",
+            pb: 1,
           }}
         >
           {report.dailyCounts.length === 0 ? (
             <Typography color="text.secondary">Bu aralikta kapanan ticket yok.</Typography>
           ) : (
-            report.dailyCounts.map((item) => (
-              <Stack alignItems="center" justifyContent="flex-end" key={item.date} spacing={1} sx={{ minWidth: 0 }}>
-                <Typography color="text.secondary" variant="caption">
-                  {item.count}
-                </Typography>
-                <Box
-                  aria-label={`${formatDate(item.date)} gunluk kapanis`}
-                  sx={{
-                    bgcolor: "primary.main",
-                    borderRadius: "4px 4px 0 0",
-                    height: `${Math.max(8, (item.count / maxDailyCount) * 130)}px`,
-                    width: "100%",
-                  }}
-                />
-                <Typography color="text.secondary" noWrap variant="caption">
-                  {formatShortDate(item.date)}
-                </Typography>
-              </Stack>
-            ))
+            <Box
+              data-testid="closure-volume-chart"
+              sx={{
+                alignItems: "end",
+                display: "grid",
+                gap: 1,
+                gridTemplateColumns: `repeat(${report.dailyCounts.length}, minmax(30px, 1fr))`,
+                minHeight: 190,
+                minWidth: report.dailyCounts.length > 14 ? `${report.dailyCounts.length * 38}px` : "100%",
+              }}
+            >
+              {report.dailyCounts.map((item, index) => {
+                const showDateLabel = shouldShowClosureDateLabel(index, report.dailyCounts.length, dateLabelStep);
+                return (
+                  <Stack alignItems="center" justifyContent="flex-end" key={item.date} spacing={1} sx={{ minWidth: 0 }}>
+                    <Typography color="text.secondary" variant="caption">
+                      {item.count}
+                    </Typography>
+                    <Box
+                      aria-label={`${formatDate(item.date)} gunluk kapanis`}
+                      sx={{
+                        bgcolor: "primary.main",
+                        borderRadius: "4px 4px 0 0",
+                        height: `${Math.max(8, (item.count / maxDailyCount) * 130)}px`,
+                        width: "100%",
+                      }}
+                      title={`${formatDate(item.date)}: ${item.count} ticket`}
+                    />
+                    <Typography
+                      color="text.secondary"
+                      data-testid={showDateLabel ? "closure-volume-date-label" : undefined}
+                      noWrap
+                      sx={{ minHeight: 16, visibility: showDateLabel ? "visible" : "hidden" }}
+                      variant="caption"
+                    >
+                      {showDateLabel ? formatShortDate(item.date) : ""}
+                    </Typography>
+                  </Stack>
+                );
+              })}
+            </Box>
           )}
         </Box>
         <Divider />
@@ -575,6 +598,17 @@ function formatShortDate(value: string) {
     day: "2-digit",
     month: "2-digit",
   }).format(new Date(value));
+}
+
+function closureDateLabelStep(count: number) {
+  if (count <= 14) {
+    return 1;
+  }
+  return Math.ceil(count / 10);
+}
+
+function shouldShowClosureDateLabel(index: number, count: number, step: number) {
+  return index === 0 || index === count - 1 || index % step === 0;
 }
 
 function shortId(value: string) {

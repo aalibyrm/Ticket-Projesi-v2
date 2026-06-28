@@ -35,6 +35,7 @@ class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/actuator/health", "/actuator/info", "/actuator/prometheus").permitAll()
                         .requestMatchers(OPENAPI_ROUTES).permitAll()
+                        .requestMatchers("/internal/**").permitAll()
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
                         .requestMatchers("/api/reports/**").hasAnyRole("MANAGER", "ADMIN")
                         .anyRequest().denyAll())

@@ -44,6 +44,18 @@ export interface TicketResponse {
   updatedAt: string;
 }
 
+export interface TicketAgentSummaryResponse {
+  agentId?: string | null;
+  assigned: boolean;
+  assignedTeamId?: string | null;
+  displayName?: string | null;
+  email?: string | null;
+  resolvedTicketCount: number;
+  slaBreachedTicketCount: number;
+  slaCompliancePercentage: number | string;
+  slaMetTicketCount: number;
+}
+
 export interface TicketCommentResponse {
   authorId: string;
   body: string;

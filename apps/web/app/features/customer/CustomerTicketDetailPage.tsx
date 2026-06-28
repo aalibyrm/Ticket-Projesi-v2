@@ -1,13 +1,17 @@
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import AttachFileOutlinedIcon from "@mui/icons-material/AttachFileOutlined";
+import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
+import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import {
   Alert,
   Box,
   Button,
   Chip,
+  CircularProgress,
   Divider,
+  Drawer,
   IconButton,
   List,
   ListItem,
@@ -30,13 +34,15 @@ import { formatDateTime, formatFileSize } from "~/features/customer/formatters";
 import {
   useAddCustomerTicketComment,
   useAttachmentDownloadUrl,
+  useCustomerTicketAgentSummary,
   useCustomerTicket,
   useCustomerTicketConversationReadState,
   useCustomerTicketComments,
   useMarkCustomerTicketConversationRead,
   useUploadTicketAttachment,
 } from "~/features/customer/customerQueries";
-import type { TicketAttachmentResponse } from "~/features/customer/customerTypes";
+import type { TicketAgentSummaryResponse, TicketAttachmentResponse } from "~/features/customer/customerTypes";
+import { tmTokens } from "~/shared/theme/tmTokens";
 
 const commentSchema = z.string().trim().min(3).max(5000);
 const maxAttachmentBytes = 10 * 1024 * 1024;
@@ -47,8 +53,10 @@ export function CustomerTicketDetailPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [comment, setComment] = useState("");
   const [fileError, setFileError] = useState<string>();
+  const [isAgentDrawerOpen, setAgentDrawerOpen] = useState(false);
 
   const ticketQuery = useCustomerTicket(ticketId);
+  const agentSummaryQuery = useCustomerTicketAgentSummary(ticketId);
   const commentsQuery = useCustomerTicketComments(ticketId);
   const readStateQuery = useCustomerTicketConversationReadState(ticketId);
   const addComment = useAddCustomerTicketComment(ticketId);
@@ -151,6 +159,12 @@ export function CustomerTicketDetailPage() {
                 <TicketStatusChip status={ticket.status} />
                 <PriorityChip priority={ticket.priority} />
               </Stack>
+              <AgentSummaryTrigger
+                isError={agentSummaryQuery.isError}
+                isLoading={agentSummaryQuery.isLoading}
+                onOpen={() => setAgentDrawerOpen(true)}
+                summary={agentSummaryQuery.data}
+              />
             </Stack>
             <Typography color="text.secondary" variant="body2">
               Guncelleme: {formatDateTime(ticket.updatedAt)}
@@ -277,6 +291,175 @@ export function CustomerTicketDetailPage() {
           </Stack>
         </Paper>
       </Stack>
+
+      <AgentSummaryDrawer
+        isError={agentSummaryQuery.isError}
+        isLoading={agentSummaryQuery.isLoading}
+        onClose={() => setAgentDrawerOpen(false)}
+        open={isAgentDrawerOpen}
+        summary={agentSummaryQuery.data}
+      />
     </Stack>
   );
+}
+
+function AgentSummaryTrigger({
+  isError,
+  isLoading,
+  onOpen,
+  summary,
+}: {
+  isError: boolean;
+  isLoading: boolean;
+  onOpen: () => void;
+  summary?: TicketAgentSummaryResponse;
+}) {
+  if (isLoading) {
+    return (
+      <Stack alignItems="center" direction="row" spacing={1}>
+        <CircularProgress size={16} />
+        <Typography color="text.secondary" variant="body2">
+          Temsilci bilgisi yukleniyor
+        </Typography>
+      </Stack>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Typography color="error" variant="body2">
+        Temsilci bilgisi alinamadi
+      </Typography>
+    );
+  }
+
+  if (!summary?.assigned) {
+    return (
+      <Typography color="text.secondary" variant="body2">
+        Temsilci atanmadi
+      </Typography>
+    );
+  }
+
+  return (
+    <Button
+      color="inherit"
+      onClick={onOpen}
+      startIcon={<PersonOutlineOutlinedIcon />}
+      sx={{ alignSelf: "flex-start", px: 0 }}
+    >
+      Temsilci: {summary.displayName ?? "Destek Temsilcisi"}
+    </Button>
+  );
+}
+
+function AgentSummaryDrawer({
+  isError,
+  isLoading,
+  onClose,
+  open,
+  summary,
+}: {
+  isError: boolean;
+  isLoading: boolean;
+  onClose: () => void;
+  open: boolean;
+  summary?: TicketAgentSummaryResponse;
+}) {
+  return (
+    <Drawer
+      anchor="right"
+      onClose={onClose}
+      open={open}
+      PaperProps={{
+        sx: {
+          p: 3,
+          width: { sm: 420, xs: "100%" },
+        },
+      }}
+    >
+      <Stack spacing={3}>
+        <Stack alignItems="center" direction="row" justifyContent="space-between">
+          <Typography variant="h5">Temsilci detayi</Typography>
+          <IconButton aria-label="Temsilci detayini kapat" onClick={onClose}>
+            <CloseOutlinedIcon />
+          </IconButton>
+        </Stack>
+
+        {isLoading && (
+          <Stack alignItems="center" direction="row" spacing={1}>
+            <CircularProgress size={18} />
+            <Typography color="text.secondary">Temsilci bilgisi yukleniyor.</Typography>
+          </Stack>
+        )}
+
+        {isError && (
+          <Alert severity="error" variant="outlined">
+            Temsilci detaylari alinamadi.
+          </Alert>
+        )}
+
+        {!isLoading && !isError && !summary?.assigned && (
+          <Alert severity="info" variant="outlined">
+            Bu ticket icin henuz temsilci atanmadi.
+          </Alert>
+        )}
+
+        {!isLoading && !isError && summary?.assigned && (
+          <>
+            <Stack spacing={0.5}>
+              <Typography variant="h6">{summary.displayName ?? "Destek Temsilcisi"}</Typography>
+              {summary.email && (
+                <Typography color="text.secondary" variant="body2">
+                  {summary.email}
+                </Typography>
+              )}
+            </Stack>
+            <Box
+              sx={{
+                display: "grid",
+                gap: 1.5,
+                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+              }}
+            >
+              <AgentMetricBox label="SLA uyumu" value={formatPercentValue(summary.slaCompliancePercentage)} />
+              <AgentMetricBox label="Cozdugu ticket" value={summary.resolvedTicketCount.toString()} />
+              <AgentMetricBox label="Hedefte" value={summary.slaMetTicketCount.toString()} />
+              <AgentMetricBox label="Ihlal" value={summary.slaBreachedTicketCount.toString()} />
+            </Box>
+          </>
+        )}
+      </Stack>
+    </Drawer>
+  );
+}
+
+function AgentMetricBox({ label, value }: { label: string; value: string }) {
+  return (
+    <Box
+      sx={{
+        bgcolor: tmTokens.colors.surfaceLow,
+        border: "1px solid",
+        borderColor: tmTokens.colors.border,
+        borderRadius: tmTokens.radius.md,
+        minHeight: 92,
+        p: 2,
+      }}
+    >
+      <Typography color="text.secondary" variant="body2">
+        {label}
+      </Typography>
+      <Typography sx={{ mt: 1 }} variant="h5">
+        {value}
+      </Typography>
+    </Box>
+  );
+}
+
+function formatPercentValue(value: number | string) {
+  const parsed = typeof value === "string" ? Number(value) : value;
+  if (!Number.isFinite(parsed)) {
+    return "0.0%";
+  }
+  return `${parsed.toFixed(1)}%`;
 }

@@ -3,6 +3,7 @@ import {
   addCustomerTicketComment,
   createAttachmentDownloadUrl,
   createCustomerTicket,
+  getCustomerTicketAgentSummary,
   getCustomerTicket,
   getCustomerTicketConversationReadState,
   listCustomerTicketComments,
@@ -17,6 +18,7 @@ import {
 import type { CreateTicketRequest } from "~/features/customer/customerTypes";
 
 export const customerQueryKeys = {
+  agentSummary: (ticketId: string) => ["customer", "ticket", ticketId, "agent-summary"] as const,
   comments: (ticketId: string) => ["customer", "ticket", ticketId, "comments"] as const,
   notifications: (read?: boolean) => ["customer", "notifications", read ?? "all"] as const,
   products: ["customer", "products"] as const,
@@ -38,6 +40,14 @@ export function useCustomerTicket(ticketId: string) {
     enabled: Boolean(ticketId),
     queryFn: () => getCustomerTicket(ticketId),
     queryKey: customerQueryKeys.ticket(ticketId),
+  });
+}
+
+export function useCustomerTicketAgentSummary(ticketId: string) {
+  return useQuery({
+    enabled: Boolean(ticketId),
+    queryFn: () => getCustomerTicketAgentSummary(ticketId),
+    queryKey: customerQueryKeys.agentSummary(ticketId),
   });
 }
 

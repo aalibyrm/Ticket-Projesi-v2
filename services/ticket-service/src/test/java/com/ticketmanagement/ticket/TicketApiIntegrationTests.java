@@ -6,9 +6,11 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -45,11 +47,14 @@ import com.ticketmanagement.ticket.api.dto.ChangeTicketStatusRequest;
 import com.ticketmanagement.ticket.api.dto.ConversationReadStateResponse;
 import com.ticketmanagement.ticket.api.dto.CreateTicketRequest;
 import com.ticketmanagement.ticket.api.dto.ProductResponse;
+import com.ticketmanagement.ticket.api.dto.TicketAgentSummaryResponse;
 import com.ticketmanagement.ticket.api.dto.TicketAttachmentResponse;
 import com.ticketmanagement.ticket.api.dto.TicketCommentResponse;
 import com.ticketmanagement.ticket.api.dto.TicketResponse;
 import com.ticketmanagement.ticket.api.dto.TicketWorklogResponse;
 import com.ticketmanagement.ticket.api.error.ApiErrorResponse;
+import com.ticketmanagement.ticket.application.AgentSummaryLookupPort;
+import com.ticketmanagement.ticket.application.AgentSummaryMetrics;
 import com.ticketmanagement.ticket.application.AttachmentLookupContext;
 import com.ticketmanagement.ticket.application.TicketAttachmentPort;
 import com.ticketmanagement.ticket.domain.TicketPriority;
@@ -87,6 +92,9 @@ class TicketApiIntegrationTests {
 
     @MockBean
     private TicketAttachmentPort ticketAttachmentPort;
+
+    @MockBean
+    private AgentSummaryLookupPort agentSummaryLookupPort;
 
     @MockBean
     private KafkaTemplate<String, String> kafkaTemplate;
@@ -182,6 +190,75 @@ class TicketApiIntegrationTests {
         assertThat(otherDetail.getBody()).isNotNull();
         assertThat(otherDetail.getBody().errorCode()).isEqualTo("ACCESS_DENIED");
         verify(ticketAttachmentPort, times(1)).listAttachments(eq(created.id()), any(AttachmentLookupContext.class));
+    }
+
+    @Test
+    void customerCanRetrieveAssignedAgentSummaryForOwnTicketOnly() {
+        UUID customerId = UUID.randomUUID();
+        UUID otherCustomerId = UUID.randomUUID();
+        UUID adminId = UUID.randomUUID();
+        TicketResponse created = createTicket(customerId);
+        assignTicket(created.id(), WEB_APP_SUPPORT_MEMBER_ID, WEB_APP_SUPPORT_TEAM_ID, adminId);
+        when(agentSummaryLookupPort.getAgentSummary(WEB_APP_SUPPORT_MEMBER_ID))
+                .thenReturn(new AgentSummaryMetrics(
+                        WEB_APP_SUPPORT_MEMBER_ID,
+                        12,
+                        9,
+                        3,
+                        new BigDecimal("75.00")));
+
+        ResponseEntity<TicketAgentSummaryResponse> response = restTemplate.exchange(
+                "/api/tickets/{id}/agent-summary",
+                HttpMethod.GET,
+                new HttpEntity<>(actorHeaders(customerId)),
+                TicketAgentSummaryResponse.class,
+                created.id());
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().assigned()).isTrue();
+        assertThat(response.getBody().agentId()).isEqualTo(WEB_APP_SUPPORT_MEMBER_ID);
+        assertThat(response.getBody().displayName()).isEqualTo("Web Agent");
+        assertThat(response.getBody().email()).isEqualTo("agent.web@example.local");
+        assertThat(response.getBody().assignedTeamId()).isEqualTo(WEB_APP_SUPPORT_TEAM_ID);
+        assertThat(response.getBody().resolvedTicketCount()).isEqualTo(12);
+        assertThat(response.getBody().slaMetTicketCount()).isEqualTo(9);
+        assertThat(response.getBody().slaBreachedTicketCount()).isEqualTo(3);
+        assertThat(response.getBody().slaCompliancePercentage()).isEqualByComparingTo("75.00");
+
+        ResponseEntity<ApiErrorResponse> otherCustomerResponse = restTemplate.exchange(
+                "/api/tickets/{id}/agent-summary",
+                HttpMethod.GET,
+                new HttpEntity<>(actorHeaders(otherCustomerId)),
+                ApiErrorResponse.class,
+                created.id());
+
+        assertThat(otherCustomerResponse.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(otherCustomerResponse.getBody()).isNotNull();
+        assertThat(otherCustomerResponse.getBody().errorCode()).isEqualTo("ACCESS_DENIED");
+        verify(agentSummaryLookupPort, times(1)).getAgentSummary(WEB_APP_SUPPORT_MEMBER_ID);
+    }
+
+    @Test
+    void unassignedTicketAgentSummaryDoesNotCallReportingService() {
+        UUID customerId = UUID.randomUUID();
+        TicketResponse created = createTicket(customerId);
+
+        ResponseEntity<TicketAgentSummaryResponse> response = restTemplate.exchange(
+                "/api/tickets/{id}/agent-summary",
+                HttpMethod.GET,
+                new HttpEntity<>(actorHeaders(customerId)),
+                TicketAgentSummaryResponse.class,
+                created.id());
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().assigned()).isFalse();
+        assertThat(response.getBody().agentId()).isNull();
+        assertThat(response.getBody().displayName()).isNull();
+        assertThat(response.getBody().assignedTeamId()).isEqualTo(WEB_APP_SUPPORT_TEAM_ID);
+        assertThat(response.getBody().resolvedTicketCount()).isZero();
+        verifyNoInteractions(agentSummaryLookupPort);
     }
 
     @Test
@@ -627,6 +704,69 @@ class TicketApiIntegrationTests {
     }
 
     @Test
+    void waitingForCustomerCannotResumeBeforeCustomerReply() {
+        UUID customerId = UUID.randomUUID();
+        UUID adminId = UUID.randomUUID();
+        UUID agentId = WEB_APP_SUPPORT_MEMBER_ID;
+        TicketResponse created = createTicket(customerId);
+
+        assignTicket(created.id(), agentId, WEB_APP_SUPPORT_TEAM_ID, adminId);
+        ResponseEntity<TicketCommentResponse> staleComment = restTemplate.exchange(
+                "/api/tickets/{id}/comments/external",
+                HttpMethod.POST,
+                new HttpEntity<>(new AddExternalCommentRequest("This is an earlier customer comment."), actorHeaders(customerId)),
+                TicketCommentResponse.class,
+                created.id());
+        assertThat(staleComment.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        changeTicketStatus(created.id(), agentId, TicketStatus.IN_PROGRESS);
+        changeTicketStatus(created.id(), agentId, TicketStatus.WAITING_FOR_CUSTOMER);
+
+        ResponseEntity<ApiErrorResponse> response = restTemplate.exchange(
+                "/api/agent/tickets/{id}/status",
+                HttpMethod.PATCH,
+                new HttpEntity<>(new ChangeTicketStatusRequest(TicketStatus.IN_PROGRESS), actorHeaders(agentId)),
+                ApiErrorResponse.class,
+                created.id());
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().errorCode()).isEqualTo("INVALID_TICKET_OPERATION");
+        assertThat(response.getBody().message()).contains("Customer response is required");
+        assertThat(ticketStatusFor(created.id())).isEqualTo(TicketStatus.WAITING_FOR_CUSTOMER.name());
+    }
+
+    @Test
+    void waitingForCustomerCanResumeAfterCustomerReply() {
+        UUID customerId = UUID.randomUUID();
+        UUID adminId = UUID.randomUUID();
+        UUID agentId = WEB_APP_SUPPORT_MEMBER_ID;
+        TicketResponse created = createTicket(customerId);
+
+        assignTicket(created.id(), agentId, WEB_APP_SUPPORT_TEAM_ID, adminId);
+        changeTicketStatus(created.id(), agentId, TicketStatus.IN_PROGRESS);
+        changeTicketStatus(created.id(), agentId, TicketStatus.WAITING_FOR_CUSTOMER);
+
+        ResponseEntity<TicketCommentResponse> commentResponse = restTemplate.exchange(
+                "/api/tickets/{id}/comments/external",
+                HttpMethod.POST,
+                new HttpEntity<>(new AddExternalCommentRequest("I added the missing payment details."), actorHeaders(customerId)),
+                TicketCommentResponse.class,
+                created.id());
+        assertThat(commentResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        ResponseEntity<TicketResponse> response = restTemplate.exchange(
+                "/api/agent/tickets/{id}/status",
+                HttpMethod.PATCH,
+                new HttpEntity<>(new ChangeTicketStatusRequest(TicketStatus.IN_PROGRESS), actorHeaders(agentId)),
+                TicketResponse.class,
+                created.id());
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().status()).isEqualTo(TicketStatus.IN_PROGRESS);
+    }
+
+    @Test
     void publisherMarksOutboxEventPublishedAfterKafkaSend() {
         UUID customerId = UUID.randomUUID();
         TicketResponse created = createTicket(customerId);
@@ -786,6 +926,32 @@ class TicketApiIntegrationTests {
                 "select status from ticket_schema.tickets where id = ?",
                 String.class,
                 ticketId);
+    }
+
+    private TicketResponse assignTicket(UUID ticketId, UUID agentId, UUID teamId, UUID adminId) {
+        ResponseEntity<TicketResponse> response = restTemplate.exchange(
+                "/api/agent/tickets/{id}/assignment",
+                HttpMethod.PATCH,
+                new HttpEntity<>(new AssignTicketRequest(agentId, teamId), supportHeaders(adminId, "ADMIN")),
+                TicketResponse.class,
+                ticketId);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        return response.getBody();
+    }
+
+    private TicketResponse changeTicketStatus(UUID ticketId, UUID agentId, TicketStatus status) {
+        ResponseEntity<TicketResponse> response = restTemplate.exchange(
+                "/api/agent/tickets/{id}/status",
+                HttpMethod.PATCH,
+                new HttpEntity<>(new ChangeTicketStatusRequest(status), actorHeaders(agentId)),
+                TicketResponse.class,
+                ticketId);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        return response.getBody();
     }
 
     private void assertLifecycleEvent(UUID ticketId, String eventType, String payloadField, String payloadValue) {

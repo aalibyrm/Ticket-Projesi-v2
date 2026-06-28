@@ -11,6 +11,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -93,6 +94,12 @@ public class ReportingQueryService {
         return new AgentPerformanceReport(
                 agentPerformanceReportRepository.agentPerformanceRows(),
                 OffsetDateTime.now(ZoneOffset.UTC));
+    }
+
+    // Tek agent icin cozulmus ticket ve SLA ozetini servis ici kullanim icin dondurur.
+    @Transactional(readOnly = true)
+    public AgentSummary getAgentSummary(UUID agentId) {
+        return agentPerformanceReportRepository.agentSummary(agentId);
     }
 
     // SLA compliance yuzdesini MET/BREACHED sonuclari ve priority kirilimiyla dondurur.

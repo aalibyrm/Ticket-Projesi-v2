@@ -86,6 +86,8 @@ app:
   clients:
     file-service:
       base-url: ${FILE_SERVICE_URL:http://localhost:8082}
+    reporting-service:
+      base-url: ${REPORTING_SERVICE_URL:http://localhost:8085}
   security:
     jwt:
       enabled: ${TICKET_SERVICE_JWT_ENABLED:true}

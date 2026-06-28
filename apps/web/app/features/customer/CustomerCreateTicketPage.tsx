@@ -5,13 +5,12 @@ import {
   Alert,
   Box,
   Button,
+  ButtonBase,
   FormControl,
-  FormControlLabel,
   FormHelperText,
   FormLabel,
   Paper,
-  Radio,
-  RadioGroup,
+  Select,
   Stack,
   TextField,
   Typography,
@@ -28,9 +27,22 @@ import {
   useUploadTicketAttachment,
 } from "~/features/customer/customerQueries";
 import type { CreateTicketFormValues } from "~/features/customer/customerTypes";
+import { tmTokens } from "~/shared/theme/tmTokens";
 import { backendUuidSchema } from "~/shared/validation/uuid";
 
 const maxAttachmentBytes = 10 * 1024 * 1024;
+const fieldLabelSx = {
+  ...tmTokens.typography.labelSm,
+  color: tmTokens.colors.secondary,
+  mb: 1,
+  textTransform: "uppercase",
+} as const;
+const selectSx = {
+  "& .MuiNativeSelect-select": {
+    minHeight: 32,
+    py: 1,
+  },
+} as const;
 
 const createTicketSchema = z.object({
   attachment: z
@@ -131,9 +143,9 @@ export function CustomerCreateTicketPage() {
       >
         Geri don
       </Button>
-      <Paper sx={{ mx: "auto", p: 4, width: "min(100%, 760px)" }}>
-        <Stack spacing={3}>
-          <Stack spacing={0.75} sx={{ borderBottom: "1px solid", borderColor: "divider", pb: 2 }}>
+      <Paper sx={{ mx: "auto", p: { md: 5, xs: 3 }, width: "min(100%, 860px)" }}>
+        <Stack spacing={4}>
+          <Stack spacing={0.75} sx={{ borderBottom: "1px solid", borderColor: "divider", pb: 2.5 }}>
             <Typography variant="h4">Yeni Destek Talebi</Typography>
             <Typography color="text.secondary">Sorununu detaylica acikla ve gerekiyorsa dosya ekle.</Typography>
           </Stack>
@@ -156,58 +168,74 @@ export function CustomerCreateTicketPage() {
               control={control}
               name="summary"
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  error={Boolean(errors.summary)}
-                  helperText={errors.summary?.message}
-                  label="Konu"
-                  placeholder="Kisa bir ozet"
-                  variant="standard"
-                />
+                <FormControl error={Boolean(errors.summary)} fullWidth>
+                  <FormLabel htmlFor="ticket-summary" sx={fieldLabelSx}>
+                    Konu
+                  </FormLabel>
+                  <TextField
+                    {...field}
+                    error={Boolean(errors.summary)}
+                    hiddenLabel
+                    id="ticket-summary"
+                    placeholder="Kisa bir ozet"
+                    variant="standard"
+                  />
+                  {errors.summary?.message && <FormHelperText>{errors.summary.message}</FormHelperText>}
+                </FormControl>
               )}
             />
             <Controller
               control={control}
               name="productId"
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  error={Boolean(errors.productId)}
-                  helperText={errors.productId?.message}
-                  label="Kategori"
-                  SelectProps={{ native: true }}
-                  select
-                  variant="standard"
-                >
-                  <option value="">Kategori sec</option>
-                  {(productsQuery.data ?? []).map((product) => (
-                    <option key={product.id} value={product.id}>
-                      {product.name}
-                    </option>
-                  ))}
-                </TextField>
+                <FormControl error={Boolean(errors.productId)} fullWidth variant="standard">
+                  <FormLabel htmlFor="ticket-product" sx={fieldLabelSx}>
+                    Kategori
+                  </FormLabel>
+                  <Select
+                    {...field}
+                    displayEmpty
+                    inputProps={{ id: "ticket-product" }}
+                    native
+                    sx={selectSx}
+                  >
+                    <option value="">Kategori sec</option>
+                    {(productsQuery.data ?? []).map((product) => (
+                      <option key={product.id} value={product.id}>
+                        {product.name}
+                      </option>
+                    ))}
+                  </Select>
+                  {errors.productId?.message && <FormHelperText>{errors.productId.message}</FormHelperText>}
+                </FormControl>
               )}
             />
             <Controller
               control={control}
               name="topicCode"
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  error={Boolean(errors.topicCode)}
-                  helperText={errors.topicCode?.message ?? selectedTopic?.description}
-                  label="Talep tipi"
-                  SelectProps={{ native: true }}
-                  select
-                  variant="standard"
-                >
-                  <option value="">Talep tipi sec</option>
-                  {(topicsQuery.data ?? []).map((topic) => (
-                    <option key={topic.code} value={topic.code}>
-                      {topic.name}
-                    </option>
-                  ))}
-                </TextField>
+                <FormControl error={Boolean(errors.topicCode)} fullWidth variant="standard">
+                  <FormLabel htmlFor="ticket-topic" sx={fieldLabelSx}>
+                    Talep tipi
+                  </FormLabel>
+                  <Select
+                    {...field}
+                    displayEmpty
+                    inputProps={{ id: "ticket-topic" }}
+                    native
+                    sx={selectSx}
+                  >
+                    <option value="">Talep tipi sec</option>
+                    {(topicsQuery.data ?? []).map((topic) => (
+                      <option key={topic.code} value={topic.code}>
+                        {topic.name}
+                      </option>
+                    ))}
+                  </Select>
+                  {(errors.topicCode?.message ?? selectedTopic?.description) && (
+                    <FormHelperText>{errors.topicCode?.message ?? selectedTopic?.description}</FormHelperText>
+                  )}
+                </FormControl>
               )}
             />
             <Controller
@@ -215,12 +243,45 @@ export function CustomerCreateTicketPage() {
               name="priority"
               render={({ field }) => (
                 <FormControl error={Boolean(errors.priority)}>
-                  <FormLabel>Oncelik</FormLabel>
-                  <RadioGroup row {...field}>
-                    <FormControlLabel control={<Radio />} label="Dusuk" value="LOW" />
-                    <FormControlLabel control={<Radio />} label="Normal" value="MEDIUM" />
-                    <FormControlLabel control={<Radio />} label="Yuksek" value="HIGH" />
-                  </RadioGroup>
+                  <FormLabel sx={fieldLabelSx}>Oncelik</FormLabel>
+                  <Stack direction="row" flexWrap="wrap" gap={2} sx={{ mt: 1 }}>
+                    {[
+                      { label: "Dusuk", value: "LOW" },
+                      { label: "Normal", value: "MEDIUM" },
+                      { label: "Yuksek", value: "HIGH" },
+                    ].map((option) => {
+                      const isSelected = field.value === option.value;
+                      const isHigh = option.value === "HIGH";
+                      return (
+                        <ButtonBase
+                          aria-pressed={isSelected}
+                          key={option.value}
+                          onClick={() => field.onChange(option.value)}
+                          sx={{
+                            bgcolor: isSelected
+                              ? isHigh
+                                ? tmTokens.colors.primary
+                                : tmTokens.colors.surfaceHigh
+                              : tmTokens.colors.surfaceLow,
+                            border: "1px solid",
+                            borderColor: isHigh ? tmTokens.colors.primaryContainer : tmTokens.colors.border,
+                            borderRadius: tmTokens.radius.md,
+                            color: isSelected && isHigh ? "#ffffff" : isHigh ? tmTokens.colors.primaryContainer : tmTokens.colors.onSurface,
+                            minHeight: 48,
+                            minWidth: 112,
+                            px: 3,
+                            ...tmTokens.typography.bodyMdBold,
+                            "&:focus-visible": {
+                              outline: `2px solid ${tmTokens.colors.primaryContainer}`,
+                              outlineOffset: 2,
+                            },
+                          }}
+                        >
+                          {option.label}
+                        </ButtonBase>
+                      );
+                    })}
+                  </Stack>
                   {errors.priority?.message && <FormHelperText>{errors.priority.message}</FormHelperText>}
                 </FormControl>
               )}
@@ -229,20 +290,37 @@ export function CustomerCreateTicketPage() {
               control={control}
               name="description"
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  error={Boolean(errors.description)}
-                  helperText={errors.description?.message}
-                  label="Aciklama"
-                  minRows={6}
-                  multiline
-                  placeholder="Karsilastigin sorunu adimlariyla belirt..."
-                  variant="standard"
-                />
+                <FormControl error={Boolean(errors.description)} fullWidth>
+                  <FormLabel htmlFor="ticket-description" sx={fieldLabelSx}>
+                    Aciklama
+                  </FormLabel>
+                  <TextField
+                    {...field}
+                    error={Boolean(errors.description)}
+                    hiddenLabel
+                    id="ticket-description"
+                    minRows={7}
+                    multiline
+                    placeholder="Karsilastigin sorunu adimlariyla belirt..."
+                    variant="standard"
+                  />
+                  {errors.description?.message && <FormHelperText>{errors.description.message}</FormHelperText>}
+                </FormControl>
               )}
             />
             <Box>
-              <Button component="label" startIcon={<AttachFileOutlinedIcon />} variant="outlined">
+              <Button
+                component="label"
+                startIcon={<AttachFileOutlinedIcon />}
+                sx={{
+                  borderStyle: "dashed",
+                  borderRadius: tmTokens.radius.md,
+                  height: 58,
+                  justifyContent: "center",
+                  width: "100%",
+                }}
+                variant="outlined"
+              >
                 Dosya ekle
                 <input hidden type="file" {...register("attachment")} />
               </Button>
@@ -250,7 +328,7 @@ export function CustomerCreateTicketPage() {
                 {errors.attachment?.message ?? selectedFile?.name ?? "Opsiyonel, maksimum 10 MB."}
               </Typography>
             </Box>
-            <Button disabled={isBusy} sx={{ alignSelf: "flex-end", minWidth: 160 }} type="submit" variant="contained">
+            <Button disabled={isBusy} sx={{ alignSelf: "flex-end", minHeight: 48, minWidth: 200 }} type="submit" variant="contained">
               {isBusy ? "Gonderiliyor" : "Gonder"}
             </Button>
           </Stack>

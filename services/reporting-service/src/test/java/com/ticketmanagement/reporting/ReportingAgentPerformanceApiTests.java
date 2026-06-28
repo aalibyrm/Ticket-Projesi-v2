@@ -28,6 +28,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import com.ticketmanagement.reporting.api.dto.AgentSummaryResponse;
 import com.ticketmanagement.reporting.api.dto.AgentPerformanceReportResponse;
 import com.ticketmanagement.reporting.application.AgentWorklogProjectionCommand;
 import com.ticketmanagement.reporting.application.ReportingProjectionService;
@@ -150,12 +151,86 @@ class ReportingAgentPerformanceApiTests {
                 .andExpect(status().isForbidden());
     }
 
+    @Test
+    void internalAgentSummaryReturnsResolvedAndSlaCounts() throws Exception {
+        UUID agentId = UUID.randomUUID();
+        createTicketProjection(
+                "TCK-4211",
+                agentId,
+                ProjectionTicketStatus.CLOSED,
+                "2026-05-27T08:00:00Z",
+                "2026-05-27T10:00:00Z",
+                ProjectionSlaStatus.MET);
+        createTicketProjection(
+                "TCK-4212",
+                agentId,
+                ProjectionTicketStatus.CLOSED,
+                "2026-05-27T08:00:00Z",
+                "2026-05-27T11:00:00Z",
+                ProjectionSlaStatus.BREACHED);
+        createTicketProjection(
+                "TCK-4213",
+                agentId,
+                ProjectionTicketStatus.RESOLVED,
+                "2026-05-27T08:00:00Z",
+                null,
+                ProjectionSlaStatus.ACTIVE);
+        createTicketProjection(
+                "TCK-4214",
+                UUID.randomUUID(),
+                ProjectionTicketStatus.CLOSED,
+                "2026-05-27T08:00:00Z",
+                "2026-05-27T09:00:00Z",
+                ProjectionSlaStatus.MET);
+
+        String responseBody = mockMvc.perform(get("/internal/reports/agents/{agentId}/summary", agentId))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        AgentSummaryResponse response = objectMapper.readValue(responseBody, AgentSummaryResponse.class);
+        assertThat(response.agentId()).isEqualTo(agentId);
+        assertThat(response.resolvedTicketCount()).isEqualTo(3);
+        assertThat(response.slaMetTicketCount()).isEqualTo(1);
+        assertThat(response.slaBreachedTicketCount()).isEqualTo(1);
+        assertThat(response.slaCompliancePercentage()).isEqualByComparingTo("50.00");
+    }
+
+    @Test
+    void publicOpenApiDoesNotExposeInternalReports() throws Exception {
+        String responseBody = mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        assertThat(responseBody).doesNotContain("/internal/reports");
+        assertThat(responseBody).contains("/api/v1/reports/agents/performance");
+    }
+
     private UUID createTicketProjection(
             String ticketNumber,
             UUID assigneeId,
             ProjectionTicketStatus status,
             String openedAt,
             String closedAt) {
+        return createTicketProjection(
+                ticketNumber,
+                assigneeId,
+                status,
+                openedAt,
+                closedAt,
+                status == ProjectionTicketStatus.CLOSED ? ProjectionSlaStatus.MET : ProjectionSlaStatus.ACTIVE);
+    }
+
+    private UUID createTicketProjection(
+            String ticketNumber,
+            UUID assigneeId,
+            ProjectionTicketStatus status,
+            String openedAt,
+            String closedAt,
+            ProjectionSlaStatus slaStatus) {
         UUID ticketId = UUID.randomUUID();
         OffsetDateTime opened = OffsetDateTime.parse(openedAt);
         OffsetDateTime closed = closedAt == null ? null : OffsetDateTime.parse(closedAt);
@@ -173,7 +248,7 @@ class ReportingAgentPerformanceApiTests {
                 updatedAt,
                 closed,
                 opened.plusHours(8),
-                status == ProjectionTicketStatus.CLOSED ? ProjectionSlaStatus.MET : ProjectionSlaStatus.ACTIVE));
+                slaStatus));
         return ticketId;
     }
 

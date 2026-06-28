@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ticketmanagement.ticket.api.dto.TicketAgentSummaryResponse;
 import com.ticketmanagement.ticket.api.dto.TicketCommentResponse;
 import com.ticketmanagement.ticket.api.dto.TicketResponse;
 import com.ticketmanagement.ticket.domain.TicketCommentVisibility;
@@ -22,6 +23,8 @@ public class TicketQueryService {
     private final TicketJpaRepository ticketRepository;
     private final TicketMapper ticketMapper;
     private final TicketAttachmentPort ticketAttachmentPort;
+    private final ActorProfileDirectory actorProfileDirectory;
+    private final AgentSummaryLookupPort agentSummaryLookupPort;
 
     // Musterinin kendi ticket listesini en yeni kayitlar once gelecek sekilde getirir.
     @Transactional(readOnly = true)
@@ -43,6 +46,30 @@ public class TicketQueryService {
         }
 
         return ticketMapper.toResponse(ticket, ticketAttachmentPort.listAttachments(ticketId, context));
+    }
+
+    // Musterinin kendi ticket'ina atanmis agent icin sinirli performans ozetini getirir.
+    @Transactional(readOnly = true)
+    public TicketAgentSummaryResponse getAgentSummaryForCustomer(UUID customerId, UUID ticketId) {
+        TicketEntity ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> NotFoundException.ticket(ticketId));
+
+        if (!ticket.getCustomerId().equals(customerId)) {
+            throw ForbiddenOperationException.accessDenied();
+        }
+
+        UUID assigneeId = ticket.getAssigneeId();
+        if (assigneeId == null) {
+            return TicketAgentSummaryResponse.unassigned(ticket.getAssignedTeamId());
+        }
+
+        ActorProfileDirectory.ActorProfile profile = actorProfileDirectory.findByActorId(assigneeId)
+                .orElse(new ActorProfileDirectory.ActorProfile("Destek Temsilcisi", null));
+        return TicketAgentSummaryResponse.assigned(
+                agentSummaryLookupPort.getAgentSummary(assigneeId),
+                profile.displayName(),
+                profile.email(),
+                ticket.getAssignedTeamId());
     }
 
     // Musteriye sadece kendi ticket'ina ait external yorumlari dondurur.

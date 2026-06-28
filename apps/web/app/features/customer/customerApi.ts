@@ -4,6 +4,7 @@ import type {
   DownloadUrlResponse,
   NotificationResponse,
   ProductResponse,
+  TicketAgentSummaryResponse,
   TicketCommentResponse,
   TicketTopicResponse,
   TicketResponse,
@@ -18,6 +19,11 @@ export async function listCustomerTickets() {
 
 export async function getCustomerTicket(ticketId: string) {
   const response = await apiClient.get<TicketResponse>(`/api/tickets/${ticketId}`);
+  return response.data;
+}
+
+export async function getCustomerTicketAgentSummary(ticketId: string) {
+  const response = await apiClient.get<TicketAgentSummaryResponse>(`/api/tickets/${ticketId}/agent-summary`);
   return response.data;
 }
 

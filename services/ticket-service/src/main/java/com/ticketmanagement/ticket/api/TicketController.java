@@ -24,6 +24,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.ticketmanagement.ticket.api.dto.AddExternalCommentRequest;
 import com.ticketmanagement.ticket.api.dto.ConversationReadStateResponse;
 import com.ticketmanagement.ticket.api.dto.CreateTicketRequest;
+import com.ticketmanagement.ticket.api.dto.TicketAgentSummaryResponse;
 import com.ticketmanagement.ticket.api.dto.TicketCommentResponse;
 import com.ticketmanagement.ticket.api.dto.TicketResponse;
 import com.ticketmanagement.ticket.application.AttachmentLookupContext;
@@ -79,6 +80,16 @@ class TicketController {
         UUID customerId = resolveCustomerId(jwt, localActorId);
         return ticketQueryService.getTicketForCustomer(customerId, id, new AttachmentLookupContext(
                 resolveBearerToken(authorizationHeader)));
+    }
+
+    // Musterinin kendi ticket'indaki atanmis agent ozetini dondurur.
+    @GetMapping("/{id}/agent-summary")
+    TicketAgentSummaryResponse getOwnTicketAgentSummary(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestHeader(value = "X-Actor-Id", required = false) UUID localActorId,
+            @PathVariable UUID id) {
+        UUID customerId = resolveCustomerId(jwt, localActorId);
+        return ticketQueryService.getAgentSummaryForCustomer(customerId, id);
     }
 
     // Musterinin kendi ticket'indaki external yorumlari okumasini saglar.
