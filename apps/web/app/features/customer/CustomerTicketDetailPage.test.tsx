@@ -63,6 +63,7 @@ describe("CustomerTicketDetailPage", () => {
           assignedTeamId: "20000000-0000-0000-0000-000000000008",
           displayName: "Payment Agent",
           email: "agent.payment@example.local",
+          metricsAvailable: true,
           resolvedTicketCount: 14,
           slaBreachedTicketCount: 2,
           slaCompliancePercentage: 87.5,
@@ -92,5 +93,53 @@ describe("CustomerTicketDetailPage", () => {
     expect(screen.getByText("87.5%")).toBeInTheDocument();
     expect(screen.getByText("Cozdugu ticket")).toBeInTheDocument();
     expect(screen.getAllByText("14").length).toBeGreaterThan(0);
+  });
+
+  it("shows assigned agent fallback when agent summary metrics are unavailable", async () => {
+    const ticketId = "33333333-3333-3333-3333-333333333333";
+
+    server.use(
+      http.get("*/api/v1/tickets/:ticketId", () =>
+        HttpResponse.json({
+          assigneeId: "40000000-0000-0000-0000-000000000008",
+          assignedTeamId: "20000000-0000-0000-0000-000000000008",
+          attachments: [],
+          createdAt: "2026-05-30T08:00:00Z",
+          customerId: "80000000-0000-0000-0000-000000000001",
+          description: "Odeme akisi kart dogrulamasindan sonra hata veriyor.",
+          id: ticketId,
+          priority: "HIGH",
+          productCode: "MOBILE",
+          productId: "33333333-3333-3333-3333-333333333333",
+          productName: "Mobile App",
+          status: "IN_PROGRESS",
+          summary: "Odeme olmuyor",
+          ticketNumber: "TCK-2026-0045",
+          updatedAt: "2026-05-30T08:30:00Z",
+        }),
+      ),
+      http.get("*/api/v1/tickets/:ticketId/agent-summary", () =>
+        HttpResponse.json({ errorCode: "SERVICE_UNAVAILABLE" }, { status: 503 }),
+      ),
+      http.get("*/api/v1/tickets/:ticketId/comments", () => HttpResponse.json([])),
+      http.get("*/api/v1/tickets/:ticketId/comments/read-state", () =>
+        HttpResponse.json({
+          lastReadAt: null,
+          ticketId,
+          unreadCount: 0,
+        }),
+      ),
+    );
+
+    renderPage(ticketId);
+
+    await waitFor(() => expect(screen.getByText("Odeme olmuyor")).toBeInTheDocument());
+    expect(screen.queryByText("Temsilci bilgisi alinamadi")).not.toBeInTheDocument();
+    const agentButton = await screen.findByRole("button", { name: /Temsilci: Payment Agent/i });
+    fireEvent.click(agentButton);
+
+    expect(await screen.findByText("Temsilci detayi")).toBeInTheDocument();
+    expect(screen.getByText("Payment Agent")).toBeInTheDocument();
+    expect(screen.getByText("Performans metrikleri su an alinamadi.")).toBeInTheDocument();
   });
 });

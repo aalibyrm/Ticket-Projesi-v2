@@ -50,6 +50,7 @@ export interface TicketAgentSummaryResponse {
   assignedTeamId?: string | null;
   displayName?: string | null;
   email?: string | null;
+  metricsAvailable?: boolean;
   resolvedTicketCount: number;
   slaBreachedTicketCount: number;
   slaCompliancePercentage: number | string;

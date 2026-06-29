@@ -134,21 +134,30 @@ export function CustomerCreateTicketPage() {
   const isBusy = isSubmitting || createTicket.isPending || uploadAttachment.isPending;
 
   return (
-    <Stack spacing={3}>
-      <Button
-        color="inherit"
-        onClick={() => navigate("/tickets")}
-        startIcon={<ArrowBackOutlinedIcon />}
-        sx={{ alignSelf: "flex-start" }}
-      >
-        Geri don
-      </Button>
-      <Paper sx={{ mx: "auto", p: { md: 5, xs: 3 }, width: "min(100%, 860px)" }}>
-        <Stack spacing={4}>
-          <Stack spacing={0.75} sx={{ borderBottom: "1px solid", borderColor: "divider", pb: 2.5 }}>
-            <Typography variant="h4">Yeni Destek Talebi</Typography>
-            <Typography color="text.secondary">Sorununu detaylica acikla ve gerekiyorsa dosya ekle.</Typography>
-          </Stack>
+    <Box
+      sx={{
+        alignItems: { md: "center", xs: "stretch" },
+        display: "flex",
+        justifyContent: "center",
+        minHeight: { md: `calc(100vh - ${tmTokens.layout.pageMargin * 2}px)`, xs: "auto" },
+        width: "100%",
+      }}
+    >
+      <Stack spacing={{ md: 1.5, xs: 2 }} sx={{ mx: "auto", width: "min(100%, 820px)" }}>
+        <Button
+          color="inherit"
+          onClick={() => navigate("/tickets")}
+          startIcon={<ArrowBackOutlinedIcon />}
+          sx={{ alignSelf: "flex-start" }}
+        >
+          Geri don
+        </Button>
+        <Paper sx={{ p: { md: 4, xs: 3 }, width: "100%" }}>
+          <Stack spacing={{ md: 2.25, xs: 3 }}>
+            <Stack spacing={0.75} sx={{ borderBottom: "1px solid", borderColor: "divider", pb: { md: 1.75, xs: 2.5 } }}>
+              <Typography variant="h4">Yeni Destek Talebi</Typography>
+              <Typography color="text.secondary">Sorununu detaylica acikla ve gerekiyorsa dosya ekle.</Typography>
+            </Stack>
 
           {(createTicket.isError || uploadAttachment.isError) && (
             <Alert severity="error" variant="outlined">
@@ -162,7 +171,7 @@ export function CustomerCreateTicketPage() {
             data-testid="create-ticket-form"
             noValidate
             onSubmit={handleSubmit(submitForm)}
-            spacing={3}
+            spacing={{ md: 2, xs: 3 }}
           >
             <Controller
               control={control}
@@ -299,7 +308,7 @@ export function CustomerCreateTicketPage() {
                     error={Boolean(errors.description)}
                     hiddenLabel
                     id="ticket-description"
-                    minRows={7}
+                    minRows={4}
                     multiline
                     placeholder="Karsilastigin sorunu adimlariyla belirt..."
                     variant="standard"
@@ -308,32 +317,35 @@ export function CustomerCreateTicketPage() {
                 </FormControl>
               )}
             />
-            <Box>
-              <Button
-                component="label"
-                startIcon={<AttachFileOutlinedIcon />}
-                sx={{
-                  borderStyle: "dashed",
-                  borderRadius: tmTokens.radius.md,
-                  height: 58,
-                  justifyContent: "center",
-                  width: "100%",
-                }}
-                variant="outlined"
-              >
-                Dosya ekle
-                <input hidden type="file" {...register("attachment")} />
+            <Stack alignItems={{ md: "flex-end", xs: "stretch" }} direction={{ md: "row", xs: "column" }} spacing={2}>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Button
+                  component="label"
+                  startIcon={<AttachFileOutlinedIcon />}
+                  sx={{
+                    borderStyle: "dashed",
+                    borderRadius: tmTokens.radius.md,
+                    height: 52,
+                    justifyContent: "center",
+                    width: "100%",
+                  }}
+                  variant="outlined"
+                >
+                  Dosya ekle
+                  <input hidden type="file" {...register("attachment")} />
+                </Button>
+                <Typography color={errors.attachment ? "error" : "text.secondary"} sx={{ mt: 0.75 }} variant="body2">
+                  {errors.attachment?.message ?? selectedFile?.name ?? "Opsiyonel, maksimum 10 MB."}
+                </Typography>
+              </Box>
+              <Button disabled={isBusy} sx={{ minHeight: 48, minWidth: { md: 200, xs: "100%" } }} type="submit" variant="contained">
+                {isBusy ? "Gonderiliyor" : "Gonder"}
               </Button>
-              <Typography color={errors.attachment ? "error" : "text.secondary"} sx={{ mt: 1 }} variant="body2">
-                {errors.attachment?.message ?? selectedFile?.name ?? "Opsiyonel, maksimum 10 MB."}
-              </Typography>
-            </Box>
-            <Button disabled={isBusy} sx={{ alignSelf: "flex-end", minHeight: 48, minWidth: 200 }} type="submit" variant="contained">
-              {isBusy ? "Gonderiliyor" : "Gonder"}
-            </Button>
+            </Stack>
           </Stack>
         </Stack>
-      </Paper>
-    </Stack>
+        </Paper>
+      </Stack>
+    </Box>
   );
 }

@@ -5,14 +5,17 @@ import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Alert,
+  Box,
   Button,
   Divider,
+  FormControl,
   IconButton,
+  FormLabel,
   List,
   ListItem,
   ListItemText,
   MenuItem,
-  Paper,
+  Select,
   Stack,
   TextField,
   Tooltip,
@@ -24,6 +27,7 @@ import { z } from "zod";
 import {
   useAddAgentWorklog,
   useAgentAttachmentDownloadUrl,
+  useAgentTicketComments,
   useAgentWorklogs,
   useAssignAgentTicket,
   useChangeAgentTicketStatus,
@@ -31,6 +35,8 @@ import {
   useSupportTeams,
 } from "~/features/agent/agentQueries";
 import type {
+  SupportTeamResponse,
+  TeamMemberResponse,
   TicketAttachmentResponse,
   TicketResponse,
   TicketStatus,
@@ -38,6 +44,7 @@ import type {
 import { selectAuthUser } from "~/features/auth/authSlice";
 import { formatDate, formatDateTime, formatFileSize } from "~/features/customer/formatters";
 import { useAppSelector } from "~/shared/store/hooks";
+import { tmTokens } from "~/shared/theme/tmTokens";
 import { actorDisplayName } from "~/shared/userDisplay";
 import { backendUuidSchema } from "~/shared/validation/uuid";
 
@@ -70,16 +77,165 @@ const worklogSchema = z.object({
 
 type WorklogFormValues = z.input<typeof worklogSchema>;
 
+const menuProps = {
+  PaperProps: {
+    sx: {
+      border: `1px solid ${tmTokens.colors.border}`,
+      boxShadow: "none",
+      maxHeight: 280,
+      maxWidth: 300,
+      mt: 0.5,
+      "& .MuiMenuItem-root": {
+        minHeight: 44,
+      },
+    },
+  },
+};
+
+const panelFieldSx = {
+  "& .MuiInputLabel-root": {
+    color: tmTokens.colors.secondary,
+    ...tmTokens.typography.labelSm,
+    textTransform: "uppercase",
+  },
+  "& .MuiInputLabel-root.Mui-focused": {
+    color: tmTokens.colors.secondary,
+  },
+  "& .MuiOutlinedInput-root": {
+    borderRadius: `${tmTokens.radius.md}px`,
+    ...tmTokens.typography.bodyMd,
+    "& fieldset": {
+      borderColor: tmTokens.colors.border,
+    },
+    "&:hover fieldset": {
+      borderColor: tmTokens.colors.border,
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: tmTokens.colors.primaryContainer,
+      borderWidth: 1,
+    },
+  },
+} as const;
+
+const assignmentFieldSx = {
+  gap: 0.75,
+  minWidth: 0,
+} as const;
+
+const assignmentLabelSx = {
+  color: tmTokens.colors.secondary,
+  ...tmTokens.typography.labelSm,
+  textTransform: "uppercase",
+} as const;
+
+const assignmentSelectSx = {
+  borderRadius: `${tmTokens.radius.md}px`,
+  ...tmTokens.typography.bodyMd,
+  "& .MuiSelect-select": {
+    alignItems: "center",
+    display: "flex",
+    minHeight: 24,
+    minWidth: 0,
+    py: 1.25,
+  },
+  "& fieldset": {
+    borderColor: tmTokens.colors.border,
+  },
+  "&:hover fieldset": {
+    borderColor: tmTokens.colors.border,
+  },
+  "&.Mui-focused fieldset": {
+    borderColor: tmTokens.colors.primaryContainer,
+    borderWidth: 1,
+  },
+} as const;
+
+function teamName(team: SupportTeamResponse) {
+  return team.name;
+}
+
+function teamMeta(team: SupportTeamResponse) {
+  return `${team.departmentCode} / ${team.code}`;
+}
+
+function memberName(member: TeamMemberResponse, user: ReturnType<typeof selectAuthUser>) {
+  return member.displayName ?? actorDisplayName(member.actorId, user, "Agent");
+}
+
+function SectionTitle({ children }: { children: string }) {
+  return (
+    <Typography sx={{ color: tmTokens.colors.onSurface, ...tmTokens.typography.headlineSm }}>
+      {children}
+    </Typography>
+  );
+}
+
+function StatusValue({ label, value }: { label: string; value: string }) {
+  return (
+    <Box
+      sx={{
+        border: `1px solid ${tmTokens.colors.border}`,
+        borderRadius: `${tmTokens.radius.md}px`,
+        px: 1.5,
+        py: 1.25,
+      }}
+    >
+      <Typography
+        sx={{
+          color: tmTokens.colors.secondary,
+          textTransform: "uppercase",
+          ...tmTokens.typography.labelSm,
+        }}
+      >
+        {label}
+      </Typography>
+      <Typography sx={{ color: tmTokens.colors.onSurface, mt: 0.5, ...tmTokens.typography.bodyMdBold }}>
+        {value}
+      </Typography>
+    </Box>
+  );
+}
+
+function MenuItemContent({ primary, secondary }: { primary: string; secondary?: string }) {
+  return (
+    <Stack sx={{ minWidth: 0, width: "100%" }}>
+      <Typography noWrap sx={{ color: tmTokens.colors.onSurface, ...tmTokens.typography.bodyMd }}>
+        {primary}
+      </Typography>
+      {secondary && (
+        <Typography noWrap sx={{ color: tmTokens.colors.secondary, ...tmTokens.typography.labelSm }}>
+          {secondary}
+        </Typography>
+      )}
+    </Stack>
+  );
+}
+
+function SelectValueText({ muted = false, value }: { muted?: boolean; value: string }) {
+  return (
+    <Typography
+      component="span"
+      noWrap
+      sx={{
+        color: muted ? tmTokens.colors.secondary : tmTokens.colors.onSurface,
+        minWidth: 0,
+        ...tmTokens.typography.bodyMd,
+      }}
+    >
+      {value}
+    </Typography>
+  );
+}
+
 export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
   const user = useAppSelector(selectAuthUser);
   const statusMutation = useChangeAgentTicketStatus(ticket.id);
   const assignMutation = useAssignAgentTicket(ticket.id);
+  const commentsQuery = useAgentTicketComments(ticket.id);
   const worklogsQuery = useAgentWorklogs(ticket.id);
   const addWorklog = useAddAgentWorklog(ticket.id);
   const downloadUrl = useAgentAttachmentDownloadUrl();
-  const statusOptions = allowedStatusTransitions[ticket.status];
   const teamsQuery = useSupportTeams();
-  const [targetStatus, setTargetStatus] = useState<TicketStatus | "">(statusOptions[0] ?? "");
   const [assigneeId, setAssigneeId] = useState(ticket.assigneeId ?? "");
   const [assignedTeamId, setAssignedTeamId] = useState(ticket.assignedTeamId ?? "");
   const [assignmentError, setAssignmentError] = useState<string>();
@@ -100,10 +256,9 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
   });
 
   useEffect(() => {
-    setTargetStatus(allowedStatusTransitions[ticket.status][0] ?? "");
     setAssigneeId(ticket.assigneeId ?? "");
     setAssignedTeamId(ticket.assignedTeamId ?? "");
-  }, [ticket.assignedTeamId, ticket.assigneeId, ticket.id, ticket.status]);
+  }, [ticket.assignedTeamId, ticket.assigneeId, ticket.id]);
 
   useEffect(() => {
     if (!teamMembersQuery.data || !assigneeId) {
@@ -114,11 +269,8 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
     }
   }, [assigneeId, teamMembersQuery.data]);
 
-  async function changeStatus() {
-    if (!targetStatus) {
-      return;
-    }
-    await statusMutation.mutateAsync({ status: targetStatus });
+  async function changeStatus(status: TicketStatus) {
+    await statusMutation.mutateAsync({ status });
   }
 
   async function submitAssignment() {
@@ -175,163 +327,234 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
   const teamMembers = teamMembersQuery.data ?? [];
   const selectedTeamInTeams = teams.some((team) => team.id === assignedTeamId);
   const selectedAssigneeInMembers = teamMembers.some((member) => member.actorId === assigneeId);
+  const selectedTeam = teams.find((team) => team.id === assignedTeamId);
+  const selectedAssignee = teamMembers.find((member) => member.actorId === assigneeId);
+  const isCurrentAssignee = Boolean(user?.id && ticket.assigneeId === user.id);
+  const canShowAssignment = !ticket.assigneeId;
+  const waitingSince = new Date(ticket.updatedAt).getTime();
+  const hasCustomerExternalReply = (commentsQuery.data ?? []).some(
+    (comment) =>
+      comment.authorId === ticket.customerId
+      && comment.visibility === "EXTERNAL"
+      && new Date(comment.createdAt).getTime() > waitingSince,
+  );
+  const statusOptions = allowedStatusTransitions[ticket.status].filter(
+    (status) => ticket.status !== "WAITING_FOR_CUSTOMER" || status !== "IN_PROGRESS" || hasCustomerExternalReply,
+  );
 
   return (
     <Stack
       component="aside"
-      spacing={2}
+      spacing={2.25}
       sx={{
         bgcolor: "background.paper",
         borderLeft: "1px solid",
         borderColor: "divider",
-        flex: "0 0 360px",
+        flex: "0 0 320px",
         minHeight: 0,
+        msOverflowStyle: "none",
         overflowY: "auto",
-        p: 2.5,
+        px: 2,
+        py: 2.5,
+        scrollbarWidth: "none",
+        "&::-webkit-scrollbar": {
+          display: "none",
+        },
       }}
     >
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        <Stack spacing={2}>
-          <Typography variant="h6">Aksiyonlar</Typography>
-          {(statusMutation.isError || assignMutation.isError || assignmentError) && (
-            <Alert severity="error" variant="outlined">
-              {assignmentError ?? "Aksiyon kaydedilemedi."}
-            </Alert>
-          )}
-          {(teamsQuery.isError || teamMembersQuery.isError) && (
-            <Alert severity="error" variant="outlined">
-              Ekip katalogu alinamadi.
-            </Alert>
-          )}
-          <TextField
-            label="Sonraki status"
-            onChange={(event) => setTargetStatus(event.target.value as TicketStatus)}
-            select
-            size="small"
-            value={targetStatus}
-          >
+      {isCurrentAssignee && (
+        <>
+          <Stack spacing={1.5}>
+            <SectionTitle>Aksiyonlar</SectionTitle>
+            {statusMutation.isError && (
+              <Alert severity="error" variant="outlined">
+                Aksiyon kaydedilemedi.
+              </Alert>
+            )}
+            <StatusValue label="Mevcut status" value={statusLabels[ticket.status]} />
+            {commentsQuery.isError && ticket.status === "WAITING_FOR_CUSTOMER" && (
+              <Alert severity="warning" variant="outlined">
+                Musteri yanit durumu kontrol edilemedi.
+              </Alert>
+            )}
             {statusOptions.length === 0 ? (
-              <MenuItem value="">Gecis yok</MenuItem>
+              <Typography color="text.secondary" sx={tmTokens.typography.bodyMd}>
+                Uygun statu gecisi yok.
+              </Typography>
             ) : (
-              statusOptions.map((status) => (
-                <MenuItem key={status} value={status}>
-                  {statusLabels[status]}
-                </MenuItem>
+              statusOptions.map((status, index) => (
+                <Button
+                  disabled={statusMutation.isPending}
+                  fullWidth
+                  key={status}
+                  onClick={() => void changeStatus(status)}
+                  startIcon={<SaveOutlinedIcon />}
+                  variant={index === 0 ? "contained" : "outlined"}
+                >
+                  {statusLabels[status]} yap
+                </Button>
               ))
             )}
-          </TextField>
-          <Button
-            disabled={!targetStatus || statusMutation.isPending}
-            onClick={() => void changeStatus()}
-            startIcon={<SaveOutlinedIcon />}
-            variant="contained"
-          >
-            Status guncelle
-          </Button>
-          <Divider />
-          <Button
-            disabled={assignMutation.isPending}
-            onClick={() => void assignToMe()}
-            startIcon={<PersonAddAltOutlinedIcon />}
-            variant="outlined"
-          >
-            Bana ata
-          </Button>
-          <TextField
-            disabled={teamsQuery.isLoading}
-            label="Ekip"
-            onChange={(event) => {
-              setAssignedTeamId(event.target.value);
-              setAssigneeId("");
-            }}
-            SelectProps={{ native: true }}
-            select
-            size="small"
-            value={assignedTeamId}
-            variant="standard"
-          >
-            <option value="">{teamsQuery.isLoading ? "Ekipler yukleniyor" : "Ekip sec"}</option>
-            {assignedTeamId && !selectedTeamInTeams && (
-              <option value={assignedTeamId}>{assignedTeamId}</option>
-            )}
-            {teams.map((team) => (
-              <option key={team.id} value={team.id}>
-                {team.name} / {team.departmentCode} / {team.code}
-              </option>
-            ))}
-          </TextField>
-          <TextField
-            disabled={!assignedTeamId || teamMembersQuery.isLoading}
-            label="Agent"
-            onChange={(event) => setAssigneeId(event.target.value)}
-            SelectProps={{ native: true }}
-            select
-            size="small"
-            value={assigneeId}
-            variant="standard"
-          >
-            <option value="">
-              {!assignedTeamId
-                ? "Once ekip sec"
-                : teamMembersQuery.isLoading
-                  ? "Agentlar yukleniyor"
-                  : "Agent sec"}
-            </option>
-            {assigneeId && !selectedAssigneeInMembers && (
-              <option value={assigneeId}>{actorDisplayName(assigneeId, user, "Agent")}</option>
-            )}
-            {teamMembers.map((member) => (
-              <option key={member.actorId} value={member.actorId}>
-                {member.displayName ?? actorDisplayName(member.actorId, user, "Agent")}
-                {member.teamLead ? " / Lead" : ""}
-              </option>
-            ))}
-          </TextField>
-          <Button disabled={assignMutation.isPending} onClick={() => void submitAssignment()} variant="outlined">
-            Atamayi kaydet
-          </Button>
-        </Stack>
-      </Paper>
+          </Stack>
 
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        <Stack component="form" onSubmit={handleSubmit((values) => void submitWorklog(values))} spacing={2}>
-          <Typography variant="h6">Worklog</Typography>
-          {addWorklog.isError && (
+          <Divider />
+        </>
+      )}
+
+      {canShowAssignment && (
+        <>
+          {(assignMutation.isError || assignmentError || teamsQuery.isError || teamMembersQuery.isError) && (
             <Alert severity="error" variant="outlined">
-              Worklog kaydedilemedi.
+              {assignmentError ?? (teamsQuery.isError || teamMembersQuery.isError ? "Ekip katalogu alinamadi." : "Atama kaydedilemedi.")}
             </Alert>
           )}
-          <TextField
-            error={Boolean(errors.workDate)}
-            helperText={errors.workDate?.message}
-            label="Tarih"
-            size="small"
-            type="date"
-            {...register("workDate")}
-            InputLabelProps={{ shrink: true }}
-          />
-          <TextField
-            error={Boolean(errors.durationMinutes)}
-            helperText={errors.durationMinutes?.message}
-            label="Sure"
-            size="small"
-            type="number"
-            {...register("durationMinutes")}
-          />
-          <TextField
-            error={Boolean(errors.description)}
-            helperText={errors.description?.message}
-            label="Aciklama"
-            minRows={3}
-            multiline
-            size="small"
-            {...register("description")}
-          />
-          <Button disabled={addWorklog.isPending} startIcon={<TimerOutlinedIcon />} type="submit" variant="outlined">
-            Worklog ekle
-          </Button>
-        </Stack>
-        <Divider sx={{ my: 2 }} />
+
+          <Stack spacing={1.5}>
+            <SectionTitle>Atama</SectionTitle>
+            <Button
+              disabled={assignMutation.isPending}
+              fullWidth
+              onClick={() => void assignToMe()}
+              startIcon={<PersonAddAltOutlinedIcon />}
+              variant="outlined"
+            >
+              Bana ata
+            </Button>
+            <FormControl disabled={teamsQuery.isLoading} fullWidth size="small" sx={assignmentFieldSx}>
+              <FormLabel id="agent-team-label" sx={assignmentLabelSx}>
+                Ekip
+              </FormLabel>
+              <Select
+                displayEmpty
+                labelId="agent-team-label"
+                MenuProps={menuProps}
+                onChange={(event) => {
+                  setAssignedTeamId(event.target.value);
+                  setAssigneeId("");
+                }}
+                renderValue={(value) => {
+                  if (!value) {
+                    return <SelectValueText muted value={teamsQuery.isLoading ? "Ekipler yukleniyor" : "Ekip sec"} />;
+                  }
+                  return <SelectValueText value={selectedTeam ? teamName(selectedTeam) : value} />;
+                }}
+                sx={assignmentSelectSx}
+                value={assignedTeamId}
+              >
+                <MenuItem value="">{teamsQuery.isLoading ? "Ekipler yukleniyor" : "Ekip sec"}</MenuItem>
+                {assignedTeamId && !selectedTeamInTeams && (
+                  <MenuItem value={assignedTeamId}>
+                    <MenuItemContent primary={assignedTeamId} />
+                  </MenuItem>
+                )}
+                {teams.map((team) => (
+                  <MenuItem key={team.id} value={team.id}>
+                    <MenuItemContent primary={teamName(team)} secondary={teamMeta(team)} />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl disabled={!assignedTeamId || teamMembersQuery.isLoading} fullWidth size="small" sx={assignmentFieldSx}>
+              <FormLabel id="agent-assignee-label" sx={assignmentLabelSx}>
+                Agent
+              </FormLabel>
+              <Select
+                displayEmpty
+                labelId="agent-assignee-label"
+                MenuProps={menuProps}
+                onChange={(event) => setAssigneeId(event.target.value)}
+                renderValue={(value) => {
+                  if (!value) {
+                    if (!assignedTeamId) {
+                      return <SelectValueText muted value="Once ekip sec" />;
+                    }
+                    return <SelectValueText muted value={teamMembersQuery.isLoading ? "Agentlar yukleniyor" : "Agent sec"} />;
+                  }
+                  return (
+                    <SelectValueText
+                      value={selectedAssignee ? memberName(selectedAssignee, user) : actorDisplayName(value, user, "Agent")}
+                    />
+                  );
+                }}
+                sx={assignmentSelectSx}
+                value={assigneeId}
+              >
+                <MenuItem value="">
+                  {!assignedTeamId
+                    ? "Once ekip sec"
+                    : teamMembersQuery.isLoading
+                      ? "Agentlar yukleniyor"
+                      : "Agent sec"}
+                </MenuItem>
+                {assigneeId && !selectedAssigneeInMembers && (
+                  <MenuItem value={assigneeId}>
+                    <MenuItemContent primary={actorDisplayName(assigneeId, user, "Agent")} />
+                  </MenuItem>
+                )}
+                {teamMembers.map((member) => (
+                  <MenuItem key={member.actorId} value={member.actorId}>
+                    <MenuItemContent
+                      primary={memberName(member, user)}
+                      secondary={member.teamLead ? "Lead" : member.email ?? member.teamCode}
+                    />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Button disabled={assignMutation.isPending} fullWidth onClick={() => void submitAssignment()} variant="outlined">
+              Atamayi kaydet
+            </Button>
+          </Stack>
+
+          <Divider />
+        </>
+      )}
+
+      <Stack component="form" onSubmit={handleSubmit((values) => void submitWorklog(values))} spacing={1.5}>
+        <SectionTitle>Worklog</SectionTitle>
+        {addWorklog.isError && (
+          <Alert severity="error" variant="outlined">
+            Worklog kaydedilemedi.
+          </Alert>
+        )}
+        <TextField
+          error={Boolean(errors.workDate)}
+          helperText={errors.workDate?.message}
+          label="Tarih"
+          size="small"
+          type="date"
+          {...register("workDate")}
+          InputLabelProps={{ shrink: true }}
+          sx={panelFieldSx}
+          variant="outlined"
+        />
+        <TextField
+          error={Boolean(errors.durationMinutes)}
+          helperText={errors.durationMinutes?.message}
+          label="Sure (dk)"
+          size="small"
+          type="number"
+          {...register("durationMinutes")}
+          sx={panelFieldSx}
+          variant="outlined"
+        />
+        <TextField
+          error={Boolean(errors.description)}
+          helperText={errors.description?.message}
+          label="Aciklama"
+          minRows={2}
+          multiline
+          size="small"
+          {...register("description")}
+          sx={panelFieldSx}
+          variant="outlined"
+        />
+        <Button disabled={addWorklog.isPending} fullWidth startIcon={<TimerOutlinedIcon />} type="submit" variant="outlined">
+          Worklog ekle
+        </Button>
+      </Stack>
+
+      <Stack spacing={1}>
         {worklogsQuery.isLoading && <Typography color="text.secondary">Worklog yukleniyor.</Typography>}
         {worklogs.length === 0 && !worklogsQuery.isLoading ? (
           <Typography color="text.secondary">Worklog yok.</Typography>
@@ -347,41 +570,41 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
             ))}
           </List>
         )}
-      </Paper>
+      </Stack>
 
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        <Stack spacing={1.5}>
-          <Typography variant="h6">Dosyalar</Typography>
-          {ticket.attachments.length === 0 ? (
-            <Typography color="text.secondary">Dosya eklenmemis.</Typography>
-          ) : (
-            <List disablePadding>
-              {ticket.attachments.map((attachment) => (
-                <ListItem
-                  disableGutters
-                  key={attachment.id}
-                  secondaryAction={
-                    <Tooltip title="Indir">
-                      <IconButton
-                        aria-label={`${attachment.originalFilename} indir`}
-                        edge="end"
-                        onClick={() => void downloadAttachment(attachment)}
-                      >
-                        <DownloadOutlinedIcon />
-                      </IconButton>
-                    </Tooltip>
-                  }
-                >
-                  <ListItemText
-                    primary={attachment.originalFilename}
-                    secondary={`${formatFileSize(attachment.sizeBytes)} / ${attachment.validationStatus} / ${formatDateTime(attachment.createdAt)}`}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          )}
-        </Stack>
-      </Paper>
+      <Divider />
+
+      <Stack spacing={1.5}>
+        <SectionTitle>Dosyalar</SectionTitle>
+        {ticket.attachments.length === 0 ? (
+          <Typography color="text.secondary">Dosya eklenmemis.</Typography>
+        ) : (
+          <List disablePadding>
+            {ticket.attachments.map((attachment) => (
+              <ListItem
+                disableGutters
+                key={attachment.id}
+                secondaryAction={
+                  <Tooltip title="Indir">
+                    <IconButton
+                      aria-label={`${attachment.originalFilename} indir`}
+                      edge="end"
+                      onClick={() => void downloadAttachment(attachment)}
+                    >
+                      <DownloadOutlinedIcon />
+                    </IconButton>
+                  </Tooltip>
+                }
+              >
+                <ListItemText
+                  primary={attachment.originalFilename}
+                  secondary={`${formatFileSize(attachment.sizeBytes)} / ${attachment.validationStatus} / ${formatDateTime(attachment.createdAt)}`}
+                />
+              </ListItem>
+            ))}
+          </List>
+        )}
+      </Stack>
     </Stack>
   );
 }

@@ -15,7 +15,8 @@ public record TicketAgentSummaryResponse(
         long resolvedTicketCount,
         long slaMetTicketCount,
         long slaBreachedTicketCount,
-        BigDecimal slaCompliancePercentage) {
+        BigDecimal slaCompliancePercentage,
+        boolean metricsAvailable) {
 
     public static TicketAgentSummaryResponse unassigned(UUID assignedTeamId) {
         return new TicketAgentSummaryResponse(
@@ -27,7 +28,8 @@ public record TicketAgentSummaryResponse(
                 0,
                 0,
                 0,
-                BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
+                BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP),
+                true);
     }
 
     public static TicketAgentSummaryResponse assigned(
@@ -44,6 +46,7 @@ public record TicketAgentSummaryResponse(
                 metrics.resolvedTicketCount(),
                 metrics.slaMetTicketCount(),
                 metrics.slaBreachedTicketCount(),
-                metrics.slaCompliancePercentage());
+                metrics.slaCompliancePercentage(),
+                metrics.metricsAvailable());
     }
 }

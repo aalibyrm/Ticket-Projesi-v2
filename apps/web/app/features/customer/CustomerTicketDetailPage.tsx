@@ -41,8 +41,9 @@ import {
   useMarkCustomerTicketConversationRead,
   useUploadTicketAttachment,
 } from "~/features/customer/customerQueries";
-import type { TicketAgentSummaryResponse, TicketAttachmentResponse } from "~/features/customer/customerTypes";
+import type { TicketAgentSummaryResponse, TicketAttachmentResponse, TicketResponse } from "~/features/customer/customerTypes";
 import { tmTokens } from "~/shared/theme/tmTokens";
+import { actorDisplayName } from "~/shared/userDisplay";
 
 const commentSchema = z.string().trim().min(3).max(5000);
 const maxAttachmentBytes = 10 * 1024 * 1024;
@@ -135,6 +136,10 @@ export function CustomerTicketDetailPage() {
 
   const ticket = ticketQuery.data;
   const isCommentInvalid = comment.length > 0 && !commentSchema.safeParse(comment).success;
+  const fallbackAgentSummary = buildFallbackAgentSummary(ticket);
+  const visibleAgentSummary = agentSummaryQuery.data
+    ?? (agentSummaryQuery.isError ? fallbackAgentSummary : undefined);
+  const isAgentSummaryError = agentSummaryQuery.isError && !visibleAgentSummary?.assigned;
 
   return (
     <Stack spacing={3}>
@@ -160,10 +165,10 @@ export function CustomerTicketDetailPage() {
                 <PriorityChip priority={ticket.priority} />
               </Stack>
               <AgentSummaryTrigger
-                isError={agentSummaryQuery.isError}
+                isError={isAgentSummaryError}
                 isLoading={agentSummaryQuery.isLoading}
                 onOpen={() => setAgentDrawerOpen(true)}
-                summary={agentSummaryQuery.data}
+                summary={visibleAgentSummary}
               />
             </Stack>
             <Typography color="text.secondary" variant="body2">
@@ -293,11 +298,11 @@ export function CustomerTicketDetailPage() {
       </Stack>
 
       <AgentSummaryDrawer
-        isError={agentSummaryQuery.isError}
+        isError={isAgentSummaryError}
         isLoading={agentSummaryQuery.isLoading}
         onClose={() => setAgentDrawerOpen(false)}
         open={isAgentDrawerOpen}
-        summary={agentSummaryQuery.data}
+        summary={visibleAgentSummary}
       />
     </Stack>
   );
@@ -351,6 +356,25 @@ function AgentSummaryTrigger({
       Temsilci: {summary.displayName ?? "Destek Temsilcisi"}
     </Button>
   );
+}
+
+function buildFallbackAgentSummary(ticket: TicketResponse): TicketAgentSummaryResponse | undefined {
+  if (!ticket.assigneeId) {
+    return undefined;
+  }
+
+  return {
+    agentId: ticket.assigneeId,
+    assigned: true,
+    assignedTeamId: ticket.assignedTeamId ?? null,
+    displayName: actorDisplayName(ticket.assigneeId, undefined, "Destek Temsilcisi"),
+    email: null,
+    metricsAvailable: false,
+    resolvedTicketCount: 0,
+    slaBreachedTicketCount: 0,
+    slaCompliancePercentage: 0,
+    slaMetTicketCount: 0,
+  };
 }
 
 function AgentSummaryDrawer({
@@ -415,6 +439,11 @@ function AgentSummaryDrawer({
                 </Typography>
               )}
             </Stack>
+            {summary.metricsAvailable === false && (
+              <Alert severity="warning" variant="outlined">
+                Performans metrikleri su an alinamadi.
+              </Alert>
+            )}
             <Box
               sx={{
                 display: "grid",

@@ -13,6 +13,7 @@ import { server } from "~/test/msw/server";
 
 const teamId = "20000000-0000-0000-0000-000000000003";
 const memberId = "40000000-0000-0000-0000-000000000003";
+const ticketId = "22222222-2222-2222-2222-222222222222";
 
 function renderPanel(ticket: TicketResponse) {
   const queryClient = new QueryClient({
@@ -35,6 +36,27 @@ function renderPanel(ticket: TicketResponse) {
       </QueryClientProvider>
     </ReduxProvider>,
   );
+}
+
+function ticketFixture(overrides: Partial<TicketResponse> = {}): TicketResponse {
+  return {
+    assigneeId: undefined,
+    assignedTeamId: teamId,
+    attachments: [],
+    createdAt: "2026-05-30T08:00:00Z",
+    customerId: "11111111-1111-1111-1111-111111111111",
+    description: "Payment page is blank after card confirmation.",
+    id: ticketId,
+    priority: "HIGH",
+    productCode: "PAY",
+    productId: "33333333-3333-3333-3333-333333333333",
+    productName: "Payment Gateway",
+    status: "IN_PROGRESS",
+    summary: "Odeme sayfasi yuklenmiyor",
+    ticketNumber: "TCK-2026-0042",
+    updatedAt: "2026-05-30T08:30:00Z",
+    ...overrides,
+  };
 }
 
 describe("AgentTicketActionPanel", () => {
@@ -85,6 +107,7 @@ describe("AgentTicketActionPanel", () => {
         ]),
       ),
       http.get("*/api/v1/agent/tickets/:ticketId/worklogs", () => HttpResponse.json([])),
+      http.get("*/api/v1/agent/tickets/:ticketId/comments", () => HttpResponse.json([])),
       http.patch("*/api/v1/agent/tickets/:ticketId/assignment", async ({ request }) => {
         assignmentBody = await request.json() as Record<string, unknown>;
         return HttpResponse.json({
@@ -95,32 +118,15 @@ describe("AgentTicketActionPanel", () => {
       }),
     );
 
-    const ticket: TicketResponse = {
-      assigneeId: undefined,
-      assignedTeamId: teamId,
-      attachments: [],
-      createdAt: "2026-05-30T08:00:00Z",
-      customerId: "11111111-1111-1111-1111-111111111111",
-      description: "Payment page is blank after card confirmation.",
-      id: "22222222-2222-2222-2222-222222222222",
-      priority: "HIGH",
-      productCode: "PAY",
-      productId: "33333333-3333-3333-3333-333333333333",
-      productName: "Payment Gateway",
-      status: "IN_PROGRESS",
-      summary: "Odeme sayfasi yuklenmiyor",
-      ticketNumber: "TCK-2026-0042",
-      updatedAt: "2026-05-30T08:30:00Z",
-    };
+    const ticket = ticketFixture();
 
     renderPanel(ticket);
 
     await waitFor(() => expect(screen.getByLabelText("Ekip")).toBeEnabled());
     await waitFor(() => expect(screen.getByLabelText("Agent")).toBeEnabled());
-    expect(screen.getByText("Web Agent")).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText("Agent"), {
-      target: { value: memberId },
-    });
+    expect(screen.getByText("Agent sec")).toBeInTheDocument();
+    fireEvent.mouseDown(screen.getByLabelText("Agent"));
+    fireEvent.click(await screen.findByRole("option", { name: /Web Agent/ }));
     fireEvent.click(screen.getByRole("button", { name: "Atamayi kaydet" }));
 
     await waitFor(() =>
@@ -129,5 +135,124 @@ describe("AgentTicketActionPanel", () => {
         assignedTeamId: teamId,
       }),
     );
+  });
+
+  it("renders one status action per allowed transition for the assigned agent", async () => {
+    store.dispatch(setAuthenticated({
+      displayName: "Support Agent",
+      id: memberId,
+      roles: ["AGENT"],
+      username: "agent@example.com",
+    }));
+
+    server.use(
+      http.get("*/api/v1/organization/teams", () => HttpResponse.json([])),
+      http.get("*/api/v1/agent/tickets/:ticketId/worklogs", () => HttpResponse.json([])),
+      http.get("*/api/v1/agent/tickets/:ticketId/comments", () => HttpResponse.json([])),
+    );
+
+    renderPanel(ticketFixture({ assigneeId: memberId }));
+
+    expect(await screen.findByText("Mevcut status")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Musteri bekleniyor yap" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cozuldu yap" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("Sonraki status")).not.toBeInTheDocument();
+  });
+
+  it("hides status actions when the current agent is not assigned", async () => {
+    store.dispatch(setAuthenticated({
+      displayName: "Support Agent",
+      id: memberId,
+      roles: ["AGENT"],
+      username: "agent@example.com",
+    }));
+
+    server.use(
+      http.get("*/api/v1/organization/teams", () => HttpResponse.json([])),
+      http.get("*/api/v1/agent/tickets/:ticketId/worklogs", () => HttpResponse.json([])),
+      http.get("*/api/v1/agent/tickets/:ticketId/comments", () => HttpResponse.json([])),
+    );
+
+    renderPanel(ticketFixture({ assigneeId: "50000000-0000-0000-0000-000000000003" }));
+
+    await waitFor(() => expect(screen.getByText("Worklog")).toBeInTheDocument());
+    expect(screen.queryByText("Mevcut status")).not.toBeInTheDocument();
+    expect(screen.queryByText("Atama")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Musteri bekleniyor yap" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Cozuldu yap" })).not.toBeInTheDocument();
+  });
+
+  it("hides assignment controls when the ticket already has an assignee", async () => {
+    store.dispatch(setAuthenticated({
+      displayName: "Support Agent",
+      id: memberId,
+      roles: ["AGENT"],
+      username: "agent@example.com",
+    }));
+
+    server.use(
+      http.get("*/api/v1/organization/teams", () => HttpResponse.json([])),
+      http.get("*/api/v1/agent/tickets/:ticketId/worklogs", () => HttpResponse.json([])),
+      http.get("*/api/v1/agent/tickets/:ticketId/comments", () => HttpResponse.json([])),
+    );
+
+    renderPanel(ticketFixture({ assigneeId: memberId }));
+
+    expect(await screen.findByText("Worklog")).toBeInTheDocument();
+    expect(screen.queryByText("Atama")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Bana ata" })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Ekip")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Agent")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Atamayi kaydet" })).not.toBeInTheDocument();
+  });
+
+  it("does not show resume action while waiting for customer without a customer reply", async () => {
+    store.dispatch(setAuthenticated({
+      displayName: "Support Agent",
+      id: memberId,
+      roles: ["AGENT"],
+      username: "agent@example.com",
+    }));
+
+    server.use(
+      http.get("*/api/v1/organization/teams", () => HttpResponse.json([])),
+      http.get("*/api/v1/agent/tickets/:ticketId/worklogs", () => HttpResponse.json([])),
+      http.get("*/api/v1/agent/tickets/:ticketId/comments", () => HttpResponse.json([])),
+    );
+
+    renderPanel(ticketFixture({ assigneeId: memberId, status: "WAITING_FOR_CUSTOMER" }));
+
+    expect(await screen.findByText("Uygun statu gecisi yok.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Islemde yap" })).not.toBeInTheDocument();
+  });
+
+  it("shows resume action after a customer external reply", async () => {
+    store.dispatch(setAuthenticated({
+      displayName: "Support Agent",
+      id: memberId,
+      roles: ["AGENT"],
+      username: "agent@example.com",
+    }));
+
+    server.use(
+      http.get("*/api/v1/organization/teams", () => HttpResponse.json([])),
+      http.get("*/api/v1/agent/tickets/:ticketId/worklogs", () => HttpResponse.json([])),
+      http.get("*/api/v1/agent/tickets/:ticketId/comments", () =>
+        HttpResponse.json([
+          {
+            authorId: "11111111-1111-1111-1111-111111111111",
+            body: "I sent the requested information.",
+            createdAt: "2026-05-30T09:00:00Z",
+            id: "44444444-4444-4444-4444-444444444444",
+            ticketId,
+            visibility: "EXTERNAL",
+          },
+        ]),
+      ),
+    );
+
+    renderPanel(ticketFixture({ assigneeId: memberId, status: "WAITING_FOR_CUSTOMER" }));
+
+    expect(await screen.findByRole("button", { name: "Islemde yap" })).toBeInTheDocument();
   });
 });

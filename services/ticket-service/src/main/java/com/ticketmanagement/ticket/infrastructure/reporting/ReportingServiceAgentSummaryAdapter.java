@@ -4,18 +4,18 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.ticketmanagement.ticket.application.AgentSummaryLookupPort;
 import com.ticketmanagement.ticket.application.AgentSummaryMetrics;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 class ReportingServiceAgentSummaryAdapter implements AgentSummaryLookupPort {
 
     @Qualifier("reportingServiceRestClient")
@@ -38,10 +38,8 @@ class ReportingServiceAgentSummaryAdapter implements AgentSummaryLookupPort {
                     response.slaBreachedTicketCount(),
                     response.slaCompliancePercentage());
         } catch (RestClientException exception) {
-            throw new ResponseStatusException(
-                    HttpStatus.SERVICE_UNAVAILABLE,
-                    "Agent reporting summary service unavailable",
-                    exception);
+            log.warn("Agent reporting summary unavailable for agentId={}", agentId, exception);
+            return AgentSummaryMetrics.unavailable(agentId);
         }
     }
 

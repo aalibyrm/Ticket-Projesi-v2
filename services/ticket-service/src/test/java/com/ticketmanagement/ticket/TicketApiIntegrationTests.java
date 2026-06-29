@@ -225,6 +225,7 @@ class TicketApiIntegrationTests {
         assertThat(response.getBody().slaMetTicketCount()).isEqualTo(9);
         assertThat(response.getBody().slaBreachedTicketCount()).isEqualTo(3);
         assertThat(response.getBody().slaCompliancePercentage()).isEqualByComparingTo("75.00");
+        assertThat(response.getBody().metricsAvailable()).isTrue();
 
         ResponseEntity<ApiErrorResponse> otherCustomerResponse = restTemplate.exchange(
                 "/api/tickets/{id}/agent-summary",
@@ -237,6 +238,36 @@ class TicketApiIntegrationTests {
         assertThat(otherCustomerResponse.getBody()).isNotNull();
         assertThat(otherCustomerResponse.getBody().errorCode()).isEqualTo("ACCESS_DENIED");
         verify(agentSummaryLookupPort, times(1)).getAgentSummary(WEB_APP_SUPPORT_MEMBER_ID);
+    }
+
+    @Test
+    void assignedAgentSummaryStillReturnsProfileWhenMetricsAreUnavailable() {
+        UUID customerId = UUID.randomUUID();
+        UUID adminId = UUID.randomUUID();
+        TicketResponse created = createTicket(customerId);
+        assignTicket(created.id(), WEB_APP_SUPPORT_MEMBER_ID, WEB_APP_SUPPORT_TEAM_ID, adminId);
+        when(agentSummaryLookupPort.getAgentSummary(WEB_APP_SUPPORT_MEMBER_ID))
+                .thenReturn(AgentSummaryMetrics.unavailable(WEB_APP_SUPPORT_MEMBER_ID));
+
+        ResponseEntity<TicketAgentSummaryResponse> response = restTemplate.exchange(
+                "/api/tickets/{id}/agent-summary",
+                HttpMethod.GET,
+                new HttpEntity<>(actorHeaders(customerId)),
+                TicketAgentSummaryResponse.class,
+                created.id());
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().assigned()).isTrue();
+        assertThat(response.getBody().agentId()).isEqualTo(WEB_APP_SUPPORT_MEMBER_ID);
+        assertThat(response.getBody().displayName()).isEqualTo("Web Agent");
+        assertThat(response.getBody().email()).isEqualTo("agent.web@example.local");
+        assertThat(response.getBody().assignedTeamId()).isEqualTo(WEB_APP_SUPPORT_TEAM_ID);
+        assertThat(response.getBody().resolvedTicketCount()).isZero();
+        assertThat(response.getBody().slaMetTicketCount()).isZero();
+        assertThat(response.getBody().slaBreachedTicketCount()).isZero();
+        assertThat(response.getBody().slaCompliancePercentage()).isEqualByComparingTo("0.00");
+        assertThat(response.getBody().metricsAvailable()).isFalse();
     }
 
     @Test
@@ -258,6 +289,7 @@ class TicketApiIntegrationTests {
         assertThat(response.getBody().displayName()).isNull();
         assertThat(response.getBody().assignedTeamId()).isEqualTo(WEB_APP_SUPPORT_TEAM_ID);
         assertThat(response.getBody().resolvedTicketCount()).isZero();
+        assertThat(response.getBody().metricsAvailable()).isTrue();
         verifyNoInteractions(agentSummaryLookupPort);
     }
 
