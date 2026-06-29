@@ -159,7 +159,7 @@ class NotificationEmailPipelineIntegrationTests {
         assertThat(sentCount).isEqualTo(1);
         assertThat(emailDeliveryRepository.findAll()).hasSize(1);
         assertThat(latestMessage.path("Subject").asText()).isEqualTo("Ticket TCK-8801 was created");
-        assertThat(latestMessage.path("To").toString()).contains("agent.payment@example.local");
+        assertThat(latestMessage.path("To").toString()).contains("zeynep.ozturk@example.local");
         assertThat(latestMessage.path("Text").asText()).contains("Ticket TCK-8801 was created.");
         assertThat(latestMessage.path("HTML").asText()).contains("Open ticket");
     }
@@ -188,7 +188,7 @@ class NotificationEmailPipelineIntegrationTests {
         assertThat(sentCount).isEqualTo(1);
         assertThat(emailDeliveryRepository.findAll()).hasSize(1);
         assertThat(latestMessage.path("Subject").asText()).isEqualTo("Ticket TCK-8802 status changed to IN_PROGRESS");
-        assertThat(latestMessage.path("To").toString()).contains("customer.user@example.local");
+        assertThat(latestMessage.path("To").toString()).contains("ayse.yilmaz@example.local");
         assertThat(latestMessage.path("Text").asText()).contains("Previous status: NEW");
         assertThat(latestMessage.path("HTML").asText()).contains("Open ticket");
     }

@@ -114,10 +114,10 @@ class OrganizationApiIntegrationTests {
                 .doesNotContain(INACTIVE_ACTOR_ID);
         assertThat(response.getBody())
                 .extracting(TeamMemberResponse::displayName)
-                .contains("Identity Lead", "Identity Agent");
+                .contains("Irem Gunes", "Elif Aydin");
         assertThat(response.getBody())
                 .extracting(TeamMemberResponse::email)
-                .contains("lead.identity@example.local", "agent.identity@example.local");
+                .contains("irem.gunes@example.local", "elif.aydin@example.local");
     }
 
     @Test

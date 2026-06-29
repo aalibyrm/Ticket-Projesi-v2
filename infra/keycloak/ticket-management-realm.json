@@ -181,9 +181,85 @@
       "username": "customer.user",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Demo",
-      "lastName": "Customer",
-      "email": "customer.user@example.local",
+      "firstName": "Ayse",
+      "lastName": "Yilmaz",
+      "email": "ayse.yilmaz@example.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "CUSTOMER"
+      ]
+    },
+    {
+      "id": "80000000-0000-0000-0000-000000000004",
+      "username": "customer.mehmet",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Mehmet",
+      "lastName": "Demir",
+      "email": "mehmet.demir@example.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "CUSTOMER"
+      ]
+    },
+    {
+      "id": "80000000-0000-0000-0000-000000000005",
+      "username": "customer.zeynep",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Zeynep",
+      "lastName": "Kaya",
+      "email": "zeynep.kaya@example.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "CUSTOMER"
+      ]
+    },
+    {
+      "id": "80000000-0000-0000-0000-000000000006",
+      "username": "customer.emre",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Emre",
+      "lastName": "Arslan",
+      "email": "emre.arslan@example.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "CUSTOMER"
+      ]
+    },
+    {
+      "id": "80000000-0000-0000-0000-000000000007",
+      "username": "customer.ceren",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Ceren",
+      "lastName": "Aksoy",
+      "email": "ceren.aksoy@example.local",
       "credentials": [
         {
           "type": "password",
@@ -200,9 +276,9 @@
       "username": "agent.identity",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Identity",
-      "lastName": "Agent",
-      "email": "agent.identity@example.local",
+      "firstName": "Elif",
+      "lastName": "Aydin",
+      "email": "elif.aydin@example.local",
       "credentials": [
         {
           "type": "password",
@@ -219,9 +295,9 @@
       "username": "agent.permission",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Permission",
-      "lastName": "Agent",
-      "email": "agent.permission@example.local",
+      "firstName": "Mert",
+      "lastName": "Kaya",
+      "email": "mert.kaya@example.local",
       "credentials": [
         {
           "type": "password",
@@ -238,9 +314,9 @@
       "username": "agent.web",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Web",
-      "lastName": "Agent",
-      "email": "agent.web@example.local",
+      "firstName": "Deniz",
+      "lastName": "Arslan",
+      "email": "deniz.arslan@example.local",
       "credentials": [
         {
           "type": "password",
@@ -257,9 +333,9 @@
       "username": "agent.core",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Core",
-      "lastName": "Agent",
-      "email": "agent.core@example.local",
+      "firstName": "Selin",
+      "lastName": "Demir",
+      "email": "selin.demir@example.local",
       "credentials": [
         {
           "type": "password",
@@ -276,9 +352,9 @@
       "username": "agent.network",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Network",
-      "lastName": "Agent",
-      "email": "agent.network@example.local",
+      "firstName": "Baran",
+      "lastName": "Yilmaz",
+      "email": "baran.yilmaz@example.local",
       "credentials": [
         {
           "type": "password",
@@ -295,9 +371,9 @@
       "username": "agent.platform",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Platform",
-      "lastName": "Agent",
-      "email": "agent.platform@example.local",
+      "firstName": "Ece",
+      "lastName": "Sahin",
+      "email": "ece.sahin@example.local",
       "credentials": [
         {
           "type": "password",
@@ -314,9 +390,9 @@
       "username": "agent.billing",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Billing",
-      "lastName": "Agent",
-      "email": "agent.billing@example.local",
+      "firstName": "Onur",
+      "lastName": "Demir",
+      "email": "onur.demir@example.local",
       "credentials": [
         {
           "type": "password",
@@ -333,9 +409,9 @@
       "username": "agent.payment",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Payment",
-      "lastName": "Agent",
-      "email": "agent.payment@example.local",
+      "firstName": "Zeynep",
+      "lastName": "Ozturk",
+      "email": "zeynep.ozturk@example.local",
       "credentials": [
         {
           "type": "password",
@@ -352,9 +428,9 @@
       "username": "manager.user",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Demo",
-      "lastName": "Manager",
-      "email": "manager.user@example.local",
+      "firstName": "Deniz",
+      "lastName": "Karaca",
+      "email": "deniz.karaca@example.local",
       "credentials": [
         {
           "type": "password",
@@ -371,9 +447,9 @@
       "username": "admin.user",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Demo",
-      "lastName": "Admin",
-      "email": "admin.user@example.local",
+      "firstName": "Burak",
+      "lastName": "Ozkan",
+      "email": "burak.ozkan@example.local",
       "credentials": [
         {
           "type": "password",

@@ -90,16 +90,16 @@ describe("AgentTicketActionPanel", () => {
         HttpResponse.json([
           {
             actorId: "30000000-0000-0000-0000-000000000003",
-            displayName: "Web Lead",
-            email: "lead.web@example.local",
+            displayName: "Seda Yildirim",
+            email: "seda.yildirim@example.local",
             teamCode: "WEB_APP_SUPPORT",
             teamId,
             teamLead: true,
           },
           {
             actorId: memberId,
-            displayName: "Web Agent",
-            email: "agent.web@example.local",
+            displayName: "Deniz Arslan",
+            email: "deniz.arslan@example.local",
             teamCode: "WEB_APP_SUPPORT",
             teamId,
             teamLead: false,
@@ -126,7 +126,7 @@ describe("AgentTicketActionPanel", () => {
     await waitFor(() => expect(screen.getByLabelText("Agent")).toBeEnabled());
     expect(screen.getByText("Agent sec")).toBeInTheDocument();
     fireEvent.mouseDown(screen.getByLabelText("Agent"));
-    fireEvent.click(await screen.findByRole("option", { name: /Web Agent/ }));
+    fireEvent.click(await screen.findByRole("option", { name: /Deniz Arslan/ }));
     fireEvent.click(screen.getByRole("button", { name: "Atamayi kaydet" }));
 
     await waitFor(() =>

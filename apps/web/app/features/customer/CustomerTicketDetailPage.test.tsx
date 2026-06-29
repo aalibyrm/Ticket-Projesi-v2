@@ -61,8 +61,8 @@ describe("CustomerTicketDetailPage", () => {
           agentId: "40000000-0000-0000-0000-000000000008",
           assigned: true,
           assignedTeamId: "20000000-0000-0000-0000-000000000008",
-          displayName: "Payment Agent",
-          email: "agent.payment@example.local",
+          displayName: "Zeynep Ozturk",
+          email: "zeynep.ozturk@example.local",
           metricsAvailable: true,
           resolvedTicketCount: 14,
           slaBreachedTicketCount: 2,
@@ -83,12 +83,12 @@ describe("CustomerTicketDetailPage", () => {
     renderPage(ticketId);
 
     await waitFor(() => expect(screen.getByText("Odeme olmuyor")).toBeInTheDocument());
-    const agentButton = await screen.findByRole("button", { name: /Temsilci: Payment Agent/i });
+    const agentButton = await screen.findByRole("button", { name: /Temsilci: Zeynep Ozturk/i });
     fireEvent.click(agentButton);
 
     expect(await screen.findByText("Temsilci detayi")).toBeInTheDocument();
-    expect(screen.getByText("Payment Agent")).toBeInTheDocument();
-    expect(screen.getByText("agent.payment@example.local")).toBeInTheDocument();
+    expect(screen.getByText("Zeynep Ozturk")).toBeInTheDocument();
+    expect(screen.getByText("zeynep.ozturk@example.local")).toBeInTheDocument();
     expect(screen.getByText("SLA uyumu")).toBeInTheDocument();
     expect(screen.getByText("87.5%")).toBeInTheDocument();
     expect(screen.getByText("Cozdugu ticket")).toBeInTheDocument();
@@ -135,11 +135,11 @@ describe("CustomerTicketDetailPage", () => {
 
     await waitFor(() => expect(screen.getByText("Odeme olmuyor")).toBeInTheDocument());
     expect(screen.queryByText("Temsilci bilgisi alinamadi")).not.toBeInTheDocument();
-    const agentButton = await screen.findByRole("button", { name: /Temsilci: Payment Agent/i });
+    const agentButton = await screen.findByRole("button", { name: /Temsilci: Zeynep Ozturk/i });
     fireEvent.click(agentButton);
 
     expect(await screen.findByText("Temsilci detayi")).toBeInTheDocument();
-    expect(screen.getByText("Payment Agent")).toBeInTheDocument();
+    expect(screen.getByText("Zeynep Ozturk")).toBeInTheDocument();
     expect(screen.getByText("Performans metrikleri su an alinamadi.")).toBeInTheDocument();
   });
 });

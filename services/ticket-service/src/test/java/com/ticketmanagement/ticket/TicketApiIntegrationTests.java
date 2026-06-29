@@ -218,8 +218,8 @@ class TicketApiIntegrationTests {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().assigned()).isTrue();
         assertThat(response.getBody().agentId()).isEqualTo(WEB_APP_SUPPORT_MEMBER_ID);
-        assertThat(response.getBody().displayName()).isEqualTo("Web Agent");
-        assertThat(response.getBody().email()).isEqualTo("agent.web@example.local");
+        assertThat(response.getBody().displayName()).isEqualTo("Deniz Arslan");
+        assertThat(response.getBody().email()).isEqualTo("deniz.arslan@example.local");
         assertThat(response.getBody().assignedTeamId()).isEqualTo(WEB_APP_SUPPORT_TEAM_ID);
         assertThat(response.getBody().resolvedTicketCount()).isEqualTo(12);
         assertThat(response.getBody().slaMetTicketCount()).isEqualTo(9);
@@ -260,8 +260,8 @@ class TicketApiIntegrationTests {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().assigned()).isTrue();
         assertThat(response.getBody().agentId()).isEqualTo(WEB_APP_SUPPORT_MEMBER_ID);
-        assertThat(response.getBody().displayName()).isEqualTo("Web Agent");
-        assertThat(response.getBody().email()).isEqualTo("agent.web@example.local");
+        assertThat(response.getBody().displayName()).isEqualTo("Deniz Arslan");
+        assertThat(response.getBody().email()).isEqualTo("deniz.arslan@example.local");
         assertThat(response.getBody().assignedTeamId()).isEqualTo(WEB_APP_SUPPORT_TEAM_ID);
         assertThat(response.getBody().resolvedTicketCount()).isZero();
         assertThat(response.getBody().slaMetTicketCount()).isZero();

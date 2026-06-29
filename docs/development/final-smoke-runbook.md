@@ -33,13 +33,19 @@ local dev akisi Keycloak OIDC akisini kullanmaya devam eder.
 docker compose --env-file .env -f infra/docker/docker-compose.yml --profile local up -d
 ```
 
-3. Backend testlerinin yesil oldugunu dogrula:
+3. Gercekci demo kullanici, ticket ve rapor verisini yukle:
+
+```powershell
+.\scripts\reset-local-demo-data.ps1 -ConfirmReset
+```
+
+4. Backend testlerinin yesil oldugunu dogrula:
 
 ```powershell
 mvn -q test
 ```
 
-4. Web uygulamasini baslat:
+5. Web uygulamasini baslat:
 
 ```powershell
 Set-Location apps/web
@@ -47,27 +53,31 @@ npm install
 npm run dev
 ```
 
-5. Keycloak local demo kullanicilari:
+6. Keycloak local demo kullanicilari:
 
-| Kullanici | Rol | Departman | Ekip | Sifre |
-| --- | --- | --- | --- | --- |
-| `customer.user` | `CUSTOMER` | - | - | `Password123!` |
-| `agent.identity` | `AGENT` | `ACCESS_MANAGEMENT` | `IDENTITY_OPERATIONS` | `Password123!` |
-| `agent.permission` | `AGENT` | `ACCESS_MANAGEMENT` | `PERMISSION_OPERATIONS` | `Password123!` |
-| `agent.web` | `AGENT` | `APPLICATION_SUPPORT` | `WEB_APP_SUPPORT` | `Password123!` |
-| `agent.core` | `AGENT` | `APPLICATION_SUPPORT` | `CORE_APP_SUPPORT` | `Password123!` |
-| `agent.network` | `AGENT` | `INFRASTRUCTURE` | `NETWORK_OPERATIONS` | `Password123!` |
-| `agent.platform` | `AGENT` | `INFRASTRUCTURE` | `PLATFORM_OPERATIONS` | `Password123!` |
-| `agent.billing` | `AGENT` | `FINANCE_OPERATIONS` | `BILLING_OPERATIONS` | `Password123!` |
-| `agent.payment` | `AGENT` | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS` | `Password123!` |
-| `manager.user` | `MANAGER` | - | - | `Password123!` |
-| `admin.user` | `ADMIN` | - | - | `Password123!` |
+| Kullanici | Gorunen ad | Rol | Departman | Ekip | Sifre |
+| --- | --- | --- | --- | --- | --- |
+| `customer.user` | Ayse Yilmaz | `CUSTOMER` | - | - | `Password123!` |
+| `customer.mehmet` | Mehmet Demir | `CUSTOMER` | - | - | `Password123!` |
+| `customer.zeynep` | Zeynep Kaya | `CUSTOMER` | - | - | `Password123!` |
+| `customer.emre` | Emre Arslan | `CUSTOMER` | - | - | `Password123!` |
+| `customer.ceren` | Ceren Aksoy | `CUSTOMER` | - | - | `Password123!` |
+| `agent.identity` | Elif Aydin | `AGENT` | `ACCESS_MANAGEMENT` | `IDENTITY_OPERATIONS` | `Password123!` |
+| `agent.permission` | Mert Kaya | `AGENT` | `ACCESS_MANAGEMENT` | `PERMISSION_OPERATIONS` | `Password123!` |
+| `agent.web` | Deniz Arslan | `AGENT` | `APPLICATION_SUPPORT` | `WEB_APP_SUPPORT` | `Password123!` |
+| `agent.core` | Selin Demir | `AGENT` | `APPLICATION_SUPPORT` | `CORE_APP_SUPPORT` | `Password123!` |
+| `agent.network` | Baran Yilmaz | `AGENT` | `INFRASTRUCTURE` | `NETWORK_OPERATIONS` | `Password123!` |
+| `agent.platform` | Ece Sahin | `AGENT` | `INFRASTRUCTURE` | `PLATFORM_OPERATIONS` | `Password123!` |
+| `agent.billing` | Onur Demir | `AGENT` | `FINANCE_OPERATIONS` | `BILLING_OPERATIONS` | `Password123!` |
+| `agent.payment` | Zeynep Ozturk | `AGENT` | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS` | `Password123!` |
+| `manager.user` | Deniz Karaca | `MANAGER` | - | - | `Password123!` |
+| `admin.user` | Burak Ozkan | `ADMIN` | - | - | `Password123!` |
 
 Topic routing'e gore `PAYMENT_FAILURE` ticket'lari `agent.payment`,
 `WEB_PORTAL_BUG` ticket'lari `agent.web`, `CORE_SYSTEM_ERROR` ticket'lari
 `agent.core` hesabinda gorunur.
 
-6. Demo sirasi:
+7. Demo sirasi:
 
 | Adim | Beklenen sonuc |
 | --- | --- |

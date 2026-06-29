@@ -120,13 +120,13 @@ Seed edilen topic routing seti:
 Local Keycloak demo agent hesaplari team bazlidir ve `team_members.actor_id`
 seed degerleriyle ayni user id'leri kullanir:
 
-| Demo agent | Department | Team |
-| --- | --- | --- |
-| `agent.identity` | `ACCESS_MANAGEMENT` | `IDENTITY_OPERATIONS` |
-| `agent.permission` | `ACCESS_MANAGEMENT` | `PERMISSION_OPERATIONS` |
-| `agent.web` | `APPLICATION_SUPPORT` | `WEB_APP_SUPPORT` |
-| `agent.core` | `APPLICATION_SUPPORT` | `CORE_APP_SUPPORT` |
-| `agent.network` | `INFRASTRUCTURE` | `NETWORK_OPERATIONS` |
-| `agent.platform` | `INFRASTRUCTURE` | `PLATFORM_OPERATIONS` |
-| `agent.billing` | `FINANCE_OPERATIONS` | `BILLING_OPERATIONS` |
-| `agent.payment` | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS` |
+| Demo agent | Display name | Department | Team |
+| --- | --- | --- | --- |
+| `agent.identity` | Elif Aydin | `ACCESS_MANAGEMENT` | `IDENTITY_OPERATIONS` |
+| `agent.permission` | Mert Kaya | `ACCESS_MANAGEMENT` | `PERMISSION_OPERATIONS` |
+| `agent.web` | Deniz Arslan | `APPLICATION_SUPPORT` | `WEB_APP_SUPPORT` |
+| `agent.core` | Selin Demir | `APPLICATION_SUPPORT` | `CORE_APP_SUPPORT` |
+| `agent.network` | Baran Yilmaz | `INFRASTRUCTURE` | `NETWORK_OPERATIONS` |
+| `agent.platform` | Ece Sahin | `INFRASTRUCTURE` | `PLATFORM_OPERATIONS` |
+| `agent.billing` | Onur Demir | `FINANCE_OPERATIONS` | `BILLING_OPERATIONS` |
+| `agent.payment` | Zeynep Ozturk | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS` |

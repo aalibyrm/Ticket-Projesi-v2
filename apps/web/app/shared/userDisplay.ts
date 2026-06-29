@@ -7,80 +7,96 @@ interface KnownUserProfile {
 
 const knownUserProfiles: Record<string, KnownUserProfile> = {
   "80000000-0000-0000-0000-000000000001": {
-    displayName: "Demo Customer",
-    email: "customer.user@example.local",
+    displayName: "Ayse Yilmaz",
+    email: "ayse.yilmaz@example.local",
+  },
+  "80000000-0000-0000-0000-000000000004": {
+    displayName: "Mehmet Demir",
+    email: "mehmet.demir@example.local",
+  },
+  "80000000-0000-0000-0000-000000000005": {
+    displayName: "Zeynep Kaya",
+    email: "zeynep.kaya@example.local",
+  },
+  "80000000-0000-0000-0000-000000000006": {
+    displayName: "Emre Arslan",
+    email: "emre.arslan@example.local",
+  },
+  "80000000-0000-0000-0000-000000000007": {
+    displayName: "Ceren Aksoy",
+    email: "ceren.aksoy@example.local",
   },
   "30000000-0000-0000-0000-000000000001": {
-    displayName: "Identity Lead",
-    email: "lead.identity@example.local",
+    displayName: "Irem Gunes",
+    email: "irem.gunes@example.local",
   },
   "30000000-0000-0000-0000-000000000002": {
-    displayName: "Permission Lead",
-    email: "lead.permission@example.local",
+    displayName: "Cem Arslan",
+    email: "cem.arslan@example.local",
   },
   "30000000-0000-0000-0000-000000000003": {
-    displayName: "Web Lead",
-    email: "lead.web@example.local",
+    displayName: "Seda Yildirim",
+    email: "seda.yildirim@example.local",
   },
   "30000000-0000-0000-0000-000000000004": {
-    displayName: "Core Lead",
-    email: "lead.core@example.local",
+    displayName: "Okan Demir",
+    email: "okan.demir@example.local",
   },
   "30000000-0000-0000-0000-000000000005": {
-    displayName: "Network Lead",
-    email: "lead.network@example.local",
+    displayName: "Derya Korkmaz",
+    email: "derya.korkmaz@example.local",
   },
   "30000000-0000-0000-0000-000000000006": {
-    displayName: "Platform Lead",
-    email: "lead.platform@example.local",
+    displayName: "Alp Kaya",
+    email: "alp.kaya@example.local",
   },
   "30000000-0000-0000-0000-000000000007": {
-    displayName: "Billing Lead",
-    email: "lead.billing@example.local",
+    displayName: "Melis Acar",
+    email: "melis.acar@example.local",
   },
   "30000000-0000-0000-0000-000000000008": {
-    displayName: "Payment Lead",
-    email: "lead.payment@example.local",
+    displayName: "Bora Yalcin",
+    email: "bora.yalcin@example.local",
   },
   "40000000-0000-0000-0000-000000000001": {
-    displayName: "Identity Agent",
-    email: "agent.identity@example.local",
+    displayName: "Elif Aydin",
+    email: "elif.aydin@example.local",
   },
   "40000000-0000-0000-0000-000000000002": {
-    displayName: "Permission Agent",
-    email: "agent.permission@example.local",
+    displayName: "Mert Kaya",
+    email: "mert.kaya@example.local",
   },
   "40000000-0000-0000-0000-000000000003": {
-    displayName: "Web Agent",
-    email: "agent.web@example.local",
+    displayName: "Deniz Arslan",
+    email: "deniz.arslan@example.local",
   },
   "40000000-0000-0000-0000-000000000004": {
-    displayName: "Core Agent",
-    email: "agent.core@example.local",
+    displayName: "Selin Demir",
+    email: "selin.demir@example.local",
   },
   "40000000-0000-0000-0000-000000000005": {
-    displayName: "Network Agent",
-    email: "agent.network@example.local",
+    displayName: "Baran Yilmaz",
+    email: "baran.yilmaz@example.local",
   },
   "40000000-0000-0000-0000-000000000006": {
-    displayName: "Platform Agent",
-    email: "agent.platform@example.local",
+    displayName: "Ece Sahin",
+    email: "ece.sahin@example.local",
   },
   "40000000-0000-0000-0000-000000000007": {
-    displayName: "Billing Agent",
-    email: "agent.billing@example.local",
+    displayName: "Onur Demir",
+    email: "onur.demir@example.local",
   },
   "40000000-0000-0000-0000-000000000008": {
-    displayName: "Payment Agent",
-    email: "agent.payment@example.local",
+    displayName: "Zeynep Ozturk",
+    email: "zeynep.ozturk@example.local",
   },
   "80000000-0000-0000-0000-000000000002": {
-    displayName: "Demo Manager",
-    email: "manager.user@example.local",
+    displayName: "Deniz Karaca",
+    email: "deniz.karaca@example.local",
   },
   "80000000-0000-0000-0000-000000000003": {
-    displayName: "Demo Admin",
-    email: "admin.user@example.local",
+    displayName: "Burak Ozkan",
+    email: "burak.ozkan@example.local",
   },
 };
 

@@ -26,19 +26,23 @@ Management platform.
 
 ## Demo Users
 
-| Username | Role | Department | Team | Password |
-| --- | --- | --- | --- | --- |
-| `customer.user` | `CUSTOMER` | - | - | `Password123!` |
-| `agent.identity` | `AGENT` | `ACCESS_MANAGEMENT` | `IDENTITY_OPERATIONS` | `Password123!` |
-| `agent.permission` | `AGENT` | `ACCESS_MANAGEMENT` | `PERMISSION_OPERATIONS` | `Password123!` |
-| `agent.web` | `AGENT` | `APPLICATION_SUPPORT` | `WEB_APP_SUPPORT` | `Password123!` |
-| `agent.core` | `AGENT` | `APPLICATION_SUPPORT` | `CORE_APP_SUPPORT` | `Password123!` |
-| `agent.network` | `AGENT` | `INFRASTRUCTURE` | `NETWORK_OPERATIONS` | `Password123!` |
-| `agent.platform` | `AGENT` | `INFRASTRUCTURE` | `PLATFORM_OPERATIONS` | `Password123!` |
-| `agent.billing` | `AGENT` | `FINANCE_OPERATIONS` | `BILLING_OPERATIONS` | `Password123!` |
-| `agent.payment` | `AGENT` | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS` | `Password123!` |
-| `manager.user` | `MANAGER` | - | - | `Password123!` |
-| `admin.user` | `ADMIN` | - | - | `Password123!` |
+| Username | Display name | Email | Role | Department | Team | Password |
+| --- | --- | --- | --- | --- | --- | --- |
+| `customer.user` | Ayse Yilmaz | `ayse.yilmaz@example.local` | `CUSTOMER` | - | - | `Password123!` |
+| `customer.mehmet` | Mehmet Demir | `mehmet.demir@example.local` | `CUSTOMER` | - | - | `Password123!` |
+| `customer.zeynep` | Zeynep Kaya | `zeynep.kaya@example.local` | `CUSTOMER` | - | - | `Password123!` |
+| `customer.emre` | Emre Arslan | `emre.arslan@example.local` | `CUSTOMER` | - | - | `Password123!` |
+| `customer.ceren` | Ceren Aksoy | `ceren.aksoy@example.local` | `CUSTOMER` | - | - | `Password123!` |
+| `agent.identity` | Elif Aydin | `elif.aydin@example.local` | `AGENT` | `ACCESS_MANAGEMENT` | `IDENTITY_OPERATIONS` | `Password123!` |
+| `agent.permission` | Mert Kaya | `mert.kaya@example.local` | `AGENT` | `ACCESS_MANAGEMENT` | `PERMISSION_OPERATIONS` | `Password123!` |
+| `agent.web` | Deniz Arslan | `deniz.arslan@example.local` | `AGENT` | `APPLICATION_SUPPORT` | `WEB_APP_SUPPORT` | `Password123!` |
+| `agent.core` | Selin Demir | `selin.demir@example.local` | `AGENT` | `APPLICATION_SUPPORT` | `CORE_APP_SUPPORT` | `Password123!` |
+| `agent.network` | Baran Yilmaz | `baran.yilmaz@example.local` | `AGENT` | `INFRASTRUCTURE` | `NETWORK_OPERATIONS` | `Password123!` |
+| `agent.platform` | Ece Sahin | `ece.sahin@example.local` | `AGENT` | `INFRASTRUCTURE` | `PLATFORM_OPERATIONS` | `Password123!` |
+| `agent.billing` | Onur Demir | `onur.demir@example.local` | `AGENT` | `FINANCE_OPERATIONS` | `BILLING_OPERATIONS` | `Password123!` |
+| `agent.payment` | Zeynep Ozturk | `zeynep.ozturk@example.local` | `AGENT` | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS` | `Password123!` |
+| `manager.user` | Deniz Karaca | `deniz.karaca@example.local` | `MANAGER` | - | - | `Password123!` |
+| `admin.user` | Burak Ozkan | `burak.ozkan@example.local` | `ADMIN` | - | - | `Password123!` |
 
 These credentials are local development placeholders only. They must not be used
 outside local/demo environments.
@@ -63,3 +67,15 @@ Keycloak imports this realm into an empty local volume. If a local
 `ticket-v2-keycloak` volume already exists, user changes in the export are not
 automatically replayed; recreate or manually sync the local realm when demo
 users change.
+
+The local demo reset script syncs these users through Keycloak Admin REST when
+Keycloak is running:
+
+```powershell
+.\scripts\reset-local-demo-data.ps1 -ConfirmReset
+```
+
+The script updates existing fixed-ID demo users only. If a newly added demo
+user is missing from an already running local realm, recreate the local
+Keycloak container so the realm export is imported again; creating that user
+through Admin REST would not safely preserve the expected `sub` value.

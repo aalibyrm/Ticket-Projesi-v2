@@ -619,20 +619,20 @@ function claimsFromJwt(token: string): { email?: string; name?: string; preferre
 
 function displayNameForActor(actorId: string, fallbackLabel: string): string {
   const knownNames: Record<string, string> = {
-    "80000000-0000-0000-0000-000000000001": "Demo Customer",
-    "40000000-0000-0000-0000-000000000003": "Web Agent",
-    "40000000-0000-0000-0000-000000000004": "Core Agent",
-    "40000000-0000-0000-0000-000000000008": "Payment Agent",
+    "80000000-0000-0000-0000-000000000001": "Ayse Yilmaz",
+    "40000000-0000-0000-0000-000000000003": "Deniz Arslan",
+    "40000000-0000-0000-0000-000000000004": "Selin Demir",
+    "40000000-0000-0000-0000-000000000008": "Zeynep Ozturk",
   };
   return knownNames[actorId] ?? `${fallbackLabel} ${actorId.slice(0, 8)}`;
 }
 
 function emailForActor(actorId: string): string {
   const knownEmails: Record<string, string> = {
-    "80000000-0000-0000-0000-000000000001": "customer.user@example.local",
-    "40000000-0000-0000-0000-000000000003": "agent.web@example.local",
+    "80000000-0000-0000-0000-000000000001": "ayse.yilmaz@example.local",
+    "40000000-0000-0000-0000-000000000003": "deniz.arslan@example.local",
     "40000000-0000-0000-0000-000000000004": "agent.core@example.local",
-    "40000000-0000-0000-0000-000000000008": "agent.payment@example.local",
+    "40000000-0000-0000-0000-000000000008": "zeynep.ozturk@example.local",
   };
   return knownEmails[actorId] ?? `user-${actorId.slice(0, 8).toLowerCase()}@example.local`;
 }
@@ -641,7 +641,7 @@ function ticketCreatedSupportEmails(): string[] {
   return uniqueEmails([
     paymentAgent.email,
     emailForActor(paymentAgent.userId),
-    "agent.payment@example.local",
+    "zeynep.ozturk@example.local",
   ]);
 }
 
@@ -649,7 +649,7 @@ function customerEmails(): string[] {
   return uniqueEmails([
     customer.email,
     emailForActor(paymentTicket.customerId),
-    "customer.user@example.local",
+    "ayse.yilmaz@example.local",
   ]);
 }
 
