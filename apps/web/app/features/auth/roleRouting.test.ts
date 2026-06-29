@@ -24,4 +24,9 @@ describe("roleRouting", () => {
     expect(getProtectedRouteRedirectPath("/tickets", ["CUSTOMER"])).toBeUndefined();
     expect(getProtectedRouteRedirectPath("/tickets/123", ["ADMIN"])).toBeUndefined();
   });
+
+  it("does not create a self redirect for authenticated users without app roles", () => {
+    expect(getProtectedRouteRedirectPath("/tickets", [])).toBeUndefined();
+    expect(getProtectedRouteRedirectPath("/agent/inbox", [])).toBeUndefined();
+  });
 });

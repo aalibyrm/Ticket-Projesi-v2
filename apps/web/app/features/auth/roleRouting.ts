@@ -39,6 +39,10 @@ export function getDefaultAuthenticatedPath(roles: AppRole[]) {
 }
 
 export function getProtectedRouteRedirectPath(pathname: string, roles: AppRole[]) {
+  if (roles.length === 0) {
+    return undefined;
+  }
+
   const policy = protectedRoutePolicies.find((routePolicy) =>
     routePolicy.pattern.test(pathname),
   );

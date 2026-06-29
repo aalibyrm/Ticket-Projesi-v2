@@ -109,12 +109,47 @@ function Sync-KeycloakDemoUsers {
         $headers = @{ Authorization = "Bearer $($token.access_token)" }
         $roleCache = @{}
 
+        function Import-DemoUser {
+            param([Parameter(Mandatory = $true)][pscustomobject] $Profile)
+
+            $importBody = @{
+                ifResourceExists = "OVERWRITE"
+                users = @(
+                    @{
+                        id = $Profile.Id
+                        username = $Profile.Username
+                        enabled = $true
+                        emailVerified = $true
+                        firstName = $Profile.FirstName
+                        lastName = $Profile.LastName
+                        email = $Profile.Email
+                        credentials = @(
+                            @{
+                                type = "password"
+                                value = "Password123!"
+                                temporary = $false
+                            }
+                        )
+                        realmRoles = @($Profile.Role)
+                    }
+                )
+            }
+
+            Invoke-WebRequest `
+                -Method Post `
+                -Uri "$baseUrl/admin/realms/$realm/partialImport" `
+                -Headers $headers `
+                -ContentType "application/json" `
+                -Body ($importBody | ConvertTo-Json -Depth 10) | Out-Null
+        }
+
         foreach ($profile in $Profiles) {
             $encodedUsername = [Uri]::EscapeDataString($profile.Username)
-            $existingUsers = Invoke-RestMethod `
+            $existingUsers = @(Invoke-RestMethod `
                 -Method Get `
                 -Uri "$baseUrl/admin/realms/$realm/users?username=$encodedUsername&exact=true" `
-                -Headers $headers
+                -Headers $headers)
+            $existingUsers = @($existingUsers | Where-Object { $_ -and $_.id })
 
             $userBody = @{
                 id = $profile.Id
@@ -126,31 +161,34 @@ function Sync-KeycloakDemoUsers {
                 email = $profile.Email
             }
 
+            foreach ($existingUser in $existingUsers) {
+                if ($existingUser.id -ne $profile.Id) {
+                    Write-Warning "Recreating local demo Keycloak user '$($profile.Username)' because id $($existingUser.id) does not match expected $($profile.Id)."
+                    Invoke-WebRequest `
+                        -Method Delete `
+                        -Uri "$baseUrl/admin/realms/$realm/users/$($existingUser.id)" `
+                        -Headers $headers | Out-Null
+                }
+            }
+
+            $existingUsers = @(Invoke-RestMethod `
+                -Method Get `
+                -Uri "$baseUrl/admin/realms/$realm/users?username=$encodedUsername&exact=true" `
+                -Headers $headers)
+            $existingUsers = @($existingUsers | Where-Object { $_ -and $_.id })
+
             if ($existingUsers.Count -eq 0) {
-                $createBody = $userBody.Clone()
-                $createBody.credentials = @(
-                    @{
-                        type = "password"
-                        value = "Password123!"
-                        temporary = $false
-                    }
-                )
-                Invoke-WebRequest `
-                    -Method Post `
-                    -Uri "$baseUrl/admin/realms/$realm/users" `
-                    -Headers $headers `
-                    -ContentType "application/json" `
-                    -Body ($createBody | ConvertTo-Json -Depth 8) | Out-Null
-                $existingUsers = Invoke-RestMethod `
+                Import-DemoUser -Profile $profile
+                $existingUsers = @(Invoke-RestMethod `
                     -Method Get `
                     -Uri "$baseUrl/admin/realms/$realm/users?username=$encodedUsername&exact=true" `
-                    -Headers $headers
+                    -Headers $headers)
+                $existingUsers = @($existingUsers | Where-Object { $_ -and $_.id })
             }
 
             $userId = $existingUsers[0].id
             if ($userId -ne $profile.Id) {
-                Write-Warning "Keycloak user '$($profile.Username)' has id $userId, expected $($profile.Id). Recreate the local Keycloak container to avoid broken ticket ownership."
-                continue
+                throw "Keycloak user '$($profile.Username)' has id $userId after recreate, expected $($profile.Id)."
             }
 
             Invoke-WebRequest `

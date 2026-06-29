@@ -25,6 +25,14 @@ export function ProtectedRoute({ children }: { children: ReactNode }) {
     return <AuthRequired error={error} />;
   }
 
+  if (roles.length === 0) {
+    return (
+      <AuthRequired
+        error="Hesabiniza uygulama rolu tanimli degil. Cikis yapip yetkili demo kullanici ile giris yapin."
+      />
+    );
+  }
+
   const redirectPath = getProtectedRouteRedirectPath(location.pathname, roles);
   if (redirectPath) {
     return <Navigate replace to={redirectPath} />;
