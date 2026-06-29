@@ -15,6 +15,7 @@ public record AgentPerformanceReportResponse(
                         .stream()
                         .map(row -> new AgentPerformanceRowResponse(
                                 row.agentId(),
+                                ReportingDisplayDirectory.agentDisplayName(row.agentId()),
                                 row.assignedTicketCount(),
                                 row.resolvedTicketCount(),
                                 row.totalWorklogMinutes(),

@@ -272,6 +272,25 @@
       ]
     },
     {
+      "id": "80000000-0000-0000-0000-000000000008",
+      "username": "customer.ali",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Ali",
+      "lastName": "Bayram",
+      "email": "ali.bayram@example.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "CUSTOMER"
+      ]
+    },
+    {
       "id": "40000000-0000-0000-0000-000000000001",
       "username": "agent.identity",
       "enabled": true,

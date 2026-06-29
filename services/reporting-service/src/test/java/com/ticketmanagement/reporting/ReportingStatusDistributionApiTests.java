@@ -118,10 +118,10 @@ class ReportingStatusDistributionApiTests {
                         "APPLICATION_SUPPORT=2",
                         "ACCESS_MANAGEMENT=1");
         assertThat(response.getBody().teamCounts())
-                .extracting(count -> count.assignedTeamId() + "=" + count.count())
+                .extracting(count -> count.assignedTeamName() + "|" + count.assignedTeamCode() + "=" + count.count())
                 .containsExactly(
-                        WEB_APP_SUPPORT_TEAM_ID + "=2",
-                        IDENTITY_OPERATIONS_TEAM_ID + "=1");
+                        "Web App Support|WEB_APP_SUPPORT=2",
+                        "Identity Operations|IDENTITY_OPERATIONS=1");
         assertThat(response.getBody().generatedAt()).isNotNull();
     }
 

@@ -14,6 +14,8 @@ export interface DepartmentTicketCountResponse {
 
 export interface TeamTicketCountResponse {
   assignedTeamId: string;
+  assignedTeamCode?: string | null;
+  assignedTeamName?: string | null;
   count: number;
 }
 
@@ -47,6 +49,7 @@ export interface ClosedTicketDateRangeResponse {
 
 export interface AgentPerformanceRowResponse {
   agentId: string;
+  agentDisplayName?: string | null;
   assignedTicketCount: number;
   averageResolutionMinutes: ReportNumericValue;
   resolvedTicketCount: number;

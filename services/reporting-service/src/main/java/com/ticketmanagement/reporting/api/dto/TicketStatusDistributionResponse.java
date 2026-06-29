@@ -28,7 +28,11 @@ public record TicketStatusDistributionResponse(
                         .toList(),
                 report.teamCounts()
                         .stream()
-                        .map(count -> new TeamTicketCountResponse(count.assignedTeamId(), count.count()))
+                        .map(count -> new TeamTicketCountResponse(
+                                count.assignedTeamId(),
+                                ReportingDisplayDirectory.teamCode(count.assignedTeamId()),
+                                ReportingDisplayDirectory.teamName(count.assignedTeamId()),
+                                count.count()))
                         .toList(),
                 report.totalOpenTickets(),
                 report.generatedAt());

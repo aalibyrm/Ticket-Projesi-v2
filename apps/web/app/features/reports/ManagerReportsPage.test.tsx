@@ -50,6 +50,8 @@ describe("ManagerReportsPage", () => {
           teamCounts: [
             {
               assignedTeamId: "20000000-0000-0000-0000-000000000003",
+              assignedTeamCode: "WEB_APP_SUPPORT",
+              assignedTeamName: "Web App Support",
               count: 9,
             },
           ],
@@ -76,6 +78,7 @@ describe("ManagerReportsPage", () => {
           rows: [
             {
               agentId: "agent-1",
+              agentDisplayName: "Elif Aydin",
               assignedTicketCount: 8,
               averageResolutionMinutes: 150,
               resolvedTicketCount: 6,
@@ -114,11 +117,12 @@ describe("ManagerReportsPage", () => {
     expect(screen.getByText("Department dagilimi")).toBeInTheDocument();
     expect(screen.getByText("Application Support")).toBeInTheDocument();
     expect(screen.getByText("Team dagilimi")).toBeInTheDocument();
+    expect(screen.getByText("Web App Support")).toBeInTheDocument();
     expect(screen.getByText("SLA dagilimi")).toBeInTheDocument();
     expect(screen.getByText("Agent performansi")).toBeInTheDocument();
     expect(screen.getByTestId("closure-volume-chart")).toBeInTheDocument();
     expect(screen.getAllByTestId("closure-volume-date-label")).toHaveLength(11);
     expect(screen.getAllByText("90.5%")).not.toHaveLength(0);
-    expect(screen.getByText("agent-1")).toBeInTheDocument();
+    expect(screen.getByText("Elif Aydin")).toBeInTheDocument();
   });
 });

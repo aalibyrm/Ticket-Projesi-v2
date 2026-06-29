@@ -15,6 +15,7 @@ public class ActorProfileDirectory {
             profile("80000000-0000-0000-0000-000000000005", "Zeynep Kaya", "zeynep.kaya@example.local"),
             profile("80000000-0000-0000-0000-000000000006", "Emre Arslan", "emre.arslan@example.local"),
             profile("80000000-0000-0000-0000-000000000007", "Ceren Aksoy", "ceren.aksoy@example.local"),
+            profile("80000000-0000-0000-0000-000000000008", "Ali Bayram", "ali.bayram@example.local"),
             profile("30000000-0000-0000-0000-000000000001", "Irem Gunes", "irem.gunes@example.local"),
             profile("30000000-0000-0000-0000-000000000002", "Cem Arslan", "cem.arslan@example.local"),
             profile("30000000-0000-0000-0000-000000000003", "Seda Yildirim", "seda.yildirim@example.local"),

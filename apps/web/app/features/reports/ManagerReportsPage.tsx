@@ -38,28 +38,28 @@ type ProgressColor = "error" | "primary" | "success" | "warning";
 
 const agentColumns: GridColDef<AgentPerformanceRowResponse>[] = [
   {
-    field: "agentId",
+    field: "agentDisplayName",
     flex: 1.4,
     headerName: "Agent",
     minWidth: 180,
-    valueFormatter: (value: string) => shortId(value),
+    valueGetter: (_value, row) => row.agentDisplayName ?? shortId(row.agentId),
   },
   {
     field: "assignedTicketCount",
     headerName: "Atanmis",
-    minWidth: 120,
+    minWidth: 96,
     type: "number",
   },
   {
     field: "resolvedTicketCount",
     headerName: "Cozulen",
-    minWidth: 120,
+    minWidth: 96,
     type: "number",
   },
   {
     field: "totalWorklogMinutes",
     headerName: "Worklog",
-    minWidth: 140,
+    minWidth: 112,
     type: "number",
     valueFormatter: (value: number) => formatMinutes(value),
   },
@@ -67,7 +67,7 @@ const agentColumns: GridColDef<AgentPerformanceRowResponse>[] = [
     field: "averageResolutionMinutes",
     flex: 1,
     headerName: "Ort. cozum",
-    minWidth: 150,
+    minWidth: 116,
     valueFormatter: (value: ReportNumericValue) => formatMinutes(value),
   },
 ];
@@ -130,7 +130,16 @@ export function ManagerReportsPage() {
   }
 
   return (
-    <Stack spacing={3}>
+    <Stack
+      spacing={3}
+      sx={{
+        maxWidth: "min(100%, 1600px)",
+        minWidth: 0,
+        mx: "auto",
+        overflowX: "hidden",
+        width: "100%",
+      }}
+    >
       <Stack
         alignItems={{ md: "center", xs: "flex-start" }}
         direction={{ md: "row", xs: "column" }}
@@ -141,7 +150,13 @@ export function ManagerReportsPage() {
           <Typography variant="overline">Yonetici raporu</Typography>
           <Typography variant="h4">Operasyon gostergeleri</Typography>
         </Stack>
-        <Stack alignItems="center" direction={{ sm: "row", xs: "column" }} spacing={1.5}>
+        <Stack
+          alignItems="center"
+          direction={{ sm: "row", xs: "column" }}
+          flexWrap="wrap"
+          spacing={1.5}
+          sx={{ minWidth: 0 }}
+        >
           <TextField
             label="Baslangic"
             onChange={(event) => handleDateChange("fromDate", event.target.value)}
@@ -149,6 +164,7 @@ export function ManagerReportsPage() {
             slotProps={{ inputLabel: { shrink: true } }}
             type="date"
             value={dateRange.fromDate}
+            sx={{ width: { sm: 150, xs: "100%" } }}
           />
           <TextField
             label="Bitis"
@@ -157,6 +173,7 @@ export function ManagerReportsPage() {
             slotProps={{ inputLabel: { shrink: true } }}
             type="date"
             value={dateRange.toDate}
+            sx={{ width: { sm: 150, xs: "100%" } }}
           />
           <Button
             disabled={isFetching}
@@ -180,6 +197,7 @@ export function ManagerReportsPage() {
           display: "grid",
           gap: 3,
           gridTemplateColumns: { lg: "1.15fr 0.85fr", xs: "1fr" },
+          minWidth: 0,
         }}
       >
         <ClosedTicketsPanel report={closedQuery.data} />
@@ -191,6 +209,7 @@ export function ManagerReportsPage() {
           display: "grid",
           gap: 3,
           gridTemplateColumns: { lg: "0.9fr 1.1fr", xs: "1fr" },
+          minWidth: 0,
         }}
       >
         <SlaCompliancePanel report={slaQuery.data} />
@@ -246,7 +265,7 @@ function KpiStrip({
       }}
     >
       {metrics.map((metric) => (
-        <Paper key={metric.label} sx={{ p: 2.5 }} variant="outlined">
+        <Paper key={metric.label} sx={{ minWidth: 0, p: 2.5 }} variant="outlined">
           <Stack spacing={2}>
             <Stack alignItems="center" direction="row" justifyContent="space-between">
               <Typography color="text.secondary" variant="body2">
@@ -282,7 +301,7 @@ function ClosedTicketsPanel({ report }: { report: ClosedTicketDateRangeResponse 
   );
 
   return (
-    <Paper sx={{ p: 3 }} variant="outlined">
+    <Paper sx={{ minWidth: 0, p: 3 }} variant="outlined">
       <Stack spacing={3}>
         <SectionHeader
           subtitle={`${formatDate(report.fromDate)} - ${formatDate(report.toDate)}`}
@@ -290,7 +309,8 @@ function ClosedTicketsPanel({ report }: { report: ClosedTicketDateRangeResponse 
         />
         <Box
           sx={{
-            overflowX: "auto",
+            minWidth: 0,
+            overflowX: "hidden",
             pb: 1,
           }}
         >
@@ -302,10 +322,11 @@ function ClosedTicketsPanel({ report }: { report: ClosedTicketDateRangeResponse 
               sx={{
                 alignItems: "end",
                 display: "grid",
-                gap: 1,
-                gridTemplateColumns: `repeat(${report.dailyCounts.length}, minmax(30px, 1fr))`,
+                gap: { md: 0.75, xs: 0.35 },
+                gridTemplateColumns: `repeat(${report.dailyCounts.length}, minmax(0, 1fr))`,
                 minHeight: 190,
-                minWidth: report.dailyCounts.length > 14 ? `${report.dailyCounts.length * 38}px` : "100%",
+                minWidth: 0,
+                width: "100%",
               }}
             >
               {report.dailyCounts.map((item, index) => {
@@ -321,7 +342,8 @@ function ClosedTicketsPanel({ report }: { report: ClosedTicketDateRangeResponse 
                         bgcolor: "primary.main",
                         borderRadius: "4px 4px 0 0",
                         height: `${Math.max(8, (item.count / maxDailyCount) * 130)}px`,
-                        width: "100%",
+                        maxWidth: 26,
+                        width: "80%",
                       }}
                       title={`${formatDate(item.date)}: ${item.count} ticket`}
                     />
@@ -329,7 +351,11 @@ function ClosedTicketsPanel({ report }: { report: ClosedTicketDateRangeResponse 
                       color="text.secondary"
                       data-testid={showDateLabel ? "closure-volume-date-label" : undefined}
                       noWrap
-                      sx={{ minHeight: 16, visibility: showDateLabel ? "visible" : "hidden" }}
+                      sx={{
+                        fontSize: { md: "0.75rem", xs: "0.65rem" },
+                        minHeight: 16,
+                        visibility: showDateLabel ? "visible" : "hidden",
+                      }}
                       variant="caption"
                     >
                       {showDateLabel ? formatShortDate(item.date) : ""}
@@ -377,7 +403,7 @@ function StatusDistributionPanel({ report }: { report: TicketStatusDistributionR
   );
 
   return (
-    <Paper sx={{ p: 3 }} variant="outlined">
+    <Paper sx={{ minWidth: 0, p: 3 }} variant="outlined">
       <Stack spacing={2.5}>
         <SectionHeader
           subtitle={`Toplam acik: ${report.totalOpenTickets}`}
@@ -412,7 +438,7 @@ function StatusDistributionPanel({ report }: { report: TicketStatusDistributionR
         {teamCounts.map((item) => (
           <MetricProgressRow
             key={item.assignedTeamId}
-            label={shortId(item.assignedTeamId)}
+            label={item.assignedTeamName ?? item.assignedTeamCode ?? shortId(item.assignedTeamId)}
             progress={progressValue(item.count, maxTeamCount)}
             value={`${item.count} ticket`}
           />
@@ -429,7 +455,7 @@ function SlaCompliancePanel({ report }: { report: SlaComplianceReportResponse })
   const compliance = toNumber(report.compliancePercentage);
 
   return (
-    <Paper sx={{ p: 3 }} variant="outlined">
+    <Paper sx={{ minWidth: 0, p: 3 }} variant="outlined">
       <Stack spacing={2.5}>
         <SectionHeader
           subtitle={`Uretim: ${formatDateTime(report.generatedAt)}`}
@@ -478,13 +504,13 @@ function SlaCompliancePanel({ report }: { report: SlaComplianceReportResponse })
 
 function AgentPerformancePanel({ rows }: { rows: AgentPerformanceRowResponse[] }) {
   return (
-    <Paper sx={{ p: 3 }} variant="outlined">
+    <Paper sx={{ minWidth: 0, p: 3 }} variant="outlined">
       <Stack spacing={2}>
         <SectionHeader
           subtitle={`${rows.length} agent`}
           title="Agent performansi"
         />
-        <Box sx={{ height: 420, width: "100%" }}>
+        <Box sx={{ height: 420, minWidth: 0, overflow: "hidden", width: "100%" }}>
           <DataGrid
             columns={agentColumns}
             disableColumnMenu
@@ -497,6 +523,12 @@ function AgentPerformancePanel({ rows }: { rows: AgentPerformanceRowResponse[] }
             }}
             pageSizeOptions={[5, 10]}
             rows={rows}
+            sx={{
+              minWidth: 0,
+              "& .MuiDataGrid-cell": {
+                minWidth: 0,
+              },
+            }}
           />
         </Box>
       </Stack>
@@ -529,7 +561,9 @@ function MetricProgressRow({
   return (
     <Stack spacing={0.75}>
       <Stack alignItems="center" direction="row" justifyContent="space-between" spacing={2}>
-        <Typography variant="body2">{label}</Typography>
+        <Typography sx={{ minWidth: 0, overflowWrap: "anywhere" }} variant="body2">
+          {label}
+        </Typography>
         <Typography color="text.secondary" variant="body2">
           {value}
         </Typography>

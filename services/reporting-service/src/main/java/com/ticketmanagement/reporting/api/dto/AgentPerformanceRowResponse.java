@@ -5,6 +5,7 @@ import java.util.UUID;
 
 public record AgentPerformanceRowResponse(
         UUID agentId,
+        String agentDisplayName,
         long assignedTicketCount,
         long resolvedTicketCount,
         long totalWorklogMinutes,

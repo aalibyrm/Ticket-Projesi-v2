@@ -53,6 +53,7 @@ function New-DemoUserProfiles {
         [pscustomobject]@{ Id = "80000000-0000-0000-0000-000000000005"; Username = "customer.zeynep"; FirstName = "Zeynep"; LastName = "Kaya"; Email = "zeynep.kaya@example.local"; Role = "CUSTOMER" },
         [pscustomobject]@{ Id = "80000000-0000-0000-0000-000000000006"; Username = "customer.emre"; FirstName = "Emre"; LastName = "Arslan"; Email = "emre.arslan@example.local"; Role = "CUSTOMER" },
         [pscustomobject]@{ Id = "80000000-0000-0000-0000-000000000007"; Username = "customer.ceren"; FirstName = "Ceren"; LastName = "Aksoy"; Email = "ceren.aksoy@example.local"; Role = "CUSTOMER" },
+        [pscustomobject]@{ Id = "80000000-0000-0000-0000-000000000008"; Username = "customer.ali"; FirstName = "Ali"; LastName = "Bayram"; Email = "ali.bayram@example.local"; Role = "CUSTOMER" },
         [pscustomobject]@{ Id = "40000000-0000-0000-0000-000000000001"; Username = "agent.identity"; FirstName = "Elif"; LastName = "Aydin"; Email = "elif.aydin@example.local"; Role = "AGENT" },
         [pscustomobject]@{ Id = "40000000-0000-0000-0000-000000000002"; Username = "agent.permission"; FirstName = "Mert"; LastName = "Kaya"; Email = "mert.kaya@example.local"; Role = "AGENT" },
         [pscustomobject]@{ Id = "40000000-0000-0000-0000-000000000003"; Username = "agent.web"; FirstName = "Deniz"; LastName = "Arslan"; Email = "deniz.arslan@example.local"; Role = "AGENT" },
@@ -116,8 +117,24 @@ function Sync-KeycloakDemoUsers {
             }
 
             if ($existingUsers.Count -eq 0) {
-                Write-Warning "Keycloak user '$($profile.Username)' is missing. Recreate the local Keycloak container so the realm export imports the fixed user id $($profile.Id)."
-                continue
+                $createBody = $userBody.Clone()
+                $createBody.credentials = @(
+                    @{
+                        type = "password"
+                        value = "Password123!"
+                        temporary = $false
+                    }
+                )
+                Invoke-WebRequest `
+                    -Method Post `
+                    -Uri "$baseUrl/admin/realms/$realm/users" `
+                    -Headers $headers `
+                    -ContentType "application/json" `
+                    -Body ($createBody | ConvertTo-Json -Depth 8) | Out-Null
+                $existingUsers = Invoke-RestMethod `
+                    -Method Get `
+                    -Uri "$baseUrl/admin/realms/$realm/users?username=$encodedUsername&exact=true" `
+                    -Headers $headers
             }
 
             $userId = $existingUsers[0].id

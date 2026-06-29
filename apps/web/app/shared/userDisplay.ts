@@ -26,6 +26,10 @@ const knownUserProfiles: Record<string, KnownUserProfile> = {
     displayName: "Ceren Aksoy",
     email: "ceren.aksoy@example.local",
   },
+  "80000000-0000-0000-0000-000000000008": {
+    displayName: "Ali Bayram",
+    email: "ali.bayram@example.local",
+  },
   "30000000-0000-0000-0000-000000000001": {
     displayName: "Irem Gunes",
     email: "irem.gunes@example.local",

@@ -62,6 +62,7 @@ npm run dev
 | `customer.zeynep` | Zeynep Kaya | `CUSTOMER` | - | - | `Password123!` |
 | `customer.emre` | Emre Arslan | `CUSTOMER` | - | - | `Password123!` |
 | `customer.ceren` | Ceren Aksoy | `CUSTOMER` | - | - | `Password123!` |
+| `customer.ali` | Ali Bayram | `CUSTOMER` | - | - | `Password123!` |
 | `agent.identity` | Elif Aydin | `AGENT` | `ACCESS_MANAGEMENT` | `IDENTITY_OPERATIONS` | `Password123!` |
 | `agent.permission` | Mert Kaya | `AGENT` | `ACCESS_MANAGEMENT` | `PERMISSION_OPERATIONS` | `Password123!` |
 | `agent.web` | Deniz Arslan | `AGENT` | `APPLICATION_SUPPORT` | `WEB_APP_SUPPORT` | `Password123!` |

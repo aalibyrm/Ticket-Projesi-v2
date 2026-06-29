@@ -33,6 +33,7 @@ Management platform.
 | `customer.zeynep` | Zeynep Kaya | `zeynep.kaya@example.local` | `CUSTOMER` | - | - | `Password123!` |
 | `customer.emre` | Emre Arslan | `emre.arslan@example.local` | `CUSTOMER` | - | - | `Password123!` |
 | `customer.ceren` | Ceren Aksoy | `ceren.aksoy@example.local` | `CUSTOMER` | - | - | `Password123!` |
+| `customer.ali` | Ali Bayram | `ali.bayram@example.local` | `CUSTOMER` | - | - | `Password123!` |
 | `agent.identity` | Elif Aydin | `elif.aydin@example.local` | `AGENT` | `ACCESS_MANAGEMENT` | `IDENTITY_OPERATIONS` | `Password123!` |
 | `agent.permission` | Mert Kaya | `mert.kaya@example.local` | `AGENT` | `ACCESS_MANAGEMENT` | `PERMISSION_OPERATIONS` | `Password123!` |
 | `agent.web` | Deniz Arslan | `deniz.arslan@example.local` | `AGENT` | `APPLICATION_SUPPORT` | `WEB_APP_SUPPORT` | `Password123!` |
