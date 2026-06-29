@@ -135,9 +135,12 @@ test("customer, agent, notification, and reporting smoke journey", async ({ page
   await page.getByRole("button", { name: "Islemde yap" }).click();
   await expect(page.getByText("Islemde").first()).toBeVisible();
 
-  await page
-    .getByRole("textbox", { name: /Yanitinizi .* icin yazin/i })
-    .fill("VPN profili yeniden olusturuldu, tekrar deneyebilir misiniz?");
+  const legacyReplyBox = page.getByLabel("Musteriye yanit");
+  const replyBox =
+    (await legacyReplyBox.count()) > 0
+      ? legacyReplyBox
+      : page.getByRole("textbox", { name: /Yanitinizi .* icin yazin/i });
+  await replyBox.fill("VPN profili yeniden olusturuldu, tekrar deneyebilir misiniz?");
   await page.getByRole("button", { name: "Yanitla" }).click();
   await expect(page.getByText("VPN profili yeniden olusturuldu")).toBeVisible();
 
