@@ -23,6 +23,12 @@ public class InvalidTicketOperationException extends RuntimeException {
                         .formatted(ticketId, currentStatus, requestedStatus));
     }
 
+    public static InvalidTicketOperationException customerResponseRequired(UUID ticketId) {
+        return new InvalidTicketOperationException(
+                "Customer response is required before moving ticket %s back to IN_PROGRESS"
+                        .formatted(ticketId));
+    }
+
     public static InvalidTicketOperationException invalidAssignmentTarget(UUID assigneeId, UUID teamId) {
         return new InvalidTicketOperationException(
                 "Invalid assignment target: assignee %s is not an active member of team %s"

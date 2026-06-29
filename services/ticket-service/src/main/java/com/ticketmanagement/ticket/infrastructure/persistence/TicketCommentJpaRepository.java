@@ -18,6 +18,12 @@ public interface TicketCommentJpaRepository extends JpaRepository<TicketCommentE
             UUID ticketId,
             TicketCommentVisibility visibility);
 
+    boolean existsByTicket_IdAndAuthorIdAndVisibilityAndCreatedAtAfter(
+            UUID ticketId,
+            UUID authorId,
+            TicketCommentVisibility visibility,
+            OffsetDateTime createdAt);
+
     @Query("""
             select count(comment)
             from TicketCommentEntity comment

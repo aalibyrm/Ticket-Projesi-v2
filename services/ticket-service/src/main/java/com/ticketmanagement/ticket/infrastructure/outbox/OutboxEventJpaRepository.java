@@ -1,5 +1,6 @@
 package com.ticketmanagement.ticket.infrastructure.outbox;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,4 +28,15 @@ public interface OutboxEventJpaRepository extends JpaRepository<OutboxEventEntit
     List<OutboxEventEntity> findClaimableForUpdate(
             @Param("maxRetries") int maxRetries,
             @Param("batchSize") int batchSize);
+
+    @Query(value = """
+            select max(occurred_at)
+            from ticket_schema.outbox_events
+            where aggregate_id = :ticketId
+              and event_type = 'ticket.status-changed'
+              and payload ->> 'newStatus' = :status
+            """, nativeQuery = true)
+    Instant findLatestTicketStatusChangedTo(
+            @Param("ticketId") UUID ticketId,
+            @Param("status") String status);
 }

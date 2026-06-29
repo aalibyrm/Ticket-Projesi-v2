@@ -69,7 +69,7 @@ test("customer, agent, notification, and reporting smoke journey", async ({ page
   await page.getByLabel("Konu").fill("VPN baglanti hatasi");
   await page.getByLabel("Kategori").selectOption(productId);
   await page.getByLabel("Talep tipi").selectOption("VPN_ACCESS");
-  await page.getByLabel("Yuksek").check();
+  await page.getByRole("button", { name: "Yuksek" }).click();
   await page
     .getByLabel("Aciklama")
     .fill("VPN baglantisi mesai baslangicinda hata veriyor ve is akisimi durduruyor.");
@@ -128,14 +128,16 @@ test("customer, agent, notification, and reporting smoke journey", async ({ page
   await expect(page.getByText("vpn-log.txt")).toBeVisible();
 
   await page.goto("/agent/inbox");
-  await expect(page.getByRole("heading", { name: "Is kuyrugu" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Atanan Biletler" })).toBeVisible();
   await page.getByText("VPN baglanti hatasi").first().click();
   await expect(page.getByRole("heading", { level: 5, name: "VPN baglanti hatasi" })).toBeVisible();
 
-  await page.getByRole("button", { name: "Status guncelle" }).click();
+  await page.getByRole("button", { name: "Islemde yap" }).click();
   await expect(page.getByText("Islemde").first()).toBeVisible();
 
-  await page.getByLabel("Musteriye yanit").fill("VPN profili yeniden olusturuldu, tekrar deneyebilir misiniz?");
+  await page
+    .getByRole("textbox", { name: /Yanitinizi .* icin yazin/i })
+    .fill("VPN profili yeniden olusturuldu, tekrar deneyebilir misiniz?");
   await page.getByRole("button", { name: "Yanitla" }).click();
   await expect(page.getByText("VPN profili yeniden olusturuldu")).toBeVisible();
 
@@ -412,6 +414,7 @@ async function registerDemoApi(page: Page, state: ReturnType<typeof createDemoSt
 
 function createTicket(body: Record<string, string>): DemoTicket {
   return {
+    assigneeId: agentId,
     assignedTeamId: teamId,
     attachments: [],
     createdAt: now,

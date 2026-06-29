@@ -1,5 +1,8 @@
 package com.ticketmanagement.ticket.application;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
@@ -14,12 +17,15 @@ import com.ticketmanagement.ticket.api.dto.ChangeTicketStatusRequest;
 import com.ticketmanagement.ticket.api.dto.TicketCommentResponse;
 import com.ticketmanagement.ticket.api.dto.TicketResponse;
 import com.ticketmanagement.ticket.api.dto.TicketWorklogResponse;
+import com.ticketmanagement.ticket.domain.TicketCommentVisibility;
+import com.ticketmanagement.ticket.domain.TicketStatus;
 import com.ticketmanagement.ticket.infrastructure.persistence.TicketCommentEntity;
 import com.ticketmanagement.ticket.infrastructure.persistence.TicketCommentJpaRepository;
 import com.ticketmanagement.ticket.infrastructure.persistence.TicketEntity;
 import com.ticketmanagement.ticket.infrastructure.persistence.TicketJpaRepository;
 import com.ticketmanagement.ticket.infrastructure.persistence.TicketWorklogEntity;
 import com.ticketmanagement.ticket.infrastructure.persistence.TicketWorklogJpaRepository;
+import com.ticketmanagement.ticket.infrastructure.outbox.OutboxEventJpaRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +38,7 @@ public class TicketAgentCommandService {
     private final TicketOutboxService ticketOutboxService;
     private final TicketWorkflowPort ticketWorkflowPort;
     private final TicketSupportAccessService ticketSupportAccessService;
+    private final OutboxEventJpaRepository outboxEventRepository;
 
     // Agent tarafindan ticket status bilgisini degistirir ve event uretir.
     @Transactional
@@ -42,6 +49,7 @@ public class TicketAgentCommandService {
                 ticketId,
                 ticket.getStatus(),
                 request.status());
+        assertCustomerResponseBeforeResuming(ticket, transition.newStatus());
 
         ticket.changeStatus(transition.newStatus());
         ticketOutboxService.saveTicketStatusChanged(
@@ -123,5 +131,29 @@ public class TicketAgentCommandService {
     private TicketEntity findTicketForUpdate(UUID ticketId) {
         return ticketRepository.findByIdForUpdate(ticketId)
                 .orElseThrow(() -> NotFoundException.ticket(ticketId));
+    }
+
+    // Musteri bekleniyor durumundaki ticket icin yeni musteri cevabi olmadan sureci tekrar baslatmaz.
+    private void assertCustomerResponseBeforeResuming(TicketEntity ticket, TicketStatus requestedStatus) {
+        if (ticket.getStatus() != TicketStatus.WAITING_FOR_CUSTOMER
+                || requestedStatus != TicketStatus.IN_PROGRESS) {
+            return;
+        }
+
+        Instant waitingSinceInstant = outboxEventRepository.findLatestTicketStatusChangedTo(
+                ticket.getId(),
+                TicketStatus.WAITING_FOR_CUSTOMER.name());
+        OffsetDateTime waitingSince = waitingSinceInstant == null
+                ? ticket.getUpdatedAt()
+                : OffsetDateTime.ofInstant(waitingSinceInstant, ZoneOffset.UTC);
+
+        boolean customerResponded = ticketCommentRepository.existsByTicket_IdAndAuthorIdAndVisibilityAndCreatedAtAfter(
+                ticket.getId(),
+                ticket.getCustomerId(),
+                TicketCommentVisibility.EXTERNAL,
+                waitingSince);
+        if (!customerResponded) {
+            throw InvalidTicketOperationException.customerResponseRequired(ticket.getId());
+        }
     }
 }
