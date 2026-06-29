@@ -1,7 +1,7 @@
 app:
   security:
     jwt:
-      enabled: false
+      enabled: ${TICKET_SERVICE_JWT_ENABLED:false}
 
 logging:
   level:
