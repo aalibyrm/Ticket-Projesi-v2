@@ -29,7 +29,8 @@ degerleriyle birebir eslestirilir:
 | `agent.network` | `INFRASTRUCTURE` | `NETWORK_OPERATIONS` | `40000000-0000-0000-0000-000000000005` |
 | `agent.platform` | `INFRASTRUCTURE` | `PLATFORM_OPERATIONS` | `40000000-0000-0000-0000-000000000006` |
 | `agent.billing` | `FINANCE_OPERATIONS` | `BILLING_OPERATIONS` | `40000000-0000-0000-0000-000000000007` |
-| `agent.payment` | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS` | `40000000-0000-0000-0000-000000000008` |
+| `agent.payment` | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS_1` | `40000000-0000-0000-0000-000000000008` |
+| `agent.payment2` | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS_2` | `40000000-0000-0000-0000-000000000009` |
 
 ## Consequences
 
@@ -39,5 +40,4 @@ degerleriyle birebir eslestirilir:
   `team_ids` claims or weaken gateway/backend access rules.
 - Existing local Keycloak volumes may still contain older demo users until the
   realm is reset or users are synced manually.
-- Team lead specific management scenarios remain a separate decision because
-  this ADR covers team member visibility for demo agents.
+- Team lead specific management scenarios are covered later by ADR-0066.

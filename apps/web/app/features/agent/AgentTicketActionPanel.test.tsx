@@ -12,6 +12,7 @@ import { appTheme } from "~/shared/theme/appTheme";
 import { server } from "~/test/msw/server";
 
 const teamId = "20000000-0000-0000-0000-000000000003";
+const leadId = "30000000-0000-0000-0000-000000000003";
 const memberId = "40000000-0000-0000-0000-000000000003";
 const ticketId = "22222222-2222-2222-2222-222222222222";
 
@@ -64,13 +65,13 @@ describe("AgentTicketActionPanel", () => {
     store.dispatch(setUnauthenticated());
   });
 
-  it("assigns ticket by selecting a known team member", async () => {
+  it("allows a team lead to assign a ticket to a known team member", async () => {
     let assignmentBody: Record<string, unknown> | undefined;
     store.dispatch(setAuthenticated({
-      displayName: "Support Agent",
-      id: memberId,
+      displayName: "Seda Yildirim",
+      id: leadId,
       roles: ["AGENT"],
-      username: "agent@example.com",
+      username: "lead.web@example.com",
     }));
 
     server.use(
@@ -89,7 +90,7 @@ describe("AgentTicketActionPanel", () => {
       http.get(`*/api/v1/organization/teams/${teamId}/members`, () =>
         HttpResponse.json([
           {
-            actorId: "30000000-0000-0000-0000-000000000003",
+            actorId: leadId,
             displayName: "Seda Yildirim",
             email: "seda.yildirim@example.local",
             teamCode: "WEB_APP_SUPPORT",
@@ -128,6 +129,77 @@ describe("AgentTicketActionPanel", () => {
     fireEvent.mouseDown(screen.getByLabelText("Agent"));
     fireEvent.click(await screen.findByRole("option", { name: /Deniz Arslan/ }));
     fireEvent.click(screen.getByRole("button", { name: "Atamayi kaydet" }));
+
+    await waitFor(() =>
+      expect(assignmentBody).toMatchObject({
+        assigneeId: memberId,
+        assignedTeamId: teamId,
+      }),
+    );
+  });
+
+  it("hides delegated assignment controls for a non-lead agent", async () => {
+    let assignmentBody: Record<string, unknown> | undefined;
+    store.dispatch(setAuthenticated({
+      displayName: "Deniz Arslan",
+      id: memberId,
+      roles: ["AGENT"],
+      username: "agent.web@example.com",
+    }));
+
+    server.use(
+      http.get("*/api/v1/organization/teams", () =>
+        HttpResponse.json([
+          {
+            code: "WEB_APP_SUPPORT",
+            departmentCode: "APPLICATION_SUPPORT",
+            departmentId: "10000000-0000-0000-0000-000000000002",
+            id: teamId,
+            leadActorId: leadId,
+            name: "Web App Support",
+          },
+        ]),
+      ),
+      http.get(`*/api/v1/organization/teams/${teamId}/members`, () =>
+        HttpResponse.json([
+          {
+            actorId: leadId,
+            displayName: "Seda Yildirim",
+            email: "seda.yildirim@example.local",
+            teamCode: "WEB_APP_SUPPORT",
+            teamId,
+            teamLead: true,
+          },
+          {
+            actorId: memberId,
+            displayName: "Deniz Arslan",
+            email: "deniz.arslan@example.local",
+            teamCode: "WEB_APP_SUPPORT",
+            teamId,
+            teamLead: false,
+          },
+        ]),
+      ),
+      http.get("*/api/v1/agent/tickets/:ticketId/worklogs", () => HttpResponse.json([])),
+      http.get("*/api/v1/agent/tickets/:ticketId/comments", () => HttpResponse.json([])),
+      http.patch("*/api/v1/agent/tickets/:ticketId/assignment", async ({ request }) => {
+        assignmentBody = await request.json() as Record<string, unknown>;
+        return HttpResponse.json({
+          ...ticket,
+          assigneeId: memberId,
+          assignedTeamId: teamId,
+        });
+      }),
+    );
+
+    const ticket = ticketFixture();
+
+    renderPanel(ticket);
+
+    expect(await screen.findByRole("button", { name: "Bana ata" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("Agent")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Atamayi kaydet" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Bana ata" }));
 
     await waitFor(() =>
       expect(assignmentBody).toMatchObject({

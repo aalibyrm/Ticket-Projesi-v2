@@ -348,6 +348,37 @@ class TicketSecurityIntegrationTests {
     }
 
     @Test
+    void teamMemberCannotAssignOwnTeamTicketToAnotherAgent() throws Exception {
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID ticketId = createTicketFor(ownerCustomerId);
+
+        mockMvc.perform(patch("/api/agent/tickets/{id}/assignment", ticketId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new AssignTicketRequest(
+                                WEB_APP_SUPPORT_LEAD_ID,
+                                WEB_APP_SUPPORT_TEAM_ID)))
+                        .with(jwtWithRoles(WEB_APP_SUPPORT_MEMBER_ID, "AGENT")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+    }
+
+    @Test
+    void teamLeadCanAssignOwnTeamTicketToTeamMember() throws Exception {
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID ticketId = createTicketFor(ownerCustomerId);
+
+        mockMvc.perform(patch("/api/agent/tickets/{id}/assignment", ticketId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new AssignTicketRequest(
+                                WEB_APP_SUPPORT_MEMBER_ID,
+                                WEB_APP_SUPPORT_TEAM_ID)))
+                        .with(jwtWithRoles(WEB_APP_SUPPORT_LEAD_ID, "AGENT")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.assigneeId").value(WEB_APP_SUPPORT_MEMBER_ID.toString()))
+                .andExpect(jsonPath("$.assignedTeamId").value(WEB_APP_SUPPORT_TEAM_ID.toString()));
+    }
+
+    @Test
     void teamLeadCanManageOwnTeamTicket() throws Exception {
         UUID ownerCustomerId = UUID.randomUUID();
         UUID ticketId = createTicketFor(ownerCustomerId);

@@ -63,6 +63,8 @@ npm run dev
 | `customer.emre` | Emre Arslan | `CUSTOMER` | - | - | `Password123!` |
 | `customer.ceren` | Ceren Aksoy | `CUSTOMER` | - | - | `Password123!` |
 | `customer.ali` | Ali Bayram | `CUSTOMER` | - | - | `Password123!` |
+| `lead.payment1` | Bora Yalcin | `AGENT` | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS_1` | `Password123!` |
+| `lead.payment2` | Eren Koc | `AGENT` | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS_2` | `Password123!` |
 | `agent.identity` | Elif Aydin | `AGENT` | `ACCESS_MANAGEMENT` | `IDENTITY_OPERATIONS` | `Password123!` |
 | `agent.permission` | Mert Kaya | `AGENT` | `ACCESS_MANAGEMENT` | `PERMISSION_OPERATIONS` | `Password123!` |
 | `agent.web` | Deniz Arslan | `AGENT` | `APPLICATION_SUPPORT` | `WEB_APP_SUPPORT` | `Password123!` |
@@ -70,13 +72,16 @@ npm run dev
 | `agent.network` | Baran Yilmaz | `AGENT` | `INFRASTRUCTURE` | `NETWORK_OPERATIONS` | `Password123!` |
 | `agent.platform` | Ece Sahin | `AGENT` | `INFRASTRUCTURE` | `PLATFORM_OPERATIONS` | `Password123!` |
 | `agent.billing` | Onur Demir | `AGENT` | `FINANCE_OPERATIONS` | `BILLING_OPERATIONS` | `Password123!` |
-| `agent.payment` | Zeynep Ozturk | `AGENT` | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS` | `Password123!` |
+| `agent.payment` | Zeynep Ozturk | `AGENT` | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS_1` | `Password123!` |
+| `agent.payment2` | Seda Erdem | `AGENT` | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS_2` | `Password123!` |
 | `manager.user` | Deniz Karaca | `MANAGER` | - | - | `Password123!` |
 | `admin.user` | Burak Ozkan | `ADMIN` | - | - | `Password123!` |
 
 Topic routing'e gore `PAYMENT_FAILURE` ticket'lari `agent.payment`,
 `WEB_PORTAL_BUG` ticket'lari `agent.web`, `CORE_SYSTEM_ERROR` ticket'lari
 `agent.core` hesabinda gorunur.
+Lead hesaplari ayni takimdaki baska agent'lara atama yapabilir. Normal agent
+hesaplari sadece bos ticket'i kendi uzerine alabilir.
 
 7. Demo sirasi:
 

@@ -92,7 +92,9 @@ Seed edilen department seti:
 - `INFRASTRUCTURE`
 - `FINANCE_OPERATIONS`
 
-Her department altinda iki uzmanlik ekibi bulunur. Triage ayri bir ekip degil;
+Her department altinda uzmanlik ekipleri bulunur. Finance Operations icinde
+Billing Operations'a ek olarak iki odeme operasyon ekibi vardir:
+`PAYMENT_OPERATIONS_1` ve `PAYMENT_OPERATIONS_2`. Triage ayri bir ekip degil;
 #62 ile deterministic `topic -> department -> team` routing rule olarak
 uygulandi.
 
@@ -115,7 +117,7 @@ Seed edilen topic routing seti:
 - `NETWORK_CONNECTIVITY` -> `INFRASTRUCTURE` / `NETWORK_OPERATIONS`
 - `SERVER_PLATFORM` -> `INFRASTRUCTURE` / `PLATFORM_OPERATIONS`
 - `INVOICE_ISSUE` -> `FINANCE_OPERATIONS` / `BILLING_OPERATIONS`
-- `PAYMENT_FAILURE` -> `FINANCE_OPERATIONS` / `PAYMENT_OPERATIONS`
+- `PAYMENT_FAILURE` -> `FINANCE_OPERATIONS` / `PAYMENT_OPERATIONS_1`
 
 Local Keycloak demo agent hesaplari team bazlidir ve `team_members.actor_id`
 seed degerleriyle ayni user id'leri kullanir:
@@ -129,4 +131,12 @@ seed degerleriyle ayni user id'leri kullanir:
 | `agent.network` | Baran Yilmaz | `INFRASTRUCTURE` | `NETWORK_OPERATIONS` |
 | `agent.platform` | Ece Sahin | `INFRASTRUCTURE` | `PLATFORM_OPERATIONS` |
 | `agent.billing` | Onur Demir | `FINANCE_OPERATIONS` | `BILLING_OPERATIONS` |
-| `agent.payment` | Zeynep Ozturk | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS` |
+| `agent.payment` | Zeynep Ozturk | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS_1` |
+| `agent.payment2` | Seda Erdem | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS_2` |
+
+Lead demo hesaplari `lead.identity`, `lead.permission`, `lead.web`,
+`lead.core`, `lead.network`, `lead.platform`, `lead.billing`,
+`lead.payment1` ve `lead.payment2` formatindadir. Lead yetkisi JWT claim'den
+degil, DB'deki aktif `team_members.team_lead` kaydindan belirlenir. Bu nedenle
+lead kullanicilar baska agent'a atama yapabilirken normal agent kullanicilar
+yalniz kendi uzerine self-assignment yapabilir.

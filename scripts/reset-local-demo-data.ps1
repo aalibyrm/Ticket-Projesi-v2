@@ -54,6 +54,15 @@ function New-DemoUserProfiles {
         [pscustomobject]@{ Id = "80000000-0000-0000-0000-000000000006"; Username = "customer.emre"; FirstName = "Emre"; LastName = "Arslan"; Email = "emre.arslan@example.local"; Role = "CUSTOMER" },
         [pscustomobject]@{ Id = "80000000-0000-0000-0000-000000000007"; Username = "customer.ceren"; FirstName = "Ceren"; LastName = "Aksoy"; Email = "ceren.aksoy@example.local"; Role = "CUSTOMER" },
         [pscustomobject]@{ Id = "80000000-0000-0000-0000-000000000008"; Username = "customer.ali"; FirstName = "Ali"; LastName = "Bayram"; Email = "ali.bayram@example.local"; Role = "CUSTOMER" },
+        [pscustomobject]@{ Id = "30000000-0000-0000-0000-000000000001"; Username = "lead.identity"; FirstName = "Irem"; LastName = "Gunes"; Email = "irem.gunes@example.local"; Role = "AGENT" },
+        [pscustomobject]@{ Id = "30000000-0000-0000-0000-000000000002"; Username = "lead.permission"; FirstName = "Cem"; LastName = "Arslan"; Email = "cem.arslan@example.local"; Role = "AGENT" },
+        [pscustomobject]@{ Id = "30000000-0000-0000-0000-000000000003"; Username = "lead.web"; FirstName = "Seda"; LastName = "Yildirim"; Email = "seda.yildirim@example.local"; Role = "AGENT" },
+        [pscustomobject]@{ Id = "30000000-0000-0000-0000-000000000004"; Username = "lead.core"; FirstName = "Okan"; LastName = "Demir"; Email = "okan.demir@example.local"; Role = "AGENT" },
+        [pscustomobject]@{ Id = "30000000-0000-0000-0000-000000000005"; Username = "lead.network"; FirstName = "Derya"; LastName = "Korkmaz"; Email = "derya.korkmaz@example.local"; Role = "AGENT" },
+        [pscustomobject]@{ Id = "30000000-0000-0000-0000-000000000006"; Username = "lead.platform"; FirstName = "Alp"; LastName = "Kaya"; Email = "alp.kaya@example.local"; Role = "AGENT" },
+        [pscustomobject]@{ Id = "30000000-0000-0000-0000-000000000007"; Username = "lead.billing"; FirstName = "Melis"; LastName = "Acar"; Email = "melis.acar@example.local"; Role = "AGENT" },
+        [pscustomobject]@{ Id = "30000000-0000-0000-0000-000000000008"; Username = "lead.payment1"; FirstName = "Bora"; LastName = "Yalcin"; Email = "bora.yalcin@example.local"; Role = "AGENT" },
+        [pscustomobject]@{ Id = "30000000-0000-0000-0000-000000000009"; Username = "lead.payment2"; FirstName = "Eren"; LastName = "Koc"; Email = "eren.koc@example.local"; Role = "AGENT" },
         [pscustomobject]@{ Id = "40000000-0000-0000-0000-000000000001"; Username = "agent.identity"; FirstName = "Elif"; LastName = "Aydin"; Email = "elif.aydin@example.local"; Role = "AGENT" },
         [pscustomobject]@{ Id = "40000000-0000-0000-0000-000000000002"; Username = "agent.permission"; FirstName = "Mert"; LastName = "Kaya"; Email = "mert.kaya@example.local"; Role = "AGENT" },
         [pscustomobject]@{ Id = "40000000-0000-0000-0000-000000000003"; Username = "agent.web"; FirstName = "Deniz"; LastName = "Arslan"; Email = "deniz.arslan@example.local"; Role = "AGENT" },
@@ -62,6 +71,7 @@ function New-DemoUserProfiles {
         [pscustomobject]@{ Id = "40000000-0000-0000-0000-000000000006"; Username = "agent.platform"; FirstName = "Ece"; LastName = "Sahin"; Email = "ece.sahin@example.local"; Role = "AGENT" },
         [pscustomobject]@{ Id = "40000000-0000-0000-0000-000000000007"; Username = "agent.billing"; FirstName = "Onur"; LastName = "Demir"; Email = "onur.demir@example.local"; Role = "AGENT" },
         [pscustomobject]@{ Id = "40000000-0000-0000-0000-000000000008"; Username = "agent.payment"; FirstName = "Zeynep"; LastName = "Ozturk"; Email = "zeynep.ozturk@example.local"; Role = "AGENT" },
+        [pscustomobject]@{ Id = "40000000-0000-0000-0000-000000000009"; Username = "agent.payment2"; FirstName = "Seda"; LastName = "Erdem"; Email = "seda.erdem@example.local"; Role = "AGENT" },
         [pscustomobject]@{ Id = "80000000-0000-0000-0000-000000000002"; Username = "manager.user"; FirstName = "Deniz"; LastName = "Karaca"; Email = "deniz.karaca@example.local"; Role = "MANAGER" },
         [pscustomobject]@{ Id = "80000000-0000-0000-0000-000000000003"; Username = "admin.user"; FirstName = "Burak"; LastName = "Ozkan"; Email = "burak.ozkan@example.local"; Role = "ADMIN" }
     )

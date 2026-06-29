@@ -80,8 +80,8 @@ class NotificationConsumerIdempotencyTests {
                         "FINANCE_OPERATIONS",
                         "Finance Operations",
                         UUID.randomUUID(),
-                        "PAYMENT_OPERATIONS",
-                        "Payment Operations",
+                        "PAYMENT_OPERATIONS_1",
+                        "Payment Operations 1",
                         supportRecipientId,
                         "HIGH",
                         "NEW"));

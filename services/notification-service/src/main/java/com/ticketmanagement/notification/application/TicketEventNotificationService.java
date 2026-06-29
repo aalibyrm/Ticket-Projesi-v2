@@ -28,7 +28,9 @@ public class TicketEventNotificationService {
             "NETWORK_OPERATIONS", UUID.fromString("40000000-0000-0000-0000-000000000005"),
             "PLATFORM_OPERATIONS", UUID.fromString("40000000-0000-0000-0000-000000000006"),
             "BILLING_OPERATIONS", UUID.fromString("40000000-0000-0000-0000-000000000007"),
-            "PAYMENT_OPERATIONS", UUID.fromString("40000000-0000-0000-0000-000000000008"));
+            "PAYMENT_OPERATIONS", UUID.fromString("40000000-0000-0000-0000-000000000008"),
+            "PAYMENT_OPERATIONS_1", UUID.fromString("40000000-0000-0000-0000-000000000008"),
+            "PAYMENT_OPERATIONS_2", UUID.fromString("40000000-0000-0000-0000-000000000009"));
     private static final String TICKET_CREATED = "ticket.created";
     private static final String TICKET_EXTERNAL_COMMENT_ADDED = "ticket.external-comment-added";
     private static final String TICKET_STATUS_CHANGED = "ticket.status-changed";

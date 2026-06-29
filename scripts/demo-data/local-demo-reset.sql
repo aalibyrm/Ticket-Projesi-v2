@@ -23,6 +23,26 @@ DELETE FROM ticket_schema.ticket_comments;
 DELETE FROM ticket_schema.outbox_events;
 DELETE FROM ticket_schema.tickets;
 
+UPDATE ticket_schema.support_teams
+SET code = 'PAYMENT_OPERATIONS_1',
+    name = 'Payment Operations 1',
+    lead_actor_id = '30000000-0000-0000-0000-000000000008'
+WHERE id = '20000000-0000-0000-0000-000000000008';
+
+INSERT INTO ticket_schema.support_teams (id, department_id, code, name, lead_actor_id, active)
+VALUES (
+  '20000000-0000-0000-0000-000000000009',
+  '10000000-0000-0000-0000-000000000004',
+  'PAYMENT_OPERATIONS_2',
+  'Payment Operations 2',
+  '30000000-0000-0000-0000-000000000009',
+  true
+)
+ON CONFLICT (code) DO UPDATE
+SET name = EXCLUDED.name,
+    lead_actor_id = EXCLUDED.lead_actor_id,
+    active = EXCLUDED.active;
+
 DELETE FROM ticket_schema.team_members
 WHERE actor_id NOT IN (
   '30000000-0000-0000-0000-000000000001',
@@ -33,6 +53,7 @@ WHERE actor_id NOT IN (
   '30000000-0000-0000-0000-000000000006',
   '30000000-0000-0000-0000-000000000007',
   '30000000-0000-0000-0000-000000000008',
+  '30000000-0000-0000-0000-000000000009',
   '40000000-0000-0000-0000-000000000001',
   '40000000-0000-0000-0000-000000000002',
   '40000000-0000-0000-0000-000000000003',
@@ -40,8 +61,29 @@ WHERE actor_id NOT IN (
   '40000000-0000-0000-0000-000000000005',
   '40000000-0000-0000-0000-000000000006',
   '40000000-0000-0000-0000-000000000007',
-  '40000000-0000-0000-0000-000000000008'
+  '40000000-0000-0000-0000-000000000008',
+  '40000000-0000-0000-0000-000000000009'
 );
+
+INSERT INTO ticket_schema.team_members (id, team_id, actor_id, team_lead, active)
+VALUES
+  (
+    '50000000-0000-0000-0000-000000000017',
+    '20000000-0000-0000-0000-000000000009',
+    '30000000-0000-0000-0000-000000000009',
+    true,
+    true
+  ),
+  (
+    '50000000-0000-0000-0000-000000000018',
+    '20000000-0000-0000-0000-000000000009',
+    '40000000-0000-0000-0000-000000000009',
+    false,
+    true
+  )
+ON CONFLICT (team_id, actor_id) DO UPDATE
+SET team_lead = EXCLUDED.team_lead,
+    active = EXCLUDED.active;
 
 CREATE TEMP TABLE demo_agent_seed (
   agent_index INTEGER PRIMARY KEY,
@@ -184,6 +226,20 @@ VALUES
     'Finance Operations',
     'Odeme islemi tamamlanmiyor',
     'Kart ile odeme adiminda islem tamamlanmadan hata mesaji aliniyor.'
+  ),
+  (
+    9,
+    '40000000-0000-0000-0000-000000000009',
+    '20000000-0000-0000-0000-000000000009',
+    '10000000-0000-0000-0000-000000000004',
+    '60000000-0000-0000-0000-000000000008',
+    '22222222-2222-2222-2222-222222222222',
+    'PAYMENT_FAILURE',
+    'Payment Failure',
+    'FINANCE_OPERATIONS',
+    'Finance Operations',
+    'Odeme dogrulama gecikiyor',
+    'Odeme onay servisinden gec donus alindigi icin musteri siparis akisi beklemede kaliyor.'
   );
 
 DO $$
@@ -193,7 +249,8 @@ DECLARE
     '80000000-0000-0000-0000-000000000004'::UUID,
     '80000000-0000-0000-0000-000000000005'::UUID,
     '80000000-0000-0000-0000-000000000006'::UUID,
-    '80000000-0000-0000-0000-000000000007'::UUID
+    '80000000-0000-0000-0000-000000000007'::UUID,
+    '80000000-0000-0000-0000-000000000008'::UUID
   ];
   seed demo_agent_seed%ROWTYPE;
   ticket_index INTEGER;
@@ -457,6 +514,6 @@ BEGIN
   END LOOP;
 END $$;
 
-SELECT setval('ticket_schema.ticket_number_seq', 1096, true);
+SELECT setval('ticket_schema.ticket_number_seq', 1108, true);
 
 COMMIT;

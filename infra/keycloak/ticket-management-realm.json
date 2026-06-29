@@ -291,6 +291,177 @@
       ]
     },
     {
+      "id": "30000000-0000-0000-0000-000000000001",
+      "username": "lead.identity",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Irem",
+      "lastName": "Gunes",
+      "email": "irem.gunes@example.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "AGENT"
+      ]
+    },
+    {
+      "id": "30000000-0000-0000-0000-000000000002",
+      "username": "lead.permission",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Cem",
+      "lastName": "Arslan",
+      "email": "cem.arslan@example.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "AGENT"
+      ]
+    },
+    {
+      "id": "30000000-0000-0000-0000-000000000003",
+      "username": "lead.web",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Seda",
+      "lastName": "Yildirim",
+      "email": "seda.yildirim@example.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "AGENT"
+      ]
+    },
+    {
+      "id": "30000000-0000-0000-0000-000000000004",
+      "username": "lead.core",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Okan",
+      "lastName": "Demir",
+      "email": "okan.demir@example.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "AGENT"
+      ]
+    },
+    {
+      "id": "30000000-0000-0000-0000-000000000005",
+      "username": "lead.network",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Derya",
+      "lastName": "Korkmaz",
+      "email": "derya.korkmaz@example.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "AGENT"
+      ]
+    },
+    {
+      "id": "30000000-0000-0000-0000-000000000006",
+      "username": "lead.platform",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Alp",
+      "lastName": "Kaya",
+      "email": "alp.kaya@example.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "AGENT"
+      ]
+    },
+    {
+      "id": "30000000-0000-0000-0000-000000000007",
+      "username": "lead.billing",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Melis",
+      "lastName": "Acar",
+      "email": "melis.acar@example.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "AGENT"
+      ]
+    },
+    {
+      "id": "30000000-0000-0000-0000-000000000008",
+      "username": "lead.payment1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Bora",
+      "lastName": "Yalcin",
+      "email": "bora.yalcin@example.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "AGENT"
+      ]
+    },
+    {
+      "id": "30000000-0000-0000-0000-000000000009",
+      "username": "lead.payment2",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Eren",
+      "lastName": "Koc",
+      "email": "eren.koc@example.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "AGENT"
+      ]
+    },
+    {
       "id": "40000000-0000-0000-0000-000000000001",
       "username": "agent.identity",
       "enabled": true,
@@ -431,6 +602,25 @@
       "firstName": "Zeynep",
       "lastName": "Ozturk",
       "email": "zeynep.ozturk@example.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "AGENT"
+      ]
+    },
+    {
+      "id": "40000000-0000-0000-0000-000000000009",
+      "username": "agent.payment2",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Seda",
+      "lastName": "Erdem",
+      "email": "seda.erdem@example.local",
       "credentials": [
         {
           "type": "password",

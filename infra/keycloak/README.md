@@ -34,6 +34,15 @@ Management platform.
 | `customer.emre` | Emre Arslan | `emre.arslan@example.local` | `CUSTOMER` | - | - | `Password123!` |
 | `customer.ceren` | Ceren Aksoy | `ceren.aksoy@example.local` | `CUSTOMER` | - | - | `Password123!` |
 | `customer.ali` | Ali Bayram | `ali.bayram@example.local` | `CUSTOMER` | - | - | `Password123!` |
+| `lead.identity` | Irem Gunes | `irem.gunes@example.local` | `AGENT` | `ACCESS_MANAGEMENT` | `IDENTITY_OPERATIONS` | `Password123!` |
+| `lead.permission` | Cem Arslan | `cem.arslan@example.local` | `AGENT` | `ACCESS_MANAGEMENT` | `PERMISSION_OPERATIONS` | `Password123!` |
+| `lead.web` | Seda Yildirim | `seda.yildirim@example.local` | `AGENT` | `APPLICATION_SUPPORT` | `WEB_APP_SUPPORT` | `Password123!` |
+| `lead.core` | Okan Demir | `okan.demir@example.local` | `AGENT` | `APPLICATION_SUPPORT` | `CORE_APP_SUPPORT` | `Password123!` |
+| `lead.network` | Derya Korkmaz | `derya.korkmaz@example.local` | `AGENT` | `INFRASTRUCTURE` | `NETWORK_OPERATIONS` | `Password123!` |
+| `lead.platform` | Alp Kaya | `alp.kaya@example.local` | `AGENT` | `INFRASTRUCTURE` | `PLATFORM_OPERATIONS` | `Password123!` |
+| `lead.billing` | Melis Acar | `melis.acar@example.local` | `AGENT` | `FINANCE_OPERATIONS` | `BILLING_OPERATIONS` | `Password123!` |
+| `lead.payment1` | Bora Yalcin | `bora.yalcin@example.local` | `AGENT` | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS_1` | `Password123!` |
+| `lead.payment2` | Eren Koc | `eren.koc@example.local` | `AGENT` | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS_2` | `Password123!` |
 | `agent.identity` | Elif Aydin | `elif.aydin@example.local` | `AGENT` | `ACCESS_MANAGEMENT` | `IDENTITY_OPERATIONS` | `Password123!` |
 | `agent.permission` | Mert Kaya | `mert.kaya@example.local` | `AGENT` | `ACCESS_MANAGEMENT` | `PERMISSION_OPERATIONS` | `Password123!` |
 | `agent.web` | Deniz Arslan | `deniz.arslan@example.local` | `AGENT` | `APPLICATION_SUPPORT` | `WEB_APP_SUPPORT` | `Password123!` |
@@ -41,7 +50,8 @@ Management platform.
 | `agent.network` | Baran Yilmaz | `baran.yilmaz@example.local` | `AGENT` | `INFRASTRUCTURE` | `NETWORK_OPERATIONS` | `Password123!` |
 | `agent.platform` | Ece Sahin | `ece.sahin@example.local` | `AGENT` | `INFRASTRUCTURE` | `PLATFORM_OPERATIONS` | `Password123!` |
 | `agent.billing` | Onur Demir | `onur.demir@example.local` | `AGENT` | `FINANCE_OPERATIONS` | `BILLING_OPERATIONS` | `Password123!` |
-| `agent.payment` | Zeynep Ozturk | `zeynep.ozturk@example.local` | `AGENT` | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS` | `Password123!` |
+| `agent.payment` | Zeynep Ozturk | `zeynep.ozturk@example.local` | `AGENT` | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS_1` | `Password123!` |
+| `agent.payment2` | Seda Erdem | `seda.erdem@example.local` | `AGENT` | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS_2` | `Password123!` |
 | `manager.user` | Deniz Karaca | `deniz.karaca@example.local` | `MANAGER` | - | - | `Password123!` |
 | `admin.user` | Burak Ozkan | `burak.ozkan@example.local` | `ADMIN` | - | - | `Password123!` |
 
@@ -76,7 +86,6 @@ Keycloak is running:
 .\scripts\reset-local-demo-data.ps1 -ConfirmReset
 ```
 
-The script updates existing fixed-ID demo users only. If a newly added demo
-user is missing from an already running local realm, recreate the local
-Keycloak container so the realm export is imported again; creating that user
-through Admin REST would not safely preserve the expected `sub` value.
+The script updates or creates fixed-ID demo users through Keycloak Admin REST.
+If a local realm already contains the same username with a different id,
+recreate the local Keycloak container so the expected `sub` value is restored.

@@ -13,7 +13,8 @@ final class ReportingDisplayDirectory {
             agent("40000000-0000-0000-0000-000000000005", "Baran Yilmaz"),
             agent("40000000-0000-0000-0000-000000000006", "Ece Sahin"),
             agent("40000000-0000-0000-0000-000000000007", "Onur Demir"),
-            agent("40000000-0000-0000-0000-000000000008", "Zeynep Ozturk"));
+            agent("40000000-0000-0000-0000-000000000008", "Zeynep Ozturk"),
+            agent("40000000-0000-0000-0000-000000000009", "Seda Erdem"));
 
     private static final Map<UUID, TeamDisplay> TEAMS = Map.ofEntries(
             team("20000000-0000-0000-0000-000000000001", "IDENTITY_OPERATIONS", "Identity Operations"),
@@ -23,7 +24,8 @@ final class ReportingDisplayDirectory {
             team("20000000-0000-0000-0000-000000000005", "NETWORK_OPERATIONS", "Network Operations"),
             team("20000000-0000-0000-0000-000000000006", "PLATFORM_OPERATIONS", "Platform Operations"),
             team("20000000-0000-0000-0000-000000000007", "BILLING_OPERATIONS", "Billing Operations"),
-            team("20000000-0000-0000-0000-000000000008", "PAYMENT_OPERATIONS", "Payment Operations"));
+            team("20000000-0000-0000-0000-000000000008", "PAYMENT_OPERATIONS_1", "Payment Operations 1"),
+            team("20000000-0000-0000-0000-000000000009", "PAYMENT_OPERATIONS_2", "Payment Operations 2"));
 
     private ReportingDisplayDirectory() {
     }

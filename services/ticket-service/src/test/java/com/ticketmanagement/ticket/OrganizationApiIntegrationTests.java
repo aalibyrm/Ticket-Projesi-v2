@@ -73,7 +73,7 @@ class OrganizationApiIntegrationTests {
                 .flatMap(department -> department.teams().stream())
                 .toList();
 
-        assertThat(teams).hasSize(8);
+        assertThat(teams).hasSize(9);
         assertThat(teams)
                 .extracting(SupportTeamResponse::code)
                 .containsExactlyInAnyOrder(
@@ -84,7 +84,12 @@ class OrganizationApiIntegrationTests {
                         "NETWORK_OPERATIONS",
                         "PLATFORM_OPERATIONS",
                         "BILLING_OPERATIONS",
-                        "PAYMENT_OPERATIONS");
+                        "PAYMENT_OPERATIONS_1",
+                        "PAYMENT_OPERATIONS_2");
+        assertThat(teams)
+                .filteredOn(team -> team.departmentCode().equals("FINANCE_OPERATIONS"))
+                .extracting(SupportTeamResponse::name)
+                .containsExactlyInAnyOrder("Billing Operations", "Payment Operations 1", "Payment Operations 2");
         assertThat(teams)
                 .extracting(SupportTeamResponse::code)
                 .noneMatch(code -> code.contains("TRIAGE"));

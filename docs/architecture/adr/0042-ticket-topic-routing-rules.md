@@ -18,7 +18,7 @@ Seed edilen topic ve routing kararlari:
 | `NETWORK_CONNECTIVITY` | `INFRASTRUCTURE` | `NETWORK_OPERATIONS` |
 | `SERVER_PLATFORM` | `INFRASTRUCTURE` | `PLATFORM_OPERATIONS` |
 | `INVOICE_ISSUE` | `FINANCE_OPERATIONS` | `BILLING_OPERATIONS` |
-| `PAYMENT_FAILURE` | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS` |
+| `PAYMENT_FAILURE` | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS_1` |
 
 Kullanici API contract icin B secenegini secti: request `topicCode` tasir.
 UUID tabanli `topicId` yerine business code secilmesinin nedeni frontend ve

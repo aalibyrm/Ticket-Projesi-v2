@@ -99,13 +99,13 @@ class TicketServiceMigrationTests {
                 "select count(*) from ticket_schema.support_teams where active = true",
                 Integer.class);
 
-        assertThat(activeTeamCount).isEqualTo(8);
+        assertThat(activeTeamCount).isEqualTo(9);
 
         Integer activeLeadCount = jdbcTemplate.queryForObject(
                 "select count(*) from ticket_schema.team_members where active = true and team_lead = true",
                 Integer.class);
 
-        assertThat(activeLeadCount).isEqualTo(8);
+        assertThat(activeLeadCount).isEqualTo(9);
 
         Integer routingTableCount = jdbcTemplate.queryForObject(
                 """

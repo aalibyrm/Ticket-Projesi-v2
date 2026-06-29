@@ -325,10 +325,17 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
   const worklogs = worklogsQuery.data ?? [];
   const teams = teamsQuery.data ?? [];
   const teamMembers = teamMembersQuery.data ?? [];
+  const isAdmin = Boolean(user?.roles.some((role) => role.toUpperCase() === "ADMIN"));
   const selectedTeamInTeams = teams.some((team) => team.id === assignedTeamId);
   const selectedAssigneeInMembers = teamMembers.some((member) => member.actorId === assigneeId);
   const selectedTeam = teams.find((team) => team.id === assignedTeamId);
   const selectedAssignee = teamMembers.find((member) => member.actorId === assigneeId);
+  const currentMemberInSelectedTeam = teamMembers.find((member) => member.actorId === user?.id);
+  const canAssignOthers = Boolean(
+    isAdmin
+      || (user?.id && (selectedTeam?.leadActorId === user.id || currentMemberInSelectedTeam?.teamLead)),
+  );
+  const assignableTeams = isAdmin ? teams : teams.filter((team) => team.leadActorId === user?.id);
   const isCurrentAssignee = Boolean(user?.id && ticket.assigneeId === user.id);
   const canShowAssignment = !ticket.assigneeId;
   const waitingSince = new Date(ticket.updatedAt).getTime();
@@ -420,90 +427,109 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
             >
               Bana ata
             </Button>
-            <FormControl disabled={teamsQuery.isLoading} fullWidth size="small" sx={assignmentFieldSx}>
-              <FormLabel id="agent-team-label" sx={assignmentLabelSx}>
-                Ekip
-              </FormLabel>
-              <Select
-                displayEmpty
-                labelId="agent-team-label"
-                MenuProps={menuProps}
-                onChange={(event) => {
-                  setAssignedTeamId(event.target.value);
-                  setAssigneeId("");
-                }}
-                renderValue={(value) => {
-                  if (!value) {
-                    return <SelectValueText muted value={teamsQuery.isLoading ? "Ekipler yukleniyor" : "Ekip sec"} />;
-                  }
-                  return <SelectValueText value={selectedTeam ? teamName(selectedTeam) : value} />;
-                }}
-                sx={assignmentSelectSx}
-                value={assignedTeamId}
-              >
-                <MenuItem value="">{teamsQuery.isLoading ? "Ekipler yukleniyor" : "Ekip sec"}</MenuItem>
-                {assignedTeamId && !selectedTeamInTeams && (
-                  <MenuItem value={assignedTeamId}>
-                    <MenuItemContent primary={assignedTeamId} />
-                  </MenuItem>
-                )}
-                {teams.map((team) => (
-                  <MenuItem key={team.id} value={team.id}>
-                    <MenuItemContent primary={teamName(team)} secondary={teamMeta(team)} />
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl disabled={!assignedTeamId || teamMembersQuery.isLoading} fullWidth size="small" sx={assignmentFieldSx}>
-              <FormLabel id="agent-assignee-label" sx={assignmentLabelSx}>
-                Agent
-              </FormLabel>
-              <Select
-                displayEmpty
-                labelId="agent-assignee-label"
-                MenuProps={menuProps}
-                onChange={(event) => setAssigneeId(event.target.value)}
-                renderValue={(value) => {
-                  if (!value) {
-                    if (!assignedTeamId) {
-                      return <SelectValueText muted value="Once ekip sec" />;
-                    }
-                    return <SelectValueText muted value={teamMembersQuery.isLoading ? "Agentlar yukleniyor" : "Agent sec"} />;
-                  }
-                  return (
-                    <SelectValueText
-                      value={selectedAssignee ? memberName(selectedAssignee, user) : actorDisplayName(value, user, "Agent")}
-                    />
-                  );
-                }}
-                sx={assignmentSelectSx}
-                value={assigneeId}
-              >
-                <MenuItem value="">
-                  {!assignedTeamId
-                    ? "Once ekip sec"
-                    : teamMembersQuery.isLoading
-                      ? "Agentlar yukleniyor"
-                      : "Agent sec"}
-                </MenuItem>
-                {assigneeId && !selectedAssigneeInMembers && (
-                  <MenuItem value={assigneeId}>
-                    <MenuItemContent primary={actorDisplayName(assigneeId, user, "Agent")} />
-                  </MenuItem>
-                )}
-                {teamMembers.map((member) => (
-                  <MenuItem key={member.actorId} value={member.actorId}>
-                    <MenuItemContent
-                      primary={memberName(member, user)}
-                      secondary={member.teamLead ? "Lead" : member.email ?? member.teamCode}
-                    />
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <Button disabled={assignMutation.isPending} fullWidth onClick={() => void submitAssignment()} variant="outlined">
-              Atamayi kaydet
-            </Button>
+            {canAssignOthers ? (
+              <>
+                <FormControl disabled={teamsQuery.isLoading} fullWidth size="small" sx={assignmentFieldSx}>
+                  <FormLabel id="agent-team-label" sx={assignmentLabelSx}>
+                    Ekip
+                  </FormLabel>
+                  <Select
+                    displayEmpty
+                    labelId="agent-team-label"
+                    MenuProps={menuProps}
+                    onChange={(event) => {
+                      setAssignedTeamId(event.target.value);
+                      setAssigneeId("");
+                    }}
+                    renderValue={(value) => {
+                      if (!value) {
+                        return <SelectValueText muted value={teamsQuery.isLoading ? "Ekipler yukleniyor" : "Ekip sec"} />;
+                      }
+                      return <SelectValueText value={selectedTeam ? teamName(selectedTeam) : value} />;
+                    }}
+                    sx={assignmentSelectSx}
+                    value={assignedTeamId}
+                  >
+                    <MenuItem value="">{teamsQuery.isLoading ? "Ekipler yukleniyor" : "Ekip sec"}</MenuItem>
+                    {assignedTeamId && !selectedTeamInTeams && (
+                      <MenuItem value={assignedTeamId}>
+                        <MenuItemContent primary={assignedTeamId} />
+                      </MenuItem>
+                    )}
+                    {assignableTeams.map((team) => (
+                      <MenuItem key={team.id} value={team.id}>
+                        <MenuItemContent primary={teamName(team)} secondary={teamMeta(team)} />
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl disabled={!assignedTeamId || teamMembersQuery.isLoading} fullWidth size="small" sx={assignmentFieldSx}>
+                  <FormLabel id="agent-assignee-label" sx={assignmentLabelSx}>
+                    Agent
+                  </FormLabel>
+                  <Select
+                    displayEmpty
+                    labelId="agent-assignee-label"
+                    MenuProps={menuProps}
+                    onChange={(event) => setAssigneeId(event.target.value)}
+                    renderValue={(value) => {
+                      if (!value) {
+                        if (!assignedTeamId) {
+                          return <SelectValueText muted value="Once ekip sec" />;
+                        }
+                        return (
+                          <SelectValueText
+                            muted
+                            value={teamMembersQuery.isLoading ? "Agentlar yukleniyor" : "Agent sec"}
+                          />
+                        );
+                      }
+                      return (
+                        <SelectValueText
+                          value={selectedAssignee ? memberName(selectedAssignee, user) : actorDisplayName(value, user, "Agent")}
+                        />
+                      );
+                    }}
+                    sx={assignmentSelectSx}
+                    value={assigneeId}
+                  >
+                    <MenuItem value="">
+                      {!assignedTeamId
+                        ? "Once ekip sec"
+                        : teamMembersQuery.isLoading
+                          ? "Agentlar yukleniyor"
+                          : "Agent sec"}
+                    </MenuItem>
+                    {assigneeId && !selectedAssigneeInMembers && (
+                      <MenuItem value={assigneeId}>
+                        <MenuItemContent primary={actorDisplayName(assigneeId, user, "Agent")} />
+                      </MenuItem>
+                    )}
+                    {teamMembers.map((member) => (
+                      <MenuItem key={member.actorId} value={member.actorId}>
+                        <MenuItemContent
+                          primary={memberName(member, user)}
+                          secondary={member.teamLead ? "Lead" : member.email ?? member.teamCode}
+                        />
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <Button disabled={assignMutation.isPending} fullWidth onClick={() => void submitAssignment()} variant="outlined">
+                  Atamayi kaydet
+                </Button>
+              </>
+            ) : (
+              <Stack spacing={1}>
+                <StatusValue
+                  label="Ekip"
+                  value={selectedTeam ? teamName(selectedTeam) : teamsQuery.isLoading ? "Ekip yukleniyor" : "Atanmis ekip"}
+                />
+                <Typography color="text.secondary" sx={tmTokens.typography.bodyMd}>
+                  Lead olmayan agentlar yalniz kendi adina atama yapabilir.
+                </Typography>
+              </Stack>
+            )}
           </Stack>
 
           <Divider />

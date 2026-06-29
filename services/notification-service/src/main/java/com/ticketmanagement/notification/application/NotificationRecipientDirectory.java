@@ -24,6 +24,7 @@ public class NotificationRecipientDirectory {
             profile("30000000-0000-0000-0000-000000000006", "Alp Kaya", "alp.kaya@example.local"),
             profile("30000000-0000-0000-0000-000000000007", "Melis Acar", "melis.acar@example.local"),
             profile("30000000-0000-0000-0000-000000000008", "Bora Yalcin", "bora.yalcin@example.local"),
+            profile("30000000-0000-0000-0000-000000000009", "Eren Koc", "eren.koc@example.local"),
             profile("40000000-0000-0000-0000-000000000001", "Elif Aydin", "elif.aydin@example.local"),
             profile("40000000-0000-0000-0000-000000000002", "Mert Kaya", "mert.kaya@example.local"),
             profile("40000000-0000-0000-0000-000000000003", "Deniz Arslan", "deniz.arslan@example.local"),
@@ -32,6 +33,7 @@ public class NotificationRecipientDirectory {
             profile("40000000-0000-0000-0000-000000000006", "Ece Sahin", "ece.sahin@example.local"),
             profile("40000000-0000-0000-0000-000000000007", "Onur Demir", "onur.demir@example.local"),
             profile("40000000-0000-0000-0000-000000000008", "Zeynep Ozturk", "zeynep.ozturk@example.local"),
+            profile("40000000-0000-0000-0000-000000000009", "Seda Erdem", "seda.erdem@example.local"),
             profile("80000000-0000-0000-0000-000000000002", "Deniz Karaca", "deniz.karaca@example.local"),
             profile("80000000-0000-0000-0000-000000000003", "Burak Ozkan", "burak.ozkan@example.local"));
 

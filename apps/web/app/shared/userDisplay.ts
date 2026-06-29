@@ -62,6 +62,10 @@ const knownUserProfiles: Record<string, KnownUserProfile> = {
     displayName: "Bora Yalcin",
     email: "bora.yalcin@example.local",
   },
+  "30000000-0000-0000-0000-000000000009": {
+    displayName: "Eren Koc",
+    email: "eren.koc@example.local",
+  },
   "40000000-0000-0000-0000-000000000001": {
     displayName: "Elif Aydin",
     email: "elif.aydin@example.local",
@@ -93,6 +97,10 @@ const knownUserProfiles: Record<string, KnownUserProfile> = {
   "40000000-0000-0000-0000-000000000008": {
     displayName: "Zeynep Ozturk",
     email: "zeynep.ozturk@example.local",
+  },
+  "40000000-0000-0000-0000-000000000009": {
+    displayName: "Seda Erdem",
+    email: "seda.erdem@example.local",
   },
   "80000000-0000-0000-0000-000000000002": {
     displayName: "Deniz Karaca",
