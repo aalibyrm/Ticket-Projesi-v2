@@ -5,11 +5,12 @@
 Kullanici #62 kapsaminda ticket topic katalogu icin B secenegini secti:
 kurumsal ama kontrollu sekiz topic kullanilacak. Customer ticket acarken
 `topicCode` gonderir; `ticket-service` aktif DB routing rule uzerinden
-`topic -> department -> default team` cozumler.
+`topic -> department -> team` cozumler. ADR-0067 sonrasi bir topic icin birden
+fazla aktif takim route'u varsa takim secimi round-robin ile yapilir.
 
 Seed edilen topic ve routing kararlari:
 
-| Topic | Department | Default team |
+| Topic | Department | Team route |
 | --- | --- | --- |
 | `PASSWORD_RESET` | `ACCESS_MANAGEMENT` | `IDENTITY_OPERATIONS` |
 | `PERMISSION_REQUEST` | `ACCESS_MANAGEMENT` | `PERMISSION_OPERATIONS` |
@@ -18,7 +19,7 @@ Seed edilen topic ve routing kararlari:
 | `NETWORK_CONNECTIVITY` | `INFRASTRUCTURE` | `NETWORK_OPERATIONS` |
 | `SERVER_PLATFORM` | `INFRASTRUCTURE` | `PLATFORM_OPERATIONS` |
 | `INVOICE_ISSUE` | `FINANCE_OPERATIONS` | `BILLING_OPERATIONS` |
-| `PAYMENT_FAILURE` | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS_1` |
+| `PAYMENT_FAILURE` | `FINANCE_OPERATIONS` | `PAYMENT_OPERATIONS_1`, `PAYMENT_OPERATIONS_2` round-robin |
 
 Kullanici API contract icin B secenegini secti: request `topicCode` tasir.
 UUID tabanli `topicId` yerine business code secilmesinin nedeni frontend ve
@@ -44,7 +45,8 @@ payload'ina eklenmez.
 - A: Basit department bazli topic seti. Hizliydi ama raporlama ve routing
   ayrimi zayif kalirdi.
 - B: Kurumsal ama kontrollu topic seti. Secildi; sekiz topic ile her uzman ekip
-  icin net default route verir.
+  icin net route verir. ADR-0067 ile ayni topic altinda birden fazla aktif takim
+  gerektiginde round-robin desteklenir.
 - C: Urun + topic bilesimli set. Daha detayliydi ancak topic sayisini hizla
   buyutur ve bu faz icin gereksiz form karmasasi olustururdu.
 
@@ -79,6 +81,6 @@ payload'ina eklenmez.
 
 #62 ile `ticket_topics`, `ticket_routing_rules`, `tickets.topic_id` ve
 `tickets.routed_department_id` ticket-service DB modeline eklendi. Ticket create
-akisi `topicCode` ile route cozer, ticket'i default team'e atar ve create
+akisi `topicCode` ile route cozer, ticket'i secilen team'e atar ve create
 transaction'i icinde `ticket.created` ile `ticket.assigned` eventlerini birlikte
 outbox'a kaydeder.

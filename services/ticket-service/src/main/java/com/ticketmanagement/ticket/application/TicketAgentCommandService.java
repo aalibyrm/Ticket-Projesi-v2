@@ -64,13 +64,14 @@ public class TicketAgentCommandService {
     @Transactional
     public TicketResponse assignTicket(SupportActorContext context, UUID ticketId, AssignTicketRequest request) {
         TicketEntity ticket = findTicketForUpdate(ticketId);
+        UUID assignedTeamId = request.assignedTeamId() == null ? ticket.getAssignedTeamId() : request.assignedTeamId();
         ticketSupportAccessService.assertCanAssignTicket(
                 ticket,
                 context,
                 request.assigneeId(),
-                request.assignedTeamId());
+                assignedTeamId);
 
-        ticket.assignTo(request.assigneeId(), request.assignedTeamId());
+        ticket.assignTo(request.assigneeId(), assignedTeamId);
         ticketOutboxService.saveTicketAssigned(ticket, context.actorId());
         return ticketMapper.toResponse(ticket);
     }

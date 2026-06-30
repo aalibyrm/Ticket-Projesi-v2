@@ -195,11 +195,11 @@ class TicketSecurityIntegrationTests {
     @Test
     void assignedAgentCanAccessTicketAttachments() throws Exception {
         UUID ownerCustomerId = UUID.randomUUID();
-        UUID agentId = UUID.randomUUID();
+        UUID agentId = WEB_APP_SUPPORT_MEMBER_ID;
         UUID adminId = UUID.randomUUID();
         UUID ticketId = createTicketFor(ownerCustomerId);
 
-        assignTicketTo(ticketId, agentId, null, adminId);
+        assignTicketTo(ticketId, agentId, WEB_APP_SUPPORT_TEAM_ID, adminId);
 
         mockMvc.perform(get("/internal/tickets/{id}/attachment-access", ticketId)
                         .with(jwtWithRoles(agentId, "AGENT")))
@@ -379,6 +379,21 @@ class TicketSecurityIntegrationTests {
     }
 
     @Test
+    void teamLeadCannotMoveTicketToAnotherTeamDuringAssignment() throws Exception {
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID ticketId = createTicketFor(ownerCustomerId);
+
+        mockMvc.perform(patch("/api/agent/tickets/{id}/assignment", ticketId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new AssignTicketRequest(
+                                WEB_APP_SUPPORT_MEMBER_ID,
+                                CORE_APP_SUPPORT_TEAM_ID)))
+                        .with(jwtWithRoles(WEB_APP_SUPPORT_LEAD_ID, "AGENT")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+    }
+
+    @Test
     void teamLeadCanManageOwnTeamTicket() throws Exception {
         UUID ownerCustomerId = UUID.randomUUID();
         UUID ticketId = createTicketFor(ownerCustomerId);
@@ -434,12 +449,12 @@ class TicketSecurityIntegrationTests {
     @Test
     void rejectsUnassignedAgentAccessToAssignedTicketWithJwt() throws Exception {
         UUID ownerCustomerId = UUID.randomUUID();
-        UUID assignedAgentId = UUID.randomUUID();
+        UUID assignedAgentId = WEB_APP_SUPPORT_MEMBER_ID;
         UUID otherAgentId = UUID.randomUUID();
         UUID adminId = UUID.randomUUID();
         UUID ticketId = createTicketFor(ownerCustomerId);
 
-        assignTicketTo(ticketId, assignedAgentId, null, adminId);
+        assignTicketTo(ticketId, assignedAgentId, WEB_APP_SUPPORT_TEAM_ID, adminId);
 
         mockMvc.perform(get("/api/agent/tickets/{id}", ticketId)
                         .with(jwtWithRoles(otherAgentId, "AGENT")))

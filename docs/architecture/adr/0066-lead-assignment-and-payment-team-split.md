@@ -24,9 +24,9 @@ Kullanici #96 kapsaminda su karari verdi:
 - Lead olmayan agent UI'da `Agent sec` alanini gormez.
 - Finance Operations altinda `PAYMENT_OPERATIONS_1` ve
   `PAYMENT_OPERATIONS_2` ekipleri bulunur.
-- `PAYMENT_FAILURE` default routing'i overengineering yapmamak icin
-  `PAYMENT_OPERATIONS_1` uzerinde kalir; `PAYMENT_OPERATIONS_2` demo/veri ve
-  manuel operasyon kapsaminda kullanilir.
+- Bu ADR ilk kabul edildiginde `PAYMENT_FAILURE` default routing'i
+  `PAYMENT_OPERATIONS_1` uzerinde kalmisti. Bu routing karari ADR-0067 ile
+  topic bazli round-robin olarak degistirildi.
 
 Lead yetkisi Keycloak claim'inden degil, ticket-service DB'sindeki aktif
 `team_members.team_lead` kaydindan okunur. Lead demo kullanicilari Keycloak'ta
@@ -40,6 +40,5 @@ Lead yetkisi Keycloak claim'inden degil, ticket-service DB'sindeki aktif
   ticket-service DB'sinde kalir.
 - Finance Operations raporlari artik Billing, Payment Operations 1 ve Payment
   Operations 2 dagilimini gosterebilir.
-- `PAYMENT_FAILURE` routing'i bilincli olarak tek default takimda kalir; ileride
-  kapasiteye gore round-robin veya workload-based routing istenirse ayri bir
-  karar ve issue ile ele alinmalidir.
+- `PAYMENT_FAILURE` routing'i artik ADR-0067 kapsaminda Payment Operations 1 ve
+  Payment Operations 2 arasinda round-robin calisir.

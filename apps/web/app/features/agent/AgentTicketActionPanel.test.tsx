@@ -75,18 +75,6 @@ describe("AgentTicketActionPanel", () => {
     }));
 
     server.use(
-      http.get("*/api/v1/organization/teams", () =>
-        HttpResponse.json([
-          {
-            code: "WEB_APP_SUPPORT",
-            departmentCode: "APPLICATION_SUPPORT",
-            departmentId: "10000000-0000-0000-0000-000000000002",
-            id: teamId,
-            leadActorId: "30000000-0000-0000-0000-000000000003",
-            name: "Web App Support",
-          },
-        ]),
-      ),
       http.get(`*/api/v1/organization/teams/${teamId}/members`, () =>
         HttpResponse.json([
           {
@@ -123,7 +111,7 @@ describe("AgentTicketActionPanel", () => {
 
     renderPanel(ticket);
 
-    await waitFor(() => expect(screen.getByLabelText("Ekip")).toBeEnabled());
+    expect(screen.queryByLabelText("Ekip")).not.toBeInTheDocument();
     await waitFor(() => expect(screen.getByLabelText("Agent")).toBeEnabled());
     expect(screen.getByText("Agent sec")).toBeInTheDocument();
     fireEvent.mouseDown(screen.getByLabelText("Agent"));
@@ -148,18 +136,6 @@ describe("AgentTicketActionPanel", () => {
     }));
 
     server.use(
-      http.get("*/api/v1/organization/teams", () =>
-        HttpResponse.json([
-          {
-            code: "WEB_APP_SUPPORT",
-            departmentCode: "APPLICATION_SUPPORT",
-            departmentId: "10000000-0000-0000-0000-000000000002",
-            id: teamId,
-            leadActorId: leadId,
-            name: "Web App Support",
-          },
-        ]),
-      ),
       http.get(`*/api/v1/organization/teams/${teamId}/members`, () =>
         HttpResponse.json([
           {
@@ -197,6 +173,7 @@ describe("AgentTicketActionPanel", () => {
     renderPanel(ticket);
 
     expect(await screen.findByRole("button", { name: "Bana ata" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("Ekip")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Agent")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Atamayi kaydet" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Bana ata" }));
@@ -218,7 +195,6 @@ describe("AgentTicketActionPanel", () => {
     }));
 
     server.use(
-      http.get("*/api/v1/organization/teams", () => HttpResponse.json([])),
       http.get("*/api/v1/agent/tickets/:ticketId/worklogs", () => HttpResponse.json([])),
       http.get("*/api/v1/agent/tickets/:ticketId/comments", () => HttpResponse.json([])),
     );
@@ -240,7 +216,6 @@ describe("AgentTicketActionPanel", () => {
     }));
 
     server.use(
-      http.get("*/api/v1/organization/teams", () => HttpResponse.json([])),
       http.get("*/api/v1/agent/tickets/:ticketId/worklogs", () => HttpResponse.json([])),
       http.get("*/api/v1/agent/tickets/:ticketId/comments", () => HttpResponse.json([])),
     );
@@ -263,7 +238,6 @@ describe("AgentTicketActionPanel", () => {
     }));
 
     server.use(
-      http.get("*/api/v1/organization/teams", () => HttpResponse.json([])),
       http.get("*/api/v1/agent/tickets/:ticketId/worklogs", () => HttpResponse.json([])),
       http.get("*/api/v1/agent/tickets/:ticketId/comments", () => HttpResponse.json([])),
     );
@@ -287,7 +261,6 @@ describe("AgentTicketActionPanel", () => {
     }));
 
     server.use(
-      http.get("*/api/v1/organization/teams", () => HttpResponse.json([])),
       http.get("*/api/v1/agent/tickets/:ticketId/worklogs", () => HttpResponse.json([])),
       http.get("*/api/v1/agent/tickets/:ticketId/comments", () => HttpResponse.json([])),
     );
@@ -307,7 +280,6 @@ describe("AgentTicketActionPanel", () => {
     }));
 
     server.use(
-      http.get("*/api/v1/organization/teams", () => HttpResponse.json([])),
       http.get("*/api/v1/agent/tickets/:ticketId/worklogs", () => HttpResponse.json([])),
       http.get("*/api/v1/agent/tickets/:ticketId/comments", () =>
         HttpResponse.json([

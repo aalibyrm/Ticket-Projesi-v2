@@ -39,6 +39,9 @@ public class TicketRoutingRuleEntity {
     private SupportTeamEntity team;
 
     @Column(nullable = false)
+    private int routingOrder;
+
+    @Column(nullable = false)
     private boolean active;
 
     @Column(nullable = false, updatable = false)

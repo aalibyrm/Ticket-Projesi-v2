@@ -54,6 +54,10 @@ public class TicketSupportAccessService {
             SupportActorContext context,
             UUID assigneeId,
             UUID assignedTeamId) {
+        if (ticket.getAssignedTeamId() != null && !ticket.getAssignedTeamId().equals(assignedTeamId)) {
+            throw ForbiddenOperationException.accessDenied();
+        }
+
         if (!context.hasRole(ROLE_ADMIN)
                 && !canLeadAssignInsideOwnTeam(ticket, context, assignedTeamId)
                 && !canSelfAssignOpenTeamTicket(ticket, context, assigneeId, assignedTeamId)) {

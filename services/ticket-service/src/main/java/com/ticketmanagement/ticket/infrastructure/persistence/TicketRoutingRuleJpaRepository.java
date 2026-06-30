@@ -1,6 +1,6 @@
 package com.ticketmanagement.ticket.infrastructure.persistence;
 
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,6 +21,7 @@ public interface TicketRoutingRuleJpaRepository extends JpaRepository<TicketRout
               and department.active = true
               and team.active = true
               and teamDepartment = department
+            order by rule.routingOrder asc, team.name asc, team.id asc
             """)
-    Optional<TicketRoutingRuleEntity> findActiveRouteForTopicCode(String topicCode);
+    List<TicketRoutingRuleEntity> findActiveRoutesForTopicCode(String topicCode);
 }

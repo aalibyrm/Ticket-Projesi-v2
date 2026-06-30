@@ -32,10 +32,8 @@ import {
   useAssignAgentTicket,
   useChangeAgentTicketStatus,
   useSupportTeamMembers,
-  useSupportTeams,
 } from "~/features/agent/agentQueries";
 import type {
-  SupportTeamResponse,
   TeamMemberResponse,
   TicketAttachmentResponse,
   TicketResponse,
@@ -66,7 +64,6 @@ const allowedStatusTransitions: Record<TicketStatus, TicketStatus[]> = {
 
 const uuidSchema = backendUuidSchema();
 const assignmentSchema = z.object({
-  assignedTeamId: uuidSchema,
   assigneeId: uuidSchema,
 });
 const worklogSchema = z.object({
@@ -150,14 +147,6 @@ const assignmentSelectSx = {
   },
 } as const;
 
-function teamName(team: SupportTeamResponse) {
-  return team.name;
-}
-
-function teamMeta(team: SupportTeamResponse) {
-  return `${team.departmentCode} / ${team.code}`;
-}
-
 function memberName(member: TeamMemberResponse, user: ReturnType<typeof selectAuthUser>) {
   return member.displayName ?? actorDisplayName(member.actorId, user, "Agent");
 }
@@ -235,10 +224,9 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
   const worklogsQuery = useAgentWorklogs(ticket.id);
   const addWorklog = useAddAgentWorklog(ticket.id);
   const downloadUrl = useAgentAttachmentDownloadUrl();
-  const teamsQuery = useSupportTeams();
   const [assigneeId, setAssigneeId] = useState(ticket.assigneeId ?? "");
-  const [assignedTeamId, setAssignedTeamId] = useState(ticket.assignedTeamId ?? "");
   const [assignmentError, setAssignmentError] = useState<string>();
+  const assignedTeamId = ticket.assignedTeamId ?? "";
   const teamMembersQuery = useSupportTeamMembers(assignedTeamId);
 
   const {
@@ -257,8 +245,7 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
 
   useEffect(() => {
     setAssigneeId(ticket.assigneeId ?? "");
-    setAssignedTeamId(ticket.assignedTeamId ?? "");
-  }, [ticket.assignedTeamId, ticket.assigneeId, ticket.id]);
+  }, [ticket.assigneeId, ticket.id]);
 
   useEffect(() => {
     if (!teamMembersQuery.data || !assigneeId) {
@@ -275,15 +262,19 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
 
   async function submitAssignment() {
     setAssignmentError(undefined);
-    const parsed = assignmentSchema.safeParse({ assignedTeamId, assigneeId });
+    if (!assignedTeamId) {
+      setAssignmentError("Ticket icin atanmis ekip bulunamadi.");
+      return;
+    }
+    const parsed = assignmentSchema.safeParse({ assigneeId });
     if (!parsed.success) {
-      setAssignmentError("Ekip ve agent secmelisin.");
+      setAssignmentError("Agent secmelisin.");
       return;
     }
 
     await assignMutation.mutateAsync({
       assigneeId: parsed.data.assigneeId,
-      assignedTeamId: parsed.data.assignedTeamId || null,
+      assignedTeamId,
     });
   }
 
@@ -293,9 +284,9 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
       setAssignmentError("Oturum kimligi assignment icin UUID formatinda degil.");
       return;
     }
-    const teamId = assignedTeamId || ticket.assignedTeamId;
+    const teamId = ticket.assignedTeamId;
     if (!teamId) {
-      setAssignmentError("Bana atamak icin once ekip secmelisin.");
+      setAssignmentError("Ticket icin atanmis ekip bulunamadi.");
       return;
     }
 
@@ -303,7 +294,6 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
       assignedTeamId: teamId,
       assigneeId: user.id,
     });
-    setAssignedTeamId(teamId);
     setAssigneeId(user.id);
   }
 
@@ -323,19 +313,15 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
   }
 
   const worklogs = worklogsQuery.data ?? [];
-  const teams = teamsQuery.data ?? [];
   const teamMembers = teamMembersQuery.data ?? [];
   const isAdmin = Boolean(user?.roles.some((role) => role.toUpperCase() === "ADMIN"));
-  const selectedTeamInTeams = teams.some((team) => team.id === assignedTeamId);
   const selectedAssigneeInMembers = teamMembers.some((member) => member.actorId === assigneeId);
-  const selectedTeam = teams.find((team) => team.id === assignedTeamId);
   const selectedAssignee = teamMembers.find((member) => member.actorId === assigneeId);
   const currentMemberInSelectedTeam = teamMembers.find((member) => member.actorId === user?.id);
   const canAssignOthers = Boolean(
-    isAdmin
-      || (user?.id && (selectedTeam?.leadActorId === user.id || currentMemberInSelectedTeam?.teamLead)),
+    isAdmin || currentMemberInSelectedTeam?.teamLead,
   );
-  const assignableTeams = isAdmin ? teams : teams.filter((team) => team.leadActorId === user?.id);
+  const assignedTeamLabel = teamMembers[0]?.teamCode ?? (assignedTeamId ? "Atanmis ekip" : "Ekip yok");
   const isCurrentAssignee = Boolean(user?.id && ticket.assigneeId === user.id);
   const canShowAssignment = !ticket.assigneeId;
   const waitingSince = new Date(ticket.updatedAt).getTime();
@@ -410,9 +396,9 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
 
       {canShowAssignment && (
         <>
-          {(assignMutation.isError || assignmentError || teamsQuery.isError || teamMembersQuery.isError) && (
+          {(assignMutation.isError || assignmentError || teamMembersQuery.isError) && (
             <Alert severity="error" variant="outlined">
-              {assignmentError ?? (teamsQuery.isError || teamMembersQuery.isError ? "Ekip katalogu alinamadi." : "Atama kaydedilemedi.")}
+              {assignmentError ?? (teamMembersQuery.isError ? "Ekip uyeleri alinamadi." : "Atama kaydedilemedi.")}
             </Alert>
           )}
 
@@ -429,40 +415,6 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
             </Button>
             {canAssignOthers ? (
               <>
-                <FormControl disabled={teamsQuery.isLoading} fullWidth size="small" sx={assignmentFieldSx}>
-                  <FormLabel id="agent-team-label" sx={assignmentLabelSx}>
-                    Ekip
-                  </FormLabel>
-                  <Select
-                    displayEmpty
-                    labelId="agent-team-label"
-                    MenuProps={menuProps}
-                    onChange={(event) => {
-                      setAssignedTeamId(event.target.value);
-                      setAssigneeId("");
-                    }}
-                    renderValue={(value) => {
-                      if (!value) {
-                        return <SelectValueText muted value={teamsQuery.isLoading ? "Ekipler yukleniyor" : "Ekip sec"} />;
-                      }
-                      return <SelectValueText value={selectedTeam ? teamName(selectedTeam) : value} />;
-                    }}
-                    sx={assignmentSelectSx}
-                    value={assignedTeamId}
-                  >
-                    <MenuItem value="">{teamsQuery.isLoading ? "Ekipler yukleniyor" : "Ekip sec"}</MenuItem>
-                    {assignedTeamId && !selectedTeamInTeams && (
-                      <MenuItem value={assignedTeamId}>
-                        <MenuItemContent primary={assignedTeamId} />
-                      </MenuItem>
-                    )}
-                    {assignableTeams.map((team) => (
-                      <MenuItem key={team.id} value={team.id}>
-                        <MenuItemContent primary={teamName(team)} secondary={teamMeta(team)} />
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
                 <FormControl disabled={!assignedTeamId || teamMembersQuery.isLoading} fullWidth size="small" sx={assignmentFieldSx}>
                   <FormLabel id="agent-assignee-label" sx={assignmentLabelSx}>
                     Agent
@@ -475,7 +427,7 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
                     renderValue={(value) => {
                       if (!value) {
                         if (!assignedTeamId) {
-                          return <SelectValueText muted value="Once ekip sec" />;
+                          return <SelectValueText muted value="Atanmis ekip yok" />;
                         }
                         return (
                           <SelectValueText
@@ -495,7 +447,7 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
                   >
                     <MenuItem value="">
                       {!assignedTeamId
-                        ? "Once ekip sec"
+                        ? "Atanmis ekip yok"
                         : teamMembersQuery.isLoading
                           ? "Agentlar yukleniyor"
                           : "Agent sec"}
@@ -523,7 +475,7 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
               <Stack spacing={1}>
                 <StatusValue
                   label="Ekip"
-                  value={selectedTeam ? teamName(selectedTeam) : teamsQuery.isLoading ? "Ekip yukleniyor" : "Atanmis ekip"}
+                  value={teamMembersQuery.isLoading ? "Ekip yukleniyor" : assignedTeamLabel}
                 />
                 <Typography color="text.secondary" sx={tmTokens.typography.bodyMd}>
                   Lead olmayan agentlar yalniz kendi adina atama yapabilir.

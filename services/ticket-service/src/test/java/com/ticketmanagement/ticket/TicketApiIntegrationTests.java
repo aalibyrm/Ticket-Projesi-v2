@@ -72,6 +72,8 @@ class TicketApiIntegrationTests {
     private static final UUID WEB_APP_SUPPORT_MEMBER_ID = UUID.fromString("40000000-0000-0000-0000-000000000003");
     private static final UUID APPLICATION_SUPPORT_DEPARTMENT_ID =
             UUID.fromString("10000000-0000-0000-0000-000000000002");
+    private static final UUID PAYMENT_OPERATIONS_1_TEAM_ID = UUID.fromString("20000000-0000-0000-0000-000000000008");
+    private static final UUID PAYMENT_OPERATIONS_2_TEAM_ID = UUID.fromString("20000000-0000-0000-0000-000000000009");
 
     @Container
     @ServiceConnection
@@ -106,6 +108,7 @@ class TicketApiIntegrationTests {
         jdbcTemplate.update("delete from ticket_schema.ticket_comments");
         jdbcTemplate.update("delete from ticket_schema.ticket_worklogs");
         jdbcTemplate.update("delete from ticket_schema.tickets");
+        jdbcTemplate.update("update ticket_schema.ticket_routing_cursors set next_route_index = 0");
     }
 
     @Test
@@ -190,6 +193,57 @@ class TicketApiIntegrationTests {
         assertThat(otherDetail.getBody()).isNotNull();
         assertThat(otherDetail.getBody().errorCode()).isEqualTo("ACCESS_DENIED");
         verify(ticketAttachmentPort, times(1)).listAttachments(eq(created.id()), any(AttachmentLookupContext.class));
+    }
+
+    @Test
+    void customerTicketCreationRoutesAcrossMultipleTopicTeamsByRoundRobin() {
+        UUID customerId = UUID.randomUUID();
+        ProductResponse product = firstProduct();
+
+        CreateTicketRequest firstRequest = new CreateTicketRequest(
+                product.id(),
+                "PAYMENT_FAILURE",
+                "Payment failed",
+                "Card payment failed after confirmation.",
+                TicketPriority.HIGH);
+        CreateTicketRequest secondRequest = new CreateTicketRequest(
+                product.id(),
+                "PAYMENT_FAILURE",
+                "Duplicate payment",
+                "Customer sees duplicate payment attempt.",
+                TicketPriority.HIGH);
+        CreateTicketRequest thirdRequest = new CreateTicketRequest(
+                product.id(),
+                "PAYMENT_FAILURE",
+                "Delayed payment",
+                "Payment confirmation is delayed.",
+                TicketPriority.MEDIUM);
+
+        ResponseEntity<TicketResponse> firstResponse = restTemplate.exchange(
+                "/api/tickets",
+                HttpMethod.POST,
+                new HttpEntity<>(firstRequest, actorHeaders(customerId)),
+                TicketResponse.class);
+        ResponseEntity<TicketResponse> secondResponse = restTemplate.exchange(
+                "/api/tickets",
+                HttpMethod.POST,
+                new HttpEntity<>(secondRequest, actorHeaders(customerId)),
+                TicketResponse.class);
+        ResponseEntity<TicketResponse> thirdResponse = restTemplate.exchange(
+                "/api/tickets",
+                HttpMethod.POST,
+                new HttpEntity<>(thirdRequest, actorHeaders(customerId)),
+                TicketResponse.class);
+
+        assertThat(firstResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(secondResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(thirdResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(firstResponse.getBody()).isNotNull();
+        assertThat(secondResponse.getBody()).isNotNull();
+        assertThat(thirdResponse.getBody()).isNotNull();
+        assertThat(firstResponse.getBody().assignedTeamId()).isEqualTo(PAYMENT_OPERATIONS_1_TEAM_ID);
+        assertThat(secondResponse.getBody().assignedTeamId()).isEqualTo(PAYMENT_OPERATIONS_2_TEAM_ID);
+        assertThat(thirdResponse.getBody().assignedTeamId()).isEqualTo(PAYMENT_OPERATIONS_1_TEAM_ID);
     }
 
     @Test
@@ -709,13 +763,13 @@ class TicketApiIntegrationTests {
     void invalidStatusTransitionIsRejectedWithoutStatusEvent() {
         UUID customerId = UUID.randomUUID();
         UUID adminId = UUID.randomUUID();
-        UUID agentId = UUID.randomUUID();
+        UUID agentId = WEB_APP_SUPPORT_MEMBER_ID;
         TicketResponse created = createTicket(customerId);
 
         ResponseEntity<TicketResponse> assignmentResponse = restTemplate.exchange(
                 "/api/agent/tickets/{id}/assignment",
                 HttpMethod.PATCH,
-                new HttpEntity<>(new AssignTicketRequest(agentId, null), supportHeaders(adminId, "ADMIN")),
+                new HttpEntity<>(new AssignTicketRequest(agentId, WEB_APP_SUPPORT_TEAM_ID), supportHeaders(adminId, "ADMIN")),
                 TicketResponse.class,
                 created.id());
         assertThat(assignmentResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -1039,7 +1093,7 @@ class TicketApiIntegrationTests {
                           '20000000-0000-0000-0000-000000000003',
                           true
                         )
-                        on conflict (topic_id) do nothing
+                        on conflict (topic_id, team_id) do nothing
                         """);
     }
 

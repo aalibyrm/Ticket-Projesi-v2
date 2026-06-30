@@ -112,11 +112,11 @@ class TicketServiceMigrationTests {
                         select count(*)
                         from information_schema.tables
                         where table_schema = 'ticket_schema'
-                          and table_name in ('ticket_topics', 'ticket_routing_rules')
+                          and table_name in ('ticket_topics', 'ticket_routing_rules', 'ticket_routing_cursors')
                         """,
                 Integer.class);
 
-        assertThat(routingTableCount).isEqualTo(2);
+        assertThat(routingTableCount).isEqualTo(3);
 
         Integer routeColumnCount = jdbcTemplate.queryForObject(
                 """
@@ -140,6 +140,18 @@ class TicketServiceMigrationTests {
                 "select count(*) from ticket_schema.ticket_routing_rules where active = true",
                 Integer.class);
 
-        assertThat(activeRoutingRuleCount).isEqualTo(8);
+        assertThat(activeRoutingRuleCount).isEqualTo(9);
+
+        Integer paymentRouteCount = jdbcTemplate.queryForObject(
+                """
+                        select count(*)
+                        from ticket_schema.ticket_routing_rules rule
+                        join ticket_schema.ticket_topics topic on topic.id = rule.topic_id
+                        where topic.code = 'PAYMENT_FAILURE'
+                          and rule.active = true
+                        """,
+                Integer.class);
+
+        assertThat(paymentRouteCount).isEqualTo(2);
     }
 }
