@@ -9,7 +9,7 @@ Management platform.
 - Roles: `CUSTOMER`, `AGENT`, `MANAGER`, `ADMIN`
 - Remember me: enabled
 - Brute force protection: enabled
-- OTP policy: TOTP configured at realm level
+- OTP policy: optional TOTP configured at realm level
 - Login theme: `ticket`
 
 ## Clients
@@ -89,3 +89,22 @@ Keycloak is running:
 The script updates or creates fixed-ID demo users through Keycloak Admin REST.
 If a local realm already contains the same username with a different id,
 recreate the local Keycloak container so the expected `sub` value is restored.
+
+## Optional 2FA
+
+Two-factor authentication is provided by Keycloak TOTP and remains optional per
+user. Users continue to sign in with username and password until they enable an
+authenticator application from Keycloak account management.
+
+Local flow:
+
+1. Sign in to the web app.
+2. Open `http://localhost:8080/realms/ticket-management/account`.
+3. Open the account security/authenticator section in Keycloak.
+4. Register Google Authenticator, Microsoft Authenticator, 1Password, or another
+   TOTP-compatible app.
+5. Sign out and sign in again. Keycloak asks for the 6-digit authenticator code
+   after the password only for users who enabled 2FA.
+
+The React app and backend services never receive, store, or validate OTP
+secrets. OTP verification is handled only by Keycloak.
