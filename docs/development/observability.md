@@ -74,6 +74,14 @@ calistirmadan once local snapshot jar'i guncelle:
 mvn -q -pl libs/event-contract install
 ```
 
+Sadece `ticket-service` restart edilecekse raw Maven komutu yerine asagidaki
+script tercih edilir. Bu script `.env` dosyasini yukledigi icin servis
+`TICKET_DB_URL` default'u olan `localhost:5432` hedefine dusmez:
+
+```powershell
+.\scripts\start-ticket-service-local.ps1 -Restart
+```
+
 ```powershell
 $agent = (Resolve-Path infra/observability/agent/opentelemetry-javaagent.jar).Path
 $config = (Resolve-Path infra/observability/opentelemetry-javaagent.properties).Path

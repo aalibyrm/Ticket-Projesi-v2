@@ -74,6 +74,15 @@ dosyasini takip edin.
 Trace kurulumu ve servislerin OpenTelemetry Java Agent ile calistirilmasi icin
 `docs/development/observability.md` dosyasini takip edin.
 
+Tek servis olarak `ticket-service` restart edilecekse repo kokunden
+asagidaki script kullanilir. Script `.env` dosyasini yukler ve DB env
+degerlerini dogrular; boylece raw Maven komutlarinda gorulebilen
+`localhost:5432` default'una dusme sorunu engellenir.
+
+```powershell
+.\scripts\start-ticket-service-local.ps1 -Restart
+```
+
 Environment degiskenleri ve secret kurallari icin
 `docs/development/environment.md` dosyasini takip edin.
 

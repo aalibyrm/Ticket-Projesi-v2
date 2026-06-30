@@ -15,6 +15,25 @@ servislerin eksik gorunmesini engellemek icin her servis dogru
 .\scripts\start-observability-services.ps1 -Restart
 ```
 
+## start-ticket-service-local.ps1
+
+Sadece `ticket-service` icin lokal restart yapar. Script once `.env` dosyasini
+process ortam degiskenlerine yukler, `TICKET_DB_URL`, `TICKET_DB_USER` ve
+`TICKET_DB_PASSWORD` degerlerini dogrular, sonra servisi baslatir.
+
+Karar: tek servis restart icin raw `mvn spring-boot:run` yerine bu script
+kullanilir. Nedeni, PowerShell oturumunda `.env` yuklu degilse Spring Boot
+`application.yml` icindeki varsayilan `localhost:5432` degerine duser ve Docker
+PostgreSQL portu olan `55432` yerine yanlis hedefe baglanmaya calisir. Script
+secret degerlerini ekrana basmaz; sadece yuklenen key sayisini yazar.
+
+```powershell
+.\scripts\start-ticket-service-local.ps1 -Restart
+```
+
+Loglar `logs/ticket-service.local.out` ve `logs/ticket-service.local.err`
+dosyalarina yazilir.
+
 ## reset-local-demo-data.ps1
 
 Local/demo PostgreSQL verisini temizler ve gercekci demo ticket, agent,
