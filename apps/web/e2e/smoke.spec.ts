@@ -115,6 +115,13 @@ test("customer, agent, notification, and reporting smoke journey", async ({ page
       response.status() === 200,
   );
 
+  const ticketDetailResponse = page.waitForResponse(
+    (response) =>
+      response.url() === `http://localhost:8080/api/v1/tickets/${ticketId}` &&
+      response.request().method() === "GET" &&
+      response.status() === 200,
+  );
+
   await Promise.all([
     createTicketResponse,
     reserveUploadResponse,
@@ -124,6 +131,7 @@ test("customer, agent, notification, and reporting smoke journey", async ({ page
   ]);
 
   await expect(page).toHaveURL(new RegExp(`/tickets/${ticketId}$`));
+  await ticketDetailResponse;
   await expect(page.getByRole("heading", { name: "VPN baglanti hatasi" })).toBeVisible();
   await expect(page.getByText("vpn-log.txt")).toBeVisible();
 
@@ -253,6 +261,29 @@ async function registerDemoApi(page: Page, state: ReturnType<typeof createDemoSt
 
     if (method === "GET" && path === `/api/v1/tickets/${ticketId}/comments`) {
       return json(route, state.comments.filter((comment) => comment.visibility === "EXTERNAL"));
+    }
+
+    if (method === "GET" && path === `/api/v1/tickets/${ticketId}/comments/read-state`) {
+      return json(route, {
+        lastReadAt: now,
+        ticketId,
+        unreadCount: 0,
+      });
+    }
+
+    if (method === "GET" && path === `/api/v1/tickets/${ticketId}/agent-summary`) {
+      return json(route, {
+        agentId,
+        assigned: true,
+        assignedTeamId: teamId,
+        displayName: "E2E Agent",
+        email: "e2e.agent@example.local",
+        metricsAvailable: true,
+        resolvedTicketCount: 1,
+        slaBreachedTicketCount: 0,
+        slaCompliancePercentage: 100,
+        slaMetTicketCount: 1,
+      });
     }
 
     if (method === "GET" && path === "/api/v1/agent/tickets") {
