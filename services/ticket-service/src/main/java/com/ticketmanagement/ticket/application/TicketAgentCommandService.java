@@ -115,7 +115,7 @@ public class TicketAgentCommandService {
     @Transactional
     public TicketWorklogResponse addWorklog(SupportActorContext context, UUID ticketId, AddWorklogRequest request) {
         TicketEntity ticket = findTicketForUpdate(ticketId);
-        ticketSupportAccessService.assertCanManageTicket(ticket, context);
+        ticketSupportAccessService.assertCanAccessWorklog(ticket, context);
         TicketWorklogEntity worklog = ticketWorklogRepository.save(TicketWorklogEntity.create(
                 UUID.randomUUID(),
                 ticket,

@@ -79,9 +79,9 @@ export function useAgentTicketConversationReadState(ticketId: string) {
   });
 }
 
-export function useAgentWorklogs(ticketId: string) {
+export function useAgentWorklogs(ticketId: string, enabled = true) {
   return useQuery({
-    enabled: Boolean(ticketId),
+    enabled: Boolean(ticketId) && enabled,
     queryFn: () => listAgentWorklogs(ticketId),
     queryKey: agentQueryKeys.worklogs(ticketId),
   });

@@ -278,6 +278,70 @@ class TicketSecurityIntegrationTests {
     }
 
     @Test
+    void teamMemberCannotAccessWorklogWithoutAssignment() throws Exception {
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID ticketId = createTicketFor(ownerCustomerId);
+
+        mockMvc.perform(get("/api/agent/tickets/{id}/worklogs", ticketId)
+                        .with(jwtWithRoles(WEB_APP_SUPPORT_MEMBER_ID, "AGENT")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+
+        mockMvc.perform(post("/api/agent/tickets/{id}/worklogs", ticketId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new AddWorklogRequest(
+                                LocalDate.parse("2026-06-06"),
+                                30,
+                                "Attempted worklog without assignment.")))
+                        .with(jwtWithRoles(WEB_APP_SUPPORT_MEMBER_ID, "AGENT")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+    }
+
+    @Test
+    void teamLeadCannotAccessWorklogWithoutAssignment() throws Exception {
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID ticketId = createTicketFor(ownerCustomerId);
+
+        mockMvc.perform(get("/api/agent/tickets/{id}/worklogs", ticketId)
+                        .with(jwtWithRoles(WEB_APP_SUPPORT_LEAD_ID, "TEAM_LEAD")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+
+        mockMvc.perform(post("/api/agent/tickets/{id}/worklogs", ticketId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new AddWorklogRequest(
+                                LocalDate.parse("2026-06-06"),
+                                30,
+                                "Lead attempted worklog without assignment.")))
+                        .with(jwtWithRoles(WEB_APP_SUPPORT_LEAD_ID, "TEAM_LEAD")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+    }
+
+    @Test
+    void adminCannotAccessWorklogWithoutAssignment() throws Exception {
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID adminId = UUID.randomUUID();
+        UUID ticketId = createTicketFor(ownerCustomerId);
+
+        mockMvc.perform(get("/api/agent/tickets/{id}/worklogs", ticketId)
+                        .with(jwtWithRoles(adminId, "ADMIN")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+
+        mockMvc.perform(post("/api/agent/tickets/{id}/worklogs", ticketId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new AddWorklogRequest(
+                                LocalDate.parse("2026-06-06"),
+                                30,
+                                "Admin attempted worklog without assignment.")))
+                        .with(jwtWithRoles(adminId, "ADMIN")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
+    }
+
+    @Test
     void teamMemberCannotAddInternalNoteToOtherTeamTicket() throws Exception {
         UUID ownerCustomerId = UUID.randomUUID();
         UUID ticketId = createTicketFor(ownerCustomerId, CORE_TOPIC_CODE);

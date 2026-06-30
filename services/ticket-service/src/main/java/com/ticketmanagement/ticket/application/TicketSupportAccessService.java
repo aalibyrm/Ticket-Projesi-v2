@@ -48,6 +48,15 @@ public class TicketSupportAccessService {
         throw ForbiddenOperationException.accessDenied();
     }
 
+    // Worklog kayitlarina yalniz ticket'in mevcut assignee agent'inin erismesini saglar.
+    public void assertCanAccessWorklog(TicketEntity ticket, SupportActorContext context) {
+        if (canAssignedAgentAccess(ticket, context)) {
+            return;
+        }
+
+        throw ForbiddenOperationException.accessDenied();
+    }
+
     // Support actor'un ticket assignment islemini yapip yapamayacagini dogrular.
     public void assertCanAssignTicket(
             TicketEntity ticket,

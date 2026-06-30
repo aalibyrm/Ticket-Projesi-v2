@@ -218,10 +218,11 @@ function SelectValueText({ muted = false, value }: { muted?: boolean; value: str
 
 export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
   const user = useAppSelector(selectAuthUser);
+  const isCurrentAssignee = Boolean(user?.id && ticket.assigneeId === user.id);
   const statusMutation = useChangeAgentTicketStatus(ticket.id);
   const assignMutation = useAssignAgentTicket(ticket.id);
   const commentsQuery = useAgentTicketComments(ticket.id);
-  const worklogsQuery = useAgentWorklogs(ticket.id);
+  const worklogsQuery = useAgentWorklogs(ticket.id, isCurrentAssignee);
   const addWorklog = useAddAgentWorklog(ticket.id);
   const downloadUrl = useAgentAttachmentDownloadUrl();
   const [assigneeId, setAssigneeId] = useState(ticket.assigneeId ?? "");
@@ -322,7 +323,6 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
     isAdmin || currentMemberInSelectedTeam?.teamLead,
   );
   const assignedTeamLabel = teamMembers[0]?.teamCode ?? (assignedTeamId ? "Atanmis ekip" : "Ekip yok");
-  const isCurrentAssignee = Boolean(user?.id && ticket.assigneeId === user.id);
   const canShowAssignment = !ticket.assigneeId;
   const waitingSince = new Date(ticket.updatedAt).getTime();
   const hasCustomerExternalReply = (commentsQuery.data ?? []).some(
@@ -488,69 +488,73 @@ export function AgentTicketActionPanel({ ticket }: { ticket: TicketResponse }) {
         </>
       )}
 
-      <Stack component="form" onSubmit={handleSubmit((values) => void submitWorklog(values))} spacing={1.5}>
-        <SectionTitle>Worklog</SectionTitle>
-        {addWorklog.isError && (
-          <Alert severity="error" variant="outlined">
-            Worklog kaydedilemedi.
-          </Alert>
-        )}
-        <TextField
-          error={Boolean(errors.workDate)}
-          helperText={errors.workDate?.message}
-          label="Tarih"
-          size="small"
-          type="date"
-          {...register("workDate")}
-          InputLabelProps={{ shrink: true }}
-          sx={panelFieldSx}
-          variant="outlined"
-        />
-        <TextField
-          error={Boolean(errors.durationMinutes)}
-          helperText={errors.durationMinutes?.message}
-          label="Sure (dk)"
-          size="small"
-          type="number"
-          {...register("durationMinutes")}
-          sx={panelFieldSx}
-          variant="outlined"
-        />
-        <TextField
-          error={Boolean(errors.description)}
-          helperText={errors.description?.message}
-          label="Aciklama"
-          minRows={2}
-          multiline
-          size="small"
-          {...register("description")}
-          sx={panelFieldSx}
-          variant="outlined"
-        />
-        <Button disabled={addWorklog.isPending} fullWidth startIcon={<TimerOutlinedIcon />} type="submit" variant="outlined">
-          Worklog ekle
-        </Button>
-      </Stack>
+      {isCurrentAssignee && (
+        <>
+          <Stack component="form" onSubmit={handleSubmit((values) => void submitWorklog(values))} spacing={1.5}>
+            <SectionTitle>Worklog</SectionTitle>
+            {addWorklog.isError && (
+              <Alert severity="error" variant="outlined">
+                Worklog kaydedilemedi.
+              </Alert>
+            )}
+            <TextField
+              error={Boolean(errors.workDate)}
+              helperText={errors.workDate?.message}
+              label="Tarih"
+              size="small"
+              type="date"
+              {...register("workDate")}
+              InputLabelProps={{ shrink: true }}
+              sx={panelFieldSx}
+              variant="outlined"
+            />
+            <TextField
+              error={Boolean(errors.durationMinutes)}
+              helperText={errors.durationMinutes?.message}
+              label="Sure (dk)"
+              size="small"
+              type="number"
+              {...register("durationMinutes")}
+              sx={panelFieldSx}
+              variant="outlined"
+            />
+            <TextField
+              error={Boolean(errors.description)}
+              helperText={errors.description?.message}
+              label="Aciklama"
+              minRows={2}
+              multiline
+              size="small"
+              {...register("description")}
+              sx={panelFieldSx}
+              variant="outlined"
+            />
+            <Button disabled={addWorklog.isPending} fullWidth startIcon={<TimerOutlinedIcon />} type="submit" variant="outlined">
+              Worklog ekle
+            </Button>
+          </Stack>
 
-      <Stack spacing={1}>
-        {worklogsQuery.isLoading && <Typography color="text.secondary">Worklog yukleniyor.</Typography>}
-        {worklogs.length === 0 && !worklogsQuery.isLoading ? (
-          <Typography color="text.secondary">Worklog yok.</Typography>
-        ) : (
-          <List disablePadding>
-            {worklogs.map((worklog) => (
-              <ListItem disableGutters key={worklog.id}>
-                <ListItemText
-                  primary={`${worklog.durationMinutes} dk / ${formatDate(worklog.workDate)}`}
-                  secondary={worklog.description}
-                />
-              </ListItem>
-            ))}
-          </List>
-        )}
-      </Stack>
+          <Stack spacing={1}>
+            {worklogsQuery.isLoading && <Typography color="text.secondary">Worklog yukleniyor.</Typography>}
+            {worklogs.length === 0 && !worklogsQuery.isLoading ? (
+              <Typography color="text.secondary">Worklog yok.</Typography>
+            ) : (
+              <List disablePadding>
+                {worklogs.map((worklog) => (
+                  <ListItem disableGutters key={worklog.id}>
+                    <ListItemText
+                      primary={`${worklog.durationMinutes} dk / ${formatDate(worklog.workDate)}`}
+                      secondary={worklog.description}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            )}
+          </Stack>
 
-      <Divider />
+          <Divider />
+        </>
+      )}
 
       <Stack spacing={1.5}>
         <SectionTitle>Dosyalar</SectionTitle>

@@ -128,6 +128,7 @@ describe("AgentTicketActionPanel", () => {
 
   it("hides delegated assignment controls for a non-lead agent", async () => {
     let assignmentBody: Record<string, unknown> | undefined;
+    let worklogRequestCount = 0;
     store.dispatch(setAuthenticated({
       displayName: "Deniz Arslan",
       id: memberId,
@@ -156,7 +157,10 @@ describe("AgentTicketActionPanel", () => {
           },
         ]),
       ),
-      http.get("*/api/v1/agent/tickets/:ticketId/worklogs", () => HttpResponse.json([])),
+      http.get("*/api/v1/agent/tickets/:ticketId/worklogs", () => {
+        worklogRequestCount += 1;
+        return HttpResponse.json([]);
+      }),
       http.get("*/api/v1/agent/tickets/:ticketId/comments", () => HttpResponse.json([])),
       http.patch("*/api/v1/agent/tickets/:ticketId/assignment", async ({ request }) => {
         assignmentBody = await request.json() as Record<string, unknown>;
@@ -176,6 +180,8 @@ describe("AgentTicketActionPanel", () => {
     expect(screen.queryByLabelText("Ekip")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Agent")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Atamayi kaydet" })).not.toBeInTheDocument();
+    expect(screen.queryByText("Worklog")).not.toBeInTheDocument();
+    expect(worklogRequestCount).toBe(0);
     fireEvent.click(screen.getByRole("button", { name: "Bana ata" }));
 
     await waitFor(() =>
@@ -208,6 +214,7 @@ describe("AgentTicketActionPanel", () => {
   });
 
   it("hides status actions when the current agent is not assigned", async () => {
+    let worklogRequestCount = 0;
     store.dispatch(setAuthenticated({
       displayName: "Support Agent",
       id: memberId,
@@ -216,17 +223,48 @@ describe("AgentTicketActionPanel", () => {
     }));
 
     server.use(
-      http.get("*/api/v1/agent/tickets/:ticketId/worklogs", () => HttpResponse.json([])),
+      http.get("*/api/v1/agent/tickets/:ticketId/worklogs", () => {
+        worklogRequestCount += 1;
+        return HttpResponse.json([]);
+      }),
       http.get("*/api/v1/agent/tickets/:ticketId/comments", () => HttpResponse.json([])),
     );
 
     renderPanel(ticketFixture({ assigneeId: "50000000-0000-0000-0000-000000000003" }));
 
-    await waitFor(() => expect(screen.getByText("Worklog")).toBeInTheDocument());
+    expect(await screen.findByText("Dosyalar")).toBeInTheDocument();
     expect(screen.queryByText("Mevcut status")).not.toBeInTheDocument();
     expect(screen.queryByText("Atama")).not.toBeInTheDocument();
+    expect(screen.queryByText("Worklog")).not.toBeInTheDocument();
+    expect(worklogRequestCount).toBe(0);
     expect(screen.queryByRole("button", { name: "Musteri bekleniyor yap" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Cozuldu yap" })).not.toBeInTheDocument();
+  });
+
+  it("hides worklog controls for an unassigned ticket", async () => {
+    let worklogRequestCount = 0;
+    store.dispatch(setAuthenticated({
+      displayName: "Support Agent",
+      id: memberId,
+      roles: ["AGENT"],
+      username: "agent@example.com",
+    }));
+
+    server.use(
+      http.get("*/api/v1/agent/tickets/:ticketId/worklogs", () => {
+        worklogRequestCount += 1;
+        return HttpResponse.json([]);
+      }),
+      http.get("*/api/v1/agent/tickets/:ticketId/comments", () => HttpResponse.json([])),
+    );
+
+    renderPanel(ticketFixture());
+
+    expect(await screen.findByText("Atama")).toBeInTheDocument();
+    expect(screen.queryByText("Worklog")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Tarih")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Worklog ekle" })).not.toBeInTheDocument();
+    expect(worklogRequestCount).toBe(0);
   });
 
   it("hides assignment controls when the ticket already has an assignee", async () => {

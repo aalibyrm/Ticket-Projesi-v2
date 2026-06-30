@@ -73,7 +73,7 @@ public class TicketAgentQueryService {
     @Transactional(readOnly = true)
     public List<TicketWorklogResponse> listWorklogsForSupportActor(SupportActorContext context, UUID ticketId) {
         TicketEntity ticket = findTicket(ticketId);
-        ticketSupportAccessService.assertCanReadTicket(ticket, context);
+        ticketSupportAccessService.assertCanAccessWorklog(ticket, context);
         return ticketWorklogRepository.findByTicketIdOrderByCreatedAtDesc(ticketId)
                 .stream()
                 .map(ticketMapper::toResponse)
